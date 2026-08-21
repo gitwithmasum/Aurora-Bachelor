@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
+  <title>Aurora Bachelor — House Management OS</title>
+  <link rel="stylesheet" href="./style_v3.css">
+</head>
+  <body>
+    
+    <div class="stars"></div>
+    <div class="aurora aurora-one"></div>
+    <div class="aurora aurora-two"></div>
+
+    <div class="app-shell">
+
+
+      <!-- Part-1: Sidebar -->
+      <aside class="sidebar">
+
+        <div class="brand">
+          <img class="brand-logo" src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo">
+        
+          <div class="brand-text">
+            <strong>AURORA</strong>
+            <div class="brand-subtitle">BACHELOR</div>
+          </div>
+        </div>
+
+        <nav id="nav">
+          <button class="nav-item active" data-page="dashboard">⌂ <span>Dashboard</span></button>
+          <button class="nav-item" data-page="meals">🍚 <span>Daily Meals</span></button>
+          <button class="nav-item" data-page="members">◉ <span>Members</span></button>
+          <button class="nav-item" data-page="expenses">◈ <span>Expenses</span></button>
+          <button class="nav-item" data-page="payments">৳ <span>Payments</span></button>
+          <button class="nav-item" data-page="bills">▣ <span>House Bills</span></button>
+          <button class="nav-item" data-page="reports">◌ <span>Monthly Report</span></button>
+          <button class="nav-item" data-page="settlement">⇄ <span>Settlement</span></button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          
+          <button class="nav-item" data-page="settings" type="button" onclick="go('settings')">
+            ⚙ <span>Settings</span>
+          </button> 
+
+        </div>
+
+      </aside>
+
+
+      <!-- Part-2: Main Content -->
+      <main class="main">
+
+        <header class="topbar">
+
+          <div class="page-heading"> 
+
+            <!-- SYSTEM IDENTITY -->
+            <div class="system-identity"> 
+              <span class="identity-line"></span>
+              <p class="eyebrow"> 
+                <span class="eyebrow-dot"></span> HOUSE MANAGEMENT OS <span class="eyebrow-code">A-01</span>
+              </p>
+            </div> 
+            
+            <!-- MAIN COMMAND TITLE -->
+            <div class="command-title">
+              <h1 id="pageTitle"> Command Center </h1> 
+              <span class="title-cursor"></span>
+            </div> 
+            
+            <!-- SYSTEM DESCRIPTION -->
+            <div class="command-meta"> 
+              <span class="meta-line"></span> <span> RESIDENTIAL ACCOUNTING </span> 
+              <span class="meta-separator">/</span> <span class="meta-live"> LIVE </span> 
+            </div>
+          </div>
+
+
+          <div class="top-actions">
+
+            <!-- SYSTEM STATUS -->
+            <div class="hud-status"> 
+              <span class="status-orb"></span>
+              <div class="status-info"> 
+                <span class="status-label">SYSTEM</span> 
+                <strong>ONLINE</strong> 
+              </div>
+            </div>
+
+            <!-- MONTH CONTROL -->
+            
+            <div class="month-select" id="monthSelect">
+            
+              <span class="month-label">
+                <i></i>
+                ACTIVE CYCLE
+              </span>
+            
+            </div>
+
+            <!-- BACKUP DATA CORE --> 
+            <button class="icon-btn data-core" id="backupBtn" title="Export Aurora Data"> 
+              <span class="core-ring"></span> 
+              <span class="core-icon">⇩</span> 
+              <span class="core-tooltip"> EXPORT DATA </span> 
+            </button>
+
+          </div>
+
+        </header>
+
+
+
+        <!-- Part-1.2: Sidebar Details -->
+        <section id="page-dashboard" class="page active"></section>
+
+
+
+        <section id="page-meals" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb cyan"></span>
+        
+              <div>
+                <span class="module-code">
+                  MODULE 01 // DAILY OPERATIONS
+                </span>
+        
+                <h2>Meal Matrix</h2>
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+              <span class="status-dot"></span>
+              LIVE
+            </div>
+        
+          </div>
+        
+        
+          <!-- MEAL SUMMARY -->
+        
+          <div class="meal-summary">
+        
+            <div class="stat-card">
+        
+              <span>TOTAL MEALS</span>
+        
+              <strong id="totalMealCount">
+                0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>MEAL EXPENSE</span>
+        
+              <strong id="totalMealExpense">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>MEAL RATE</span>
+        
+              <strong id="currentMealRate">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>ACTIVE MEMBERS</span>
+        
+              <strong id="activeMealMembers">
+                0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- TOOLBAR -->
+        
+          <div class="sheet-toolbar">
+        
+            <button class="sheet-btn primary" id="addMealDayBtn">
+              + ADD DAY
+            </button>
+        
+            <button class="sheet-btn" id="saveMealsBtn">
+              ✓ SAVE
+            </button>
+        
+            <div class="toolbar-spacer"></div>
+        
+            <span class="month-indicator">
+              CURRENT MONTH
+            </span>
+        
+          </div>
+        
+        
+          <!-- MEAL MATRIX -->
+        
+          <div class="data-sheet meal-sheet">
+        
+            <table>
+        
+              <thead id="mealTableHead">
+              </thead>
+        
+              <tbody id="mealTableBody">
+              </tbody>
+        
+              <tfoot id="mealTableFoot">
+              </tfoot>
+        
+            </table>
+        
+          </div>
+        
+        </section>
+
+        <section id="page-members" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb cyan"></span>
+        
+              <div>
+        
+                <span class="module-code">
+                  MODULE 00 // RESIDENT DATABASE
+                </span>
+        
+                <h2>Member Core</h2>
+        
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              DATABASE ONLINE
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- MEMBER OVERVIEW -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>TOTAL MEMBERS</span>
+        
+              <strong id="memberTotalCount">
+                0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>ACTIVE</span>
+        
+              <strong id="memberActiveCount">
+                0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>INACTIVE</span>
+        
+              <strong id="memberInactiveCount">
+                0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>MONTH</span>
+        
+              <strong id="memberCurrentMonth">
+                --
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- MEMBER CONTROL -->
+        
+          <div class="member-control">
+        
+            <div>
+        
+              <span class="report-code">
+                RESIDENT // CONTROL
+              </span>
+        
+              <h3>
+                Member Registry
+              </h3>
+        
+            </div>
+        
+        
+            <button class="aurora-action-btn" id="addMemberBtn">
+        
+              <span>＋</span>
+        
+              ADD MEMBER
+        
+            </button>
+        
+          </div>
+        
+        
+          <!-- MEMBER GRID -->
+        
+          <div id="memberGrid" class="member-grid">
+          </div>
+        
+        
+        </section>
+        
+        
+        <!-- =========================================================
+                                MEMBER MODAL
+        ========================================================= -->
+    
+        <div class="aurora-modal" id="memberModal">
+        
+          <div class="aurora-modal-backdrop"></div>
+        
+        
+          <div class="aurora-modal-panel">
+        
+            <div class="aurora-modal-header">
+        
+              <div>
+        
+                <span class="report-code">
+                  MEMBER // DATABASE ENTRY
+                </span>
+        
+                <h3 id="memberModalTitle">
+                  Add Member
+                </h3>
+        
+              </div>
+        
+        
+              <button class="modal-close" id="memberModalClose">
+                ×
+              </button>
+        
+            </div>
+        
+        
+            <form id="memberForm">
+        
+              <input type="hidden" id="memberEditId" />
+        
+        
+              <label class="aurora-input">
+        
+                <span>
+                  MEMBER NAME
+                </span>
+        
+                <input type="text" id="memberName" placeholder="Enter member name" required />
+        
+              </label>
+        
+        
+              <label class="aurora-input">
+        
+                <span>
+                  JOINING DATE
+                </span>
+        
+                <input type="date" id="memberJoiningDate" required />
+        
+              </label>
+        
+        
+              <label class="aurora-input">
+        
+                <span>
+                  PHONE / CONTACT
+                </span>
+        
+                <input type="text" id="memberPhone" placeholder="Optional" />
+        
+              </label>
+        
+        
+              <label class="aurora-input">
+        
+                <span>
+                  STATUS
+                </span>
+        
+                <select id="memberStatus">
+        
+                  <option value="active">
+                    ACTIVE
+                  </option>
+        
+                  <option value="inactive">
+                    INACTIVE
+                  </option>
+        
+                </select>
+        
+              </label>
+        
+        
+              <div class="modal-actions">
+        
+                <button type="button" class="modal-cancel" id="memberCancelBtn">
+                  CANCEL
+                </button>
+        
+        
+                <button type="submit" class="aurora-action-btn">
+                  SAVE MEMBER
+                </button>
+        
+              </div>
+        
+            </form>
+        
+          </div>
+        </div>
+
+
+
+
+        <section id="page-expenses" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb purple"></span>
+        
+              <div>
+                <span class="module-code">
+                  MODULE 03 // FINANCIAL LOG
+                </span>
+        
+                <h2>Expense Core</h2>
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              LIVE
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- ACCOUNT SUMMARY -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>MEAL EXPENSE</span>
+        
+              <strong id="mealExpenseTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>HOUSE EXPENSE</span>
+        
+              <strong id="houseExpenseTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TOTAL EXPENSE</span>
+        
+              <strong id="allExpenseTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TRANSACTIONS</span>
+        
+              <strong id="expenseTransactionCount">
+                0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- ACCOUNT FILTER -->
+        
+          <div class="account-switcher">
+        
+            <button class="account-tab active" data-expense-account="all">
+              ALL
+            </button>
+        
+            <button class="account-tab" data-expense-account="meal">
+              🍚 MEAL
+            </button>
+        
+            <button class="account-tab" data-expense-account="house">
+              🏠 HOUSE
+            </button>
+        
+          </div>
+        
+        
+          <!-- TOOLBAR -->
+        
+          <div class="sheet-toolbar">
+        
+            <button class="sheet-btn primary" id="addExpenseBtn">
+              + ADD EXPENSE
+            </button>
+        
+            <div class="toolbar-spacer"></div>
+        
+            <span>
+              EXPENSE CORE // LEDGER
+            </span>
+        
+          </div>
+        
+        
+          <!-- EXPENSE TABLE -->
+        
+          <div class="data-sheet">
+        
+            <table>
+        
+              <thead>
+        
+                <tr>
+        
+                  <th>DATE</th>
+                  <th>ACCOUNT</th>
+                  <th>CATEGORY</th>
+                  <th>DESCRIPTION</th>
+                  <th>PAID BY</th>
+                  <th>METHOD</th>
+                  <th>AMOUNT</th>
+                  <th>ACTION</th>
+        
+                </tr>
+        
+              </thead>
+        
+              <tbody id="expenseTableBody">
+              </tbody>
+        
+              <tfoot>
+        
+                <tr>
+        
+                  <td colspan="6">
+                    FILTERED TOTAL
+                  </td>
+        
+                  <td id="expenseFilteredTotal">
+                    ৳0
+                  </td>
+        
+                  <td></td>
+        
+                </tr>
+        
+              </tfoot>
+        
+            </table>
+        
+          </div>
+        
+        </section>
+
+        <section id="page-payments" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb cyan"></span>
+        
+              <div>
+        
+                <span class="module-code">
+                  MODULE 05 // CONTRIBUTION NETWORK
+                </span>
+        
+                <h2>Payment Ledger</h2>
+        
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              LIVE
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- PAYMENT SUMMARY -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>MEAL PAYMENTS</span>
+        
+              <strong id="mealPaymentTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>HOUSE PAYMENTS</span>
+        
+              <strong id="housePaymentTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TOTAL PAID</span>
+        
+              <strong id="allPaymentTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TRANSACTIONS</span>
+        
+              <strong id="paymentCount">
+                0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- ACCOUNT FILTER -->
+        
+          <div class="account-switcher">
+        
+            <button class="account-tab active" data-payment-account="all">
+              ALL
+            </button>
+        
+            <button class="account-tab" data-payment-account="meal">
+              🍚 MEAL
+            </button>
+        
+            <button class="account-tab" data-payment-account="house">
+              🏠 HOUSE
+            </button>
+        
+          </div>
+        
+        
+          <!-- TOOLBAR -->
+        
+          <div class="sheet-toolbar">
+        
+            <button class="sheet-btn primary" id="addPaymentBtn">
+              + RECORD PAYMENT
+            </button>
+        
+            <div class="toolbar-spacer"></div>
+        
+            <span>
+              PAYMENT LEDGER // CONTRIBUTIONS
+            </span>
+        
+          </div>
+        
+        
+          <!-- PAYMENT TABLE -->
+        
+          <div class="data-sheet">
+        
+            <table>
+        
+              <thead>
+        
+                <tr>
+        
+                  <th>DATE</th>
+                  <th>MEMBER</th>
+                  <th>ACCOUNT</th>
+                  <th>METHOD</th>
+                  <th>REFERENCE</th>
+                  <th>NOTE</th>
+                  <th>AMOUNT</th>
+                  <th>ACTION</th>
+        
+                </tr>
+        
+              </thead>
+        
+              <tbody id="paymentTableBody">
+              </tbody>
+        
+              <tfoot>
+        
+                <tr>
+        
+                  <td colspan="6">
+                    FILTERED TOTAL
+                  </td>
+        
+                  <td id="paymentFilteredTotal">
+                    ৳0
+                  </td>
+        
+                  <td></td>
+        
+                </tr>
+        
+              </tfoot>
+        
+            </table>
+        
+          </div>
+        
+        </section>
+
+
+        <section id="page-bills" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb gold"></span>
+        
+              <div>
+                <span class="module-code">
+                  MODULE 04 // HOUSE FINANCE
+                </span>
+        
+                <h2>House Bills Core</h2>
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              TRACKING
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- BILL SUMMARY -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>MONTHLY RENT</span>
+        
+              <strong id="monthlyRentTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>UTILITY BILLS</span>
+        
+              <strong id="utilityBillTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>HOUSE TOTAL</span>
+        
+              <strong id="houseBillTotal">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>BILL COUNT</span>
+        
+              <strong id="houseBillCount">
+                0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- BILL TYPE FILTER -->
+        
+          <div class="account-switcher">
+        
+            <button class="account-tab active" data-bill-type="all">
+              ALL
+            </button>
+        
+            <button class="account-tab" data-bill-type="rent">
+              🏠 RENT
+            </button>
+        
+            <button class="account-tab" data-bill-type="electricity">
+              ⚡ ELECTRICITY
+            </button>
+        
+            <button class="account-tab" data-bill-type="gas">
+              🔥 GAS
+            </button>
+        
+            <button class="account-tab" data-bill-type="water">
+              💧 WATER
+            </button>
+        
+            <button class="account-tab" data-bill-type="internet">
+              🌐 INTERNET
+            </button>
+        
+          </div>
+        
+        
+          <!-- TOOLBAR -->
+        
+          <div class="sheet-toolbar">
+        
+            <button class="sheet-btn primary" id="addBillBtn">
+              + ADD BILL
+            </button>
+        
+            <button class="sheet-btn" id="addRecurringBillBtn">
+              ↻ RECURRING
+            </button>
+        
+            <div class="toolbar-spacer"></div>
+        
+            <span>
+              HOUSE ACCOUNT // BILLS
+            </span>
+        
+          </div>
+        
+        
+          <!-- BILL TABLE -->
+        
+          <div class="data-sheet">
+        
+            <table>
+        
+              <thead>
+        
+                <tr>
+        
+                  <th>DATE</th>
+                  <th>TYPE</th>
+                  <th>DESCRIPTION</th>
+                  <th>PERIOD</th>
+                  <th>PAID BY</th>
+                  <th>STATUS</th>
+                  <th>AMOUNT</th>
+                  <th>ACTION</th>
+        
+                </tr>
+        
+              </thead>
+        
+              <tbody id="billTableBody">
+              </tbody>
+        
+              <tfoot>
+        
+                <tr>
+        
+                  <td colspan="6">
+                    FILTERED TOTAL
+                  </td>
+        
+                  <td id="billFilteredTotal">
+                    ৳0
+                  </td>
+        
+                  <td></td>
+        
+                </tr>
+        
+              </tfoot>
+        
+            </table>
+        
+          </div>
+        
+        </section>
+
+
+        <section id="page-reports" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb cyan"></span>
+        
+              <div>
+                <span class="module-code">
+                  MODULE 06 // ANALYTICS ENGINE
+                </span>
+        
+                <h2>Reports Core</h2>
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              ANALYZING
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- MASTER STATS -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>TOTAL MEAL COST</span>
+        
+              <strong id="reportMealCost">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TOTAL HOUSE COST</span>
+        
+              <strong id="reportHouseCost">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>TOTAL PAID</span>
+        
+              <strong id="reportTotalPaid">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>ACTIVE MEMBERS</span>
+        
+              <strong id="reportMemberCount">
+                0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- REPORT GRID -->
+        
+          <div class="report-grid">
+        
+        
+            <!-- MEAL REPORT -->
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <div>
+        
+                  <span class="report-code">
+                    ACCOUNT // 01
+                  </span>
+        
+                  <h3>🍚 Meal Analytics</h3>
+        
+                </div>
+        
+                <span class="report-live">
+                  LIVE
+                </span>
+        
+              </div>
+        
+        
+              <div class="report-metrics">
+        
+                <div>
+        
+                  <span>TOTAL MEALS</span>
+        
+                  <strong id="reportTotalMeals">
+                    0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>MEAL RATE</span>
+        
+                  <strong id="reportMealRate">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>MEAL EXPENSE</span>
+        
+                  <strong id="reportMealExpense">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>MEAL PAYMENTS</span>
+        
+                  <strong id="reportMealPayments">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+              </div>
+        
+            </div>
+        
+        
+            <!-- HOUSE REPORT -->
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <div>
+        
+                  <span class="report-code">
+                    ACCOUNT // 02
+                  </span>
+        
+                  <h3>🏠 House Analytics</h3>
+        
+                </div>
+        
+                <span class="report-live">
+                  LIVE
+                </span>
+        
+              </div>
+        
+        
+              <div class="report-metrics">
+        
+                <div>
+        
+                  <span>HOUSE BILLS</span>
+        
+                  <strong id="reportHouseBills">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>HOUSE PAYMENTS</span>
+        
+                  <strong id="reportHousePayments">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>RENT</span>
+        
+                  <strong id="reportRent">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+        
+                <div>
+        
+                  <span>UTILITIES</span>
+        
+                  <strong id="reportUtilities">
+                    ৳0
+                  </strong>
+        
+                </div>
+        
+              </div>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- MEMBER REPORT -->
+        
+          <div class="report-panel member-report">
+        
+            <div class="report-panel-header">
+        
+              <div>
+        
+                <span class="report-code">
+                  MEMBER // BALANCE MATRIX
+                </span>
+        
+                <h3>Member Financial Matrix</h3>
+        
+              </div>
+        
+              <span class="report-live">
+                CALCULATED
+              </span>
+        
+            </div>
+        
+        
+            <div class="data-sheet">
+        
+              <table>
+        
+                <thead>
+        
+                  <tr>
+        
+                    <th>MEMBER</th>
+                    <th>MEALS</th>
+                    <th>MEAL COST</th>
+                    <th>MEAL PAID</th>
+                    <th>HOUSE PAID</th>
+                    <th>TOTAL PAID</th>
+                    <th>BALANCE</th>
+                    <th>STATUS</th>
+        
+                  </tr>
+        
+                </thead>
+        
+                <tbody id="memberReportBody">
+                </tbody>
+        
+              </table>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- ACCOUNT BALANCE -->
+        
+          <div class="report-grid">
+        
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <h3>🍚 Meal Account</h3>
+        
+              </div>
+        
+              <div class="big-balance">
+        
+                <span>ACCOUNT BALANCE</span>
+        
+                <strong id="mealAccountBalance">
+                  ৳0
+                </strong>
+        
+              </div>
+        
+            </div>
+        
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <h3>🏠 House Account</h3>
+        
+              </div>
+        
+              <div class="big-balance">
+        
+                <span>ACCOUNT BALANCE</span>
+        
+                <strong id="houseAccountBalance">
+                  ৳0
+                </strong>
+        
+              </div>
+        
+            </div>
+        
+        
+          </div>
+        
+        </section>
+
+        <section id="page-settlement" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb gold"></span>
+        
+              <div>
+        
+                <span class="module-code">
+                  MODULE 07 // MONTHLY SETTLEMENT
+                </span>
+        
+                <h2>Settlement Core</h2>
+        
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+        
+              <span class="status-dot"></span>
+              CALCULATED
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- SETTLEMENT OVERVIEW -->
+        
+          <div class="expense-summary">
+        
+            <div class="stat-card">
+        
+              <span>MEAL BALANCE</span>
+        
+              <strong id="settlementMealBalance">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>HOUSE BALANCE</span>
+        
+              <strong id="settlementHouseBalance">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>RECEIVABLE</span>
+        
+              <strong id="settlementReceivable">
+                ৳0
+              </strong>
+        
+            </div>
+        
+        
+            <div class="stat-card">
+        
+              <span>PAYABLE</span>
+        
+              <strong id="settlementPayable">
+                ৳0
+              </strong>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- SETTLEMENT MODE -->
+        
+          <div class="account-switcher">
+        
+            <button class="account-tab active" data-settlement-view="combined">
+              ◉ COMBINED
+            </button>
+        
+            <button class="account-tab" data-settlement-view="meal">
+              🍚 MEAL
+            </button>
+        
+            <button class="account-tab" data-settlement-view="house">
+              🏠 HOUSE
+            </button>
+        
+          </div>
+        
+        
+          <!-- SETTLEMENT MATRIX -->
+        
+          <div class="report-panel">
+        
+            <div class="report-panel-header">
+        
+              <div>
+        
+                <span class="report-code">
+                  FINAL // MEMBER BALANCE MATRIX
+                </span>
+        
+                <h3>
+                  Monthly Settlement
+                </h3>
+        
+              </div>
+        
+              <span class="report-live">
+                AUTO CALCULATED
+              </span>
+        
+            </div>
+        
+        
+            <div class="data-sheet">
+        
+              <table>
+        
+                <thead>
+        
+                  <tr>
+        
+                    <th>MEMBER</th>
+                    <th>MEAL COST</th>
+                    <th>MEAL PAID</th>
+                    <th>HOUSE SHARE</th>
+                    <th>HOUSE PAID</th>
+                    <th>TOTAL COST</th>
+                    <th>TOTAL PAID</th>
+                    <th>BALANCE</th>
+                    <th>STATUS</th>
+        
+                  </tr>
+        
+                </thead>
+        
+                <tbody id="settlementTableBody">
+                </tbody>
+        
+              </table>
+        
+            </div>
+        
+          </div>
+        
+        
+          <!-- WHO PAYS WHOM -->
+        
+          <div class="report-panel">
+        
+            <div class="report-panel-header">
+        
+              <div>
+        
+                <span class="report-code">
+                  SETTLEMENT // TRANSFER MATRIX
+                </span>
+        
+                <h3>
+                  Who Pays Whom
+                </h3>
+        
+              </div>
+        
+              <span class="report-live">
+                OPTIMIZED
+              </span>
+        
+            </div>
+        
+        
+            <div id="settlementTransfers" class="transfer-list">
+            </div>
+        
+          </div>
+        
+        
+          <!-- FINAL SNAPSHOT -->
+        
+          <div class="report-grid">
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <h3>
+                  📥 Total Receivable
+                </h3>
+        
+              </div>
+        
+              <div class="big-balance">
+        
+                <span>
+                  MEMBERS SHOULD RECEIVE
+                </span>
+        
+                <strong id="finalReceivable" class="balance-positive">
+                  ৳0
+                </strong>
+        
+              </div>
+        
+            </div>
+        
+        
+            <div class="report-panel">
+        
+              <div class="report-panel-header">
+        
+                <h3>
+                  📤 Total Payable
+                </h3>
+        
+              </div>
+        
+              <div class="big-balance">
+        
+                <span>
+                  MEMBERS SHOULD PAY
+                </span>
+        
+                <strong id="finalPayable" class="balance-negative">
+                  ৳0
+                </strong>
+        
+              </div>
+        
+            </div>
+        
+          </div>
+        
+        </section>
+
+
+        <section id="page-settings" class="page">
+        
+          <div class="module-header">
+        
+            <div class="module-identity">
+        
+              <span class="module-orb purple"></span>
+        
+              <div>
+                <span class="module-code">
+                  SYSTEM 08 // CONFIGURATION
+                </span>
+        
+                <h2>System Settings</h2>
+              </div>
+        
+            </div>
+        
+            <div class="module-status">
+              <span class="status-dot"></span>
+              CONFIG
+            </div>
+        
+          </div>
+        
+        
+          <div class="settings-grid">
+        
+            <div class="setting-card">
+        
+              <span>HOUSE NAME</span>
+        
+              <input type="text" id="houseName" value="Aurora Bachelor">
+        
+            </div>
+        
+        
+            <div class="setting-card">
+        
+              <span>CURRENCY</span>
+        
+              <select id="currency">
+                <option value="BDT">৳ BDT</option>
+              </select>
+        
+            </div>
+        
+        
+            <div class="setting-card">
+        
+              <span>DEFAULT MEAL RATE</span>
+        
+              <input type="number" id="defaultMealRate" value="0">
+        
+            </div>
+        
+        
+            <div class="setting-card">
+        
+              <span>MONTH START DAY</span>
+        
+              <input type="number" id="monthStartDay" value="1" min="1" max="28">
+        
+            </div>
+        
+          </div>
+        
+        
+          <div class="settings-actions">
+        
+            <button class="sheet-btn primary">
+              SAVE CONFIGURATION
+            </button>
+        
+            <button class="sheet-btn">
+              RESET DATA
+            </button>
+        
+          </div>
+        
+        </section>
+
+      </main>
+    </div>
+
+    <div id="modalRoot"></div>
+    <div id="toast"></div>
+    <script src="./script.js"></script>
+  </body>
+</html>
