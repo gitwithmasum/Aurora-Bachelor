@@ -2848,36 +2848,34 @@ const AuroraPaymentAccount = (() => {
     const currentMonth =
       month();
 
+    if (!currentMonth) {
+      return false;
+    }
 
-    currentMonth
-      .mealAccount
-      .payments =
-      (
-        currentMonth
-          .mealAccount
-          .payments || []
-      )
-        .filter(
-          payment =>
-            payment.id !== id
-        );
+    const payment =
+      data().find(item => item.id === id);
 
+    if (!payment) {
+      return false;
+    }
 
-    currentMonth
-      .houseAccount
-      .payments =
-      (
-        currentMonth
-          .houseAccount
-          .payments || []
-      )
-        .filter(
-          payment =>
-            payment.id !== id
-        );
+    if (payment.account === "house") {
 
+      currentMonth.houseAccount.payments =
+        (currentMonth.houseAccount.payments || [])
+          .filter(item => item.id !== id);
+
+    } else {
+
+      currentMonth.mealAccount.payments =
+        (currentMonth.mealAccount.payments || [])
+          .filter(item => item.id !== id);
+
+    }
 
     AuroraDataStore.save();
+
+    return true;
 
   }
 
@@ -3470,6 +3468,426 @@ const AuroraHouseAccount = (() => {
 /* ============================================================
    AURORA BACHELOR — DASHBOARD V3
 ============================================================ */
+
+/* ============================================================
+   AURORA BACHELOR — DASHBOARD V4
+   Separate Meal Account + House Account
+============================================================ */
+
+function renderDashboard() {
+
+  const page =
+    document.getElementById("page-dashboard");
+
+  if (!page) {
+    return;
+  }
+
+  const month =
+    AuroraDataStore.getMonth(
+      AuroraApp.getCurrentMonth()
+    );
+
+  const members =
+    AuroraDataStore.getMembers();
+
+  /* ==========================================================
+     MEAL ACCOUNT — COMPLETELY SEPARATE
+  ========================================================== */
+
+  const totalMeals =
+    AuroraMealAccount.totalMeals();
+
+  const mealExpense =
+    AuroraMealAccount.totalExpense();
+
+  const mealRate =
+    AuroraMealAccount.mealRate();
+
+  const mealPaid =
+    AuroraPaymentAccount.totalByAccount("meal");
+
+  const mealOutstanding =
+    Math.max(
+      0,
+      mealExpense - mealPaid
+    );
+
+  /* ==========================================================
+     HOUSE ACCOUNT — COMPLETELY SEPARATE
+  ========================================================== */
+
+  const houseCost =
+    AuroraHouseAccount.totalCost();
+
+  const rent =
+    AuroraHouseAccount.totalRent();
+
+  const bills =
+    AuroraHouseAccount.totalBills();
+
+  const housePaid =
+    AuroraPaymentAccount.totalByAccount("house");
+
+  const houseOutstanding =
+    Math.max(
+      0,
+      houseCost - housePaid
+    );
+
+  /* ==========================================================
+     OVERVIEW — COMBINED ONLY FOR SUMMARY
+  ========================================================== */
+
+  const combinedExpense =
+    mealExpense + houseCost;
+
+  const combinedPaid =
+    mealPaid + housePaid;
+
+  const combinedOutstanding =
+    mealOutstanding + houseOutstanding;
+
+  page.innerHTML = `
+
+    <div class="card hero">
+
+      <div class="eyebrow">
+        AURORA //
+        ${monthLabel(
+    AuroraApp.getCurrentMonth()
+  ).toUpperCase()}
+      </div>
+
+      <div class="kpi-row">
+
+        <div>
+          <h2>House Command Center</h2>
+
+          <div class="muted">
+            Meal and house accounts are tracked independently.
+          </div>
+        </div>
+
+        <div class="big">
+          ${money(mealRate)}
+        </div>
+
+      </div>
+
+      <div class="muted">
+        Current meal rate · meal expenses divided by recorded meals.
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         MEAL ACCOUNT
+    ======================================================= -->
+
+    <div class="grid stats" style="margin-top:14px">
+
+      ${card(
+    "Meal Count",
+    totalMeals,
+    "Current month"
+  )}
+
+      ${card(
+    "Meal Rate",
+    money(mealRate),
+    "Per meal"
+  )}
+
+      ${card(
+    "Meal Expense",
+    money(mealExpense),
+    "Food account"
+  )}
+
+      ${card(
+    "Meal Outstanding",
+    money(mealOutstanding),
+    `Paid ${money(mealPaid)}`
+  )}
+
+    </div>
+
+
+    <!-- ======================================================
+         HOUSE ACCOUNT
+    ======================================================= -->
+
+    <div class="grid stats" style="margin-top:14px">
+
+      ${card(
+    "House Cost",
+    money(houseCost),
+    "Rent + bills"
+  )}
+
+      ${card(
+    "House Rent",
+    money(rent),
+    "Rent account"
+  )}
+
+      ${card(
+    "House Bills",
+    money(bills),
+    "Utilities"
+  )}
+
+      ${card(
+    "House Outstanding",
+    money(houseOutstanding),
+    `Paid ${money(housePaid)}`
+  )}
+
+    </div>
+
+
+    <!-- ======================================================
+         ACCOUNT OVERVIEW
+    ======================================================= -->
+
+    <div class="grid stats" style="margin-top:14px">
+
+      ${card(
+    "Active Members",
+    members.length,
+    "Current house members"
+  )}
+
+      ${card(
+    "Combined Expense",
+    money(combinedExpense),
+    "Meal + house overview"
+  )}
+
+      ${card(
+    "Combined Paid",
+    money(combinedPaid),
+    "Meal + house payments"
+  )}
+
+      ${card(
+    "Combined Outstanding",
+    money(combinedOutstanding),
+    "Summary only"
+  )}
+
+    </div>
+
+
+    <!-- ======================================================
+         MEMBER MATRIX
+    ======================================================= -->
+
+    <div class="grid two-col">
+
+      <div class="card">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Member Balance Matrix</h2>
+
+            <div class="muted">
+              Meal account balance by active member.
+            </div>
+          </div>
+
+          <button
+            class="btn small"
+            onclick="go('members')"
+          >
+            Manage
+          </button>
+
+        </div>
+
+        ${members.length ? `
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Meals</th>
+                  <th>Meal Due</th>
+                  <th>Meal Paid</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                ${members.map(member => {
+
+    const meals =
+      AuroraMealAccount.memberMeals(
+        member.id
+      );
+
+    const due =
+      AuroraMealAccount.memberDue(
+        member.id
+      );
+
+    const paid =
+      AuroraPaymentAccount
+        .data()
+        .filter(
+          payment =>
+            payment.account === "meal" &&
+            payment.memberId === member.id
+        )
+        .reduce(
+          (sum, payment) =>
+            sum + Number(payment.amount || 0),
+          0
+        );
+
+    const balance =
+      paid - due;
+
+    return `
+                    <tr>
+                      <td>
+                        <strong>${esc(member.name)}</strong>
+                      </td>
+
+                      <td>${meals}</td>
+                      <td>${money(due)}</td>
+                      <td>${money(paid)}</td>
+
+                      <td class="${balance >= 0 ? "positive" : "negative"
+      }">
+                        ${balance >= 0 ? "+" : ""}${money(balance)}
+                      </td>
+                    </tr>
+                  `;
+
+  }).join("")}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        ` : `
+
+          <div class="empty">
+            <div class="emoji">👥</div>
+            <h3>No active members</h3>
+            <p class="muted">
+              Add members to start house accounting.
+            </p>
+          </div>
+
+        `}
+
+      </div>
+
+
+      <!-- ====================================================
+           HOUSE FINANCE
+      ===================================================== -->
+
+      <div class="card">
+
+        <div class="section-head">
+
+          <div>
+            <h2>House Finance Core</h2>
+
+            <div class="muted">
+              House account only — rent, bills and house payments.
+            </div>
+          </div>
+
+          <button
+            class="btn small"
+            onclick="go('bills')"
+          >
+            Open
+          </button>
+
+        </div>
+
+        <div class="bar-list">
+
+          <div class="bar-row">
+            <span>Rent</span>
+            <span class="progress">
+              <i style="width:${houseCost > 0
+      ? (rent / houseCost) * 100
+      : 0
+    }%"></i>
+            </span>
+            <strong>${money(rent)}</strong>
+          </div>
+
+          <div class="bar-row">
+            <span>Bills</span>
+            <span class="progress">
+              <i style="width:${houseCost > 0
+      ? (bills / houseCost) * 100
+      : 0
+    }%"></i>
+            </span>
+            <strong>${money(bills)}</strong>
+          </div>
+
+        </div>
+
+        <div class="muted" style="margin-top:18px">
+          🏠 Rent: ${money(rent)}
+          <br>
+          📄 Bills: ${money(bills)}
+          <br>
+          💳 House Paid: ${money(housePaid)}
+          <br>
+          ⚠ Outstanding: ${money(houseOutstanding)}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         QUICK ACTIONS
+    ======================================================= -->
+
+    <div class="grid quick-grid">
+
+      <button class="card quick" onclick="go('meals')">
+        <b>🍚 Daily Meals</b>
+        <span class="muted">Record daily meal usage.</span>
+      </button>
+
+      <button class="card quick" onclick="go('expenses')">
+        <b>◈ Meal Expenses</b>
+        <span class="muted">Track food and grocery spending.</span>
+      </button>
+
+      <button class="card quick" onclick="go('payments')">
+        <b>৳ Payments</b>
+        <span class="muted">Track meal and house contributions.</span>
+      </button>
+
+    </div>
+
+  `;
+
+}
+
 
 
 
@@ -5555,11 +5973,11 @@ function renderMeals() {
                                         max="10"
                                         step="0.5"
                                         value="${Number(
-                                          meal
-                                            .values?.[
-                                          member.id
-                                          ] || 0
-                                        )}"
+                    meal
+                      .values?.[
+                    member.id
+                    ] || 0
+                  )}"
                                         data-meal-index="${index}"
                                         data-member-id="${member.id}"
                                       >
@@ -5858,23 +6276,22 @@ function openExpenseModal() {
               required
             >
 
-              ${
-                members
-                  .map(
-                    member => `
+              ${members
+      .map(
+        member => `
 
                       <option
                         value="${member.id}"
                       >
                         ${esc(
-                          member.name
-                        )}
+          member.name
+        )}
                       </option>
 
                     `
-                  )
-                  .join("")
-              }
+      )
+      .join("")
+    }
 
             </select>
 
@@ -6146,32 +6563,32 @@ function renderExpenseSummary() {
     <div class="grid stats">
 
       ${card(
-        "Total Expenses",
-        money(total),
-        "Current month"
-      )}
+    "Total Expenses",
+    money(total),
+    "Current month"
+  )}
 
 
       ${card(
-        "Meal Expenses",
-        money(mealTotal),
-        "Food + grocery + gas"
-      )}
+    "Meal Expenses",
+    money(mealTotal),
+    "Food + grocery + gas"
+  )}
 
 
       ${card(
-        "Transactions",
-        AuroraExpenseAccount
-          .data().length,
-        "Expense records"
-      )}
+    "Transactions",
+    AuroraExpenseAccount
+      .data().length,
+    "Expense records"
+  )}
 
 
       ${card(
-        "Categories",
-        categoryCount,
-        "Used categories"
-      )}
+    "Categories",
+    categoryCount,
+    "Used categories"
+  )}
 
     </div>
 
@@ -6261,8 +6678,8 @@ function renderExpenses() {
 
           <div class="muted">
             ${monthLabel(
-              AuroraApp.getCurrentMonth()
-            )}
+    AuroraApp.getCurrentMonth()
+  )}
           </div>
 
         </div>
@@ -6270,12 +6687,11 @@ function renderExpenses() {
       </div>
 
 
-      ${
-        rows.length
+      ${rows.length
 
-          ?
+      ?
 
-        `
+      `
 
           <div class="table-wrap">
 
@@ -6316,27 +6732,26 @@ function renderExpenses() {
 
               <tbody>
 
-                ${
-                  rows
-                    .map(
-                      expense => {
+                ${rows
+        .map(
+          expense => {
 
-                        const member =
-                          members.find(
-                            item =>
-                              item.id ===
-                              expense.paidBy
-                          );
+            const member =
+              members.find(
+                item =>
+                  item.id ===
+                  expense.paidBy
+              );
 
 
-                        return `
+            return `
 
                           <tr>
 
                             <td>
                               ${dateLabel(
-                                expense.date
-                              )}
+              expense.date
+            )}
                             </td>
 
 
@@ -6346,8 +6761,8 @@ function renderExpenses() {
                                 class="pill"
                               >
                                 ${esc(
-                                  expense.category
-                                )}
+              expense.category
+            )}
                               </span>
 
                             </td>
@@ -6355,16 +6770,16 @@ function renderExpenses() {
 
                             <td>
                               ${esc(
-                                expense.description
-                              )}
+              expense.description
+            )}
                             </td>
 
 
                             <td>
                               ${esc(
-                                member?.name ||
-                                "Unknown"
-                              )}
+              member?.name ||
+              "Unknown"
+            )}
                             </td>
 
 
@@ -6372,8 +6787,8 @@ function renderExpenses() {
                               class="expense-amount"
                             >
                               ${money(
-                                expense.amount
-                              )}
+              expense.amount
+            )}
                             </td>
 
 
@@ -6400,10 +6815,10 @@ function renderExpenses() {
 
                         `;
 
-                      }
-                    )
-                    .join("")
-                }
+          }
+        )
+        .join("")
+      }
 
               </tbody>
 
@@ -6421,8 +6836,8 @@ function renderExpenses() {
 
                   <th>
                     ${money(
-                      AuroraExpenseAccount.total()
-                    )}
+        AuroraExpenseAccount.total()
+      )}
                   </th>
 
 
@@ -6438,9 +6853,9 @@ function renderExpenses() {
 
         `
 
-          :
+      :
 
-        `
+      `
 
           <div class="empty">
 
@@ -6470,7 +6885,7 @@ function renderExpenses() {
           </div>
 
         `
-      }
+    }
 
     </div>
 
@@ -11019,10 +11434,10 @@ function renderSettings() {
               <option
                 value="aurora"
                 ${personalization.theme ===
-                  "aurora"
-                  ? "selected"
-                  : ""
-                }
+      "aurora"
+      ? "selected"
+      : ""
+    }
               >
                 Aurora
               </option>
@@ -11030,10 +11445,10 @@ function renderSettings() {
               <option
                 value="midnight"
                 ${personalization.theme ===
-                  "midnight"
-                  ? "selected"
-                  : ""
-                }
+      "midnight"
+      ? "selected"
+      : ""
+    }
               >
                 Midnight
               </option>
@@ -11056,10 +11471,10 @@ function renderSettings() {
               <option
                 value="cyan"
                 ${personalization.accent ===
-                  "cyan"
-                  ? "selected"
-                  : ""
-                }
+      "cyan"
+      ? "selected"
+      : ""
+    }
               >
                 Cyan
               </option>
@@ -11067,10 +11482,10 @@ function renderSettings() {
               <option
                 value="violet"
                 ${personalization.accent ===
-                  "violet"
-                  ? "selected"
-                  : ""
-                }
+      "violet"
+      ? "selected"
+      : ""
+    }
               >
                 Violet
               </option>
@@ -11078,10 +11493,10 @@ function renderSettings() {
               <option
                 value="green"
                 ${personalization.accent ===
-                  "green"
-                  ? "selected"
-                  : ""
-                }
+      "green"
+      ? "selected"
+      : ""
+    }
               >
                 Green
               </option>
@@ -11104,10 +11519,10 @@ function renderSettings() {
               <option
                 value="low"
                 ${personalization.glow ===
-                  "low"
-                  ? "selected"
-                  : ""
-                }
+      "low"
+      ? "selected"
+      : ""
+    }
               >
                 Low
               </option>
@@ -11115,10 +11530,10 @@ function renderSettings() {
               <option
                 value="medium"
                 ${personalization.glow ===
-                  "medium"
-                  ? "selected"
-                  : ""
-                }
+      "medium"
+      ? "selected"
+      : ""
+    }
               >
                 Medium
               </option>
@@ -11126,10 +11541,10 @@ function renderSettings() {
               <option
                 value="high"
                 ${personalization.glow ===
-                  "high"
-                  ? "selected"
-                  : ""
-                }
+      "high"
+      ? "selected"
+      : ""
+    }
               >
                 High
               </option>
@@ -11150,20 +11565,20 @@ function renderSettings() {
               <option
                 value="full"
                 ${personalization.animation ===
-                  "full"
-                  ? "selected"
-                  : ""
-                }>
+      "full"
+      ? "selected"
+      : ""
+    }>
                 Full
               </option>
 
               <option
                 value="reduced"
                 ${personalization.animation ===
-                  "reduced"
-                  ? "selected"
-                  : ""
-                }> Reduced
+      "reduced"
+      ? "selected"
+      : ""
+    }> Reduced
               </option>
 
             </select>
@@ -11181,11 +11596,10 @@ function renderSettings() {
 
               <option
                 value="aurora"
-                ${
-              personalization.background === "aurora"
-                ? "selected"
-                : ""
-              }
+                ${personalization.background === "aurora"
+      ? "selected"
+      : ""
+    }
               >
                 Aurora
               </option>
@@ -11193,9 +11607,9 @@ function renderSettings() {
               <option
                 value="grid"
                 ${personalization.background === "grid"
-                ? "selected"
-                : ""
-              }
+      ? "selected"
+      : ""
+    }
               >
                 Tech Grid
               </option>
@@ -11203,9 +11617,9 @@ function renderSettings() {
               <option
                 value="minimal"
                 ${personalization.background === "minimal"
-                ? "selected"
-                : ""
-              }
+      ? "selected"
+      : ""
+    }
               >
                 Minimal
               </option>
@@ -11226,9 +11640,9 @@ function renderSettings() {
               <option
                 value="comfortable"
                 ${personalization.density === "comfortable"
-                ? "selected"
-                : ""
-              }
+      ? "selected"
+      : ""
+    }
               >
                 Comfortable
               </option>
@@ -11236,9 +11650,9 @@ function renderSettings() {
               <option
                 value="compact"
                 ${personalization.density === "compact"
-                ? "selected"
-                : ""
-              }
+      ? "selected"
+      : ""
+    }
               >
                 Compact
               </option>
@@ -11246,9 +11660,9 @@ function renderSettings() {
               <option
                 value="tight"
                 ${personalization.density === "tight"
-                ? "selected"
-                : ""
-                }
+      ? "selected"
+      : ""
+    }
               >
                 Tight
               </option>
@@ -11279,9 +11693,9 @@ function renderSettings() {
             id="settingsCompact"
             type="checkbox"
             ${personalization.compactMode
-              ? "checked"
-              : ""
-            }
+      ? "checked"
+      : ""
+    }
           >
 
           <i></i>
@@ -11737,55 +12151,6 @@ function savePersonalizationSettings() {
   toast(
     "Personalization saved."
   );
-
-}
-
-
-/* ============================================================
-   APPLY PERSONALIZATION
-============================================================ */
-
-function applyAuroraPersonalization() {
-
-  const db =
-    AuroraDataStore.get();
-
-
-  const personalization =
-    db.settings?.personalization || {};
-
-
-  document.documentElement
-    .dataset.theme =
-    personalization.theme ||
-    "aurora";
-
-
-  document.documentElement
-    .dataset.accent =
-    personalization.accent ||
-    "cyan";
-
-
-  document.documentElement
-    .dataset.glow =
-    personalization.glow ||
-    "medium";
-
-
-  document.documentElement
-    .dataset.animation =
-    personalization.animation ||
-    "full";
-
-
-  document.documentElement
-    .classList.toggle(
-      "aurora-compact",
-      Boolean(
-        personalization.compactMode
-      )
-    );
 
 }
 
