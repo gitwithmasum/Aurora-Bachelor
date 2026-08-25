@@ -13155,3 +13155,27 @@ function restoreSettingsDefaults() {
 }
 
 
+
+
+/* ----------------------------------------------------------
+              SERVICE WORKER REGISTRATION
+---------------------------------------------------------- */
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(registration => {
+        console.log(
+          "Aurora Service Worker registered:",
+          registration.scope
+        );
+      })
+      .catch(error => {
+        console.error(
+          "Aurora Service Worker registration failed:",
+          error
+        );
+      });
+  });
+}

@@ -1,0 +1,22 @@
+{
+    "name": "Aurora Bachelor",
+    "short_name": "Aurora",
+    "description": "Aurora Bachelor House Management System",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#030711",
+    "theme_color": "#54eaff",
+    "icons": [
+        {
+            "src": "./Assets/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "./Assets/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
