@@ -6,22 +6,24 @@
   <meta name="theme-color" content="#07111f">
   <title>Aurora Bachelor — House Management OS</title>
   <link rel="stylesheet" href="./style_v3.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
   <body>
-    
+
+
     <div class="stars"></div>
     <div class="aurora aurora-one"></div>
     <div class="aurora aurora-two"></div>
 
-    <div class="app-shell">
 
+    <div class="app-shell">
 
       <!-- Part-1: Sidebar -->
       <aside class="sidebar">
 
         <div class="brand">
           <img class="brand-logo" src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo">
-        
+       
           <div class="brand-text">
             <strong>AURORA</strong>
             <div class="brand-subtitle">BACHELOR</div>
@@ -37,15 +39,23 @@
           <button class="nav-item" data-page="bills">▣ <span>House Bills</span></button>
           <button class="nav-item" data-page="reports">◌ <span>Monthly Report</span></button>
           <button class="nav-item" data-page="settlement">⇄ <span>Settlement</span></button>
-        </nav>
-
-        <div class="sidebar-bottom">
-          
           <button class="nav-item" data-page="settings" type="button" onclick="go('settings')">
             ⚙ <span>Settings</span>
-          </button> 
+          </button>
+        </nav>         
+    
 
-        </div>
+        <!-- PROFILE -->
+        <button
+            class="icon-btn profile-btn"
+            id="profileBtn"
+            title="Open Profile"
+            type="button"
+            onclick="openAuroraProfile()">
+
+            <span class="profile-ring"></span>
+            <span class="profile-icon">👤</span> 
+        </button>
 
       </aside>
 
@@ -54,6 +64,8 @@
       <main class="main">
 
         <header class="topbar">
+
+          <section id="page-profile" class="page"></section>
 
           <div class="page-heading"> 
 
@@ -108,16 +120,18 @@
               <span class="core-tooltip"> EXPORT DATA </span> 
             </button>
 
+            <!-- PROFILE -->                        
+            
           </div>
 
         </header>
 
+       
 
 
         <!-- Part-1.2: Sidebar Details -->
         <section id="page-dashboard" class="page active"></section>
-
-
+        
 
         <section id="page-meals" class="page">
         
@@ -237,6 +251,8 @@
         
         </section>
 
+
+
         <section id="page-members" class="page">
         
           <div class="module-header">
@@ -347,124 +363,124 @@
         
           <!-- MEMBER GRID -->
         
-          <div id="memberGrid" class="member-grid">
-          </div>
-        
+          <div id="memberGrid" class="member-grid"></div>
+
+
+          <!-- =========================================================
+                                          MEMBER MODAL
+          ========================================================= -->
+          
+          <div class="aurora-modal" id="memberModal">
+          
+            <div class="aurora-modal-backdrop"></div>
+          
+          
+            <div class="aurora-modal-panel">
+          
+              <div class="aurora-modal-header">
+          
+                <div>
+          
+                  <span class="report-code">
+                    MEMBER // DATABASE ENTRY
+                  </span>
+          
+                  <h3 id="memberModalTitle">
+                    Add Member
+                  </h3>
+          
+                </div>
+          
+          
+                <button class="modal-close" id="memberModalClose">
+                  ×
+                </button>
+          
+              </div>
+          
+          
+              <form id="memberForm">
+          
+                <input type="hidden" id="memberEditId" />
+          
+          
+                <label class="aurora-input">
+          
+                  <span>
+                    MEMBER NAME
+                  </span>
+          
+                  <input type="text" id="memberName" placeholder="Enter member name" required />
+          
+                </label>
+          
+          
+                <label class="aurora-input">
+          
+                  <span>
+                    JOINING DATE
+                  </span>
+          
+                  <input type="date" id="memberJoiningDate" required />
+          
+                </label>
+          
+          
+                <label class="aurora-input">
+          
+                  <span>
+                    PHONE / CONTACT
+                  </span>
+          
+                  <input type="text" id="memberPhone" placeholder="Optional" />
+          
+                </label>
+          
+          
+                <label class="aurora-input">
+          
+                  <span>
+                    STATUS
+                  </span>
+          
+                  <select id="memberStatus">
+          
+                    <option value="active">
+                      ACTIVE
+                    </option>
+          
+                    <option value="inactive">
+                      INACTIVE
+                    </option>
+          
+                  </select>
+          
+                </label>
+          
+          
+                <div class="modal-actions">
+          
+                  <button type="button" class="modal-cancel" id="memberCancelBtn">
+                    CANCEL
+                  </button>
+          
+          
+                  <button type="submit" class="aurora-action-btn">
+                    SAVE MEMBER
+                  </button>
+          
+                </div>
+          
+              </form>
+          
+            </div>
+          </div>       
         
         </section>
         
-        
-        <!-- =========================================================
-                                MEMBER MODAL
-        ========================================================= -->
-    
-        <div class="aurora-modal" id="memberModal">
-        
-          <div class="aurora-modal-backdrop"></div>
-        
-        
-          <div class="aurora-modal-panel">
-        
-            <div class="aurora-modal-header">
-        
-              <div>
-        
-                <span class="report-code">
-                  MEMBER // DATABASE ENTRY
-                </span>
-        
-                <h3 id="memberModalTitle">
-                  Add Member
-                </h3>
-        
-              </div>
-        
-        
-              <button class="modal-close" id="memberModalClose">
-                ×
-              </button>
-        
-            </div>
-        
-        
-            <form id="memberForm">
-        
-              <input type="hidden" id="memberEditId" />
-        
-        
-              <label class="aurora-input">
-        
-                <span>
-                  MEMBER NAME
-                </span>
-        
-                <input type="text" id="memberName" placeholder="Enter member name" required />
-        
-              </label>
-        
-        
-              <label class="aurora-input">
-        
-                <span>
-                  JOINING DATE
-                </span>
-        
-                <input type="date" id="memberJoiningDate" required />
-        
-              </label>
-        
-        
-              <label class="aurora-input">
-        
-                <span>
-                  PHONE / CONTACT
-                </span>
-        
-                <input type="text" id="memberPhone" placeholder="Optional" />
-        
-              </label>
-        
-        
-              <label class="aurora-input">
-        
-                <span>
-                  STATUS
-                </span>
-        
-                <select id="memberStatus">
-        
-                  <option value="active">
-                    ACTIVE
-                  </option>
-        
-                  <option value="inactive">
-                    INACTIVE
-                  </option>
-        
-                </select>
-        
-              </label>
-        
-        
-              <div class="modal-actions">
-        
-                <button type="button" class="modal-cancel" id="memberCancelBtn">
-                  CANCEL
-                </button>
-        
-        
-                <button type="submit" class="aurora-action-btn">
-                  SAVE MEMBER
-                </button>
-        
-              </div>
-        
-            </form>
-        
-          </div>
-        </div>
 
-
+        
+       
 
 
         <section id="page-expenses" class="page">
@@ -798,6 +814,7 @@
         </section>
 
 
+
         <section id="page-bills" class="page">
         
           <div class="module-header">
@@ -979,6 +996,7 @@
         </section>
 
 
+        
         <section id="page-reports" class="page">
         
           <div class="module-header">
@@ -1315,6 +1333,8 @@
         
         </section>
 
+
+
         <section id="page-settlement" class="page">
         
           <div class="module-header">
@@ -1560,6 +1580,8 @@
         </section>
 
 
+
+
         <section id="page-settings" class="page">
         
           <div class="module-header">
@@ -1642,8 +1664,121 @@
         
         </section>
 
+
+
+
+        <!-- ============================================================
+             AURORA FUTURISTIC PROFILE
+        ============================================================ -->
+        
+        <section id="page-profile" class="page">
+
+          <!-- ============================================================
+                AURORA FUTURISTIC PROFILE OVERLAY
+          ============================================================ -->
+          
+          <div class="profile-overlay" id="profileOverlay" aria-hidden="true">
+          
+            <div class="aurora-profile-panel">
+          
+              <div class="profile-panel-top">
+          
+                <div>
+                  <span class="profile-eyebrow">
+                    AURORA // IDENTITY CORE
+                  </span>
+          
+                  <h2>PROFILE</h2>
+                </div>
+          
+                <button class="profile-close" id="profileClose" type="button">
+                  ×
+                </button>
+          
+              </div>
+          
+              <div class="profile-core">
+          
+                <div class="profile-avatar-wrap">
+                  <div class="profile-avatar-ring"></div>
+          
+                  <img id="profileAvatar" class="profile-avatar" src="" alt="Profile">
+          
+                  <span class="profile-online-dot"></span>
+                </div>
+          
+                <div class="profile-identity">
+          
+                  <span class="profile-status">
+                    ● AUTHENTICATED
+                  </span>
+          
+                  <h3 id="profileName">Loading...</h3>
+          
+                  <p id="profileEmail">Loading...</p>
+          
+                </div>
+          
+              </div>
+          
+              <div class="profile-grid">
+          
+                <div class="profile-data-card">
+                  <span>ACCESS LEVEL</span>
+                  <strong id="profileRole">—</strong>
+                </div>
+          
+                <div class="profile-data-card">
+                  <span>HOUSE</span>
+                  <strong id="profileHouse">Aurora Bachelor</strong>
+                </div>
+          
+                <div class="profile-data-card">
+                  <span>ACCOUNT STATUS</span>
+                  <strong class="online-text">ACTIVE</strong>
+                </div>
+          
+                <div class="profile-data-card">
+                  <span>AUTH PROVIDER</span>
+                  <strong>GOOGLE</strong>
+                </div>
+          
+              </div>
+          
+              <div class="profile-id">
+          
+                <span>AURORA USER ID</span>
+          
+                <code id="profileUserId">—</code>
+          
+              </div>
+          
+              <div class="profile-actions">
+          
+                <button class="profile-action secondary" id="profileSettingsBtn" type="button">
+                  ⚙ SETTINGS
+                </button>
+          
+                <button class="profile-action danger" id="profileSignOut" type="button">
+                  ⇥ SIGN OUT
+                </button>
+          
+              </div>
+          
+            </div>
+          
+          </div>
+
+        </section>
+
+
       </main>
     </div>
+
+
+
+
+
 
     <div id="modalRoot"></div>
     <div id="toast"></div>

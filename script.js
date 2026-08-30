@@ -5,6 +5,206 @@
 
 
 /* ============================================================
+   AURORA — SUPABASE CLIENT
+============================================================ */
+
+const SUPABASE_URL =
+  "https://jykzxgrfgdpefsocpsur.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_aGr0tI4CKz1xuuD7uMmmCA_G1tkn8lC";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+console.log("🌐 Aurora Supabase Client Ready");
+
+
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
+
+    console.log(
+      "AURORA AUTH EVENT:",
+      event,
+      session?.user?.email || null
+    );
+
+    if (event === "SIGNED_IN" && session) {
+      await ensureAuroraProfile(session.user);
+    }
+
+    if (event === "SIGNED_OUT") {
+      console.log("Aurora user signed out.");
+    }
+  }
+);
+
+
+
+
+
+
+
+async function testGoogleLogin() {
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+
+  if (error) {
+
+    console.error(
+      "Google Login Error:",
+      error
+    );
+
+    return;
+  }
+
+  console.log(
+    "Google Login Started:",
+    data
+  );
+}
+
+
+
+
+
+async function initializeAuroraOwner() {
+
+  try {
+
+    const {
+      data: {
+        user
+      },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+
+    if (userError || !user) {
+
+      console.warn(
+        "Aurora Owner Init: No authenticated user."
+      );
+
+      return null;
+    }
+
+
+    // Check whether this user already owns a household
+
+    const {
+      data: existingHouse,
+      error: existingError
+    } = await supabaseClient
+
+      .from("households")
+
+      .select("id")
+
+      .eq("owner_id", user.id)
+
+      .limit(1)
+
+      .maybeSingle();
+
+
+    if (existingError) {
+
+      console.error(
+        "Owner check failed:",
+        existingError
+      );
+
+      return null;
+    }
+
+
+    // Already initialized
+
+    if (existingHouse) {
+
+      console.log(
+        "👑 Aurora Owner already initialized:",
+        existingHouse.id
+      );
+
+      return existingHouse.id;
+    }
+
+
+    // Create first Aurora household
+
+    const {
+      data: householdId,
+      error: ownerError
+    } = await supabaseClient
+
+      .rpc(
+        "create_aurora_owner",
+        {
+          p_user_id: user.id,
+
+          p_house_name:
+            "Aurora Bachelor"
+        }
+      );
+
+
+    if (ownerError) {
+
+      console.error(
+        "Owner initialization failed:",
+        ownerError
+      );
+
+      return null;
+    }
+
+
+    console.log(
+      "👑 Aurora Owner initialized:",
+      householdId
+    );
+
+
+    return householdId;
+
+
+  } catch (error) {
+
+    console.error(
+      "Aurora Owner Init Error:",
+      error
+    );
+
+    return null;
+  }
+
+}
+
+
+
+
+
+
+/* ============================================================
    CORE APP STATE
 ============================================================ */
 
@@ -1779,6 +1979,20 @@ function render() {
         break;
 
 
+      case "profile":
+
+        if (
+          typeof renderProfile ===
+          "function"
+        ) {
+
+          renderProfile();
+
+        }
+
+        break;
+
+
       default:
 
         currentPage =
@@ -1837,6 +2051,555 @@ function render() {
   }
 
 }
+
+
+/* ============================================================
+   AURORA // PROFILE
+============================================================ */
+
+async function renderProfile() {
+
+  const page =
+    document.getElementById(
+      "page-profile"
+    );
+
+
+  if (!page) {
+
+    console.error(
+      "Aurora Profile: #page-profile not found."
+    );
+
+    return;
+  }
+
+
+  /* ----------------------------------------------------------
+     LOADING UI
+  ---------------------------------------------------------- */
+
+  page.innerHTML = `
+
+    <div class="profile-page">
+
+      <div class="profile-core">
+
+        <div class="profile-header">
+
+          <div>
+
+            <span class="profile-header-label">
+              AURORA // IDENTITY CORE
+            </span>
+
+            <h1>
+              Profile
+            </h1>
+
+            <div class="profile-header-description">
+              Account identity and access control
+            </div>
+
+          </div>
+
+
+          <button
+            class="profile-back-btn"
+            type="button"
+            onclick="go('dashboard')"
+            title="Back"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div
+          id="profileContent"
+          class="profile-loading"
+        >
+          INITIALIZING IDENTITY CORE...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  try {
+
+    /* --------------------------------------------------------
+       GET CURRENT SUPABASE USER
+    -------------------------------------------------------- */
+
+    const {
+      data: {
+        user
+      },
+      error
+    } =
+      await supabaseClient
+        .auth
+        .getUser();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (!user) {
+
+      document.getElementById(
+        "profileContent"
+      ).innerHTML = `
+
+        <div class="empty">
+
+          <div class="emoji">
+            🔐
+          </div>
+
+          <h3>
+            Authentication Required
+          </h3>
+
+          <p class="muted">
+            Please sign in with Google.
+          </p>
+
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    /* --------------------------------------------------------
+       GOOGLE USER DATA
+    -------------------------------------------------------- */
+
+    const metadata =
+      user.user_metadata || {};
+
+
+    const name =
+      metadata.full_name ||
+      metadata.name ||
+      "Aurora User";
+
+
+    const email =
+      user.email ||
+      "No email";
+
+
+    const avatar =
+      metadata.avatar_url ||
+      metadata.picture ||
+      "";
+
+
+    /* --------------------------------------------------------
+       PROFILE DATABASE
+    -------------------------------------------------------- */
+
+    let profile = null;
+
+
+    const {
+      data: profileData,
+      error: profileError
+    } =
+      await supabaseClient
+
+        .from("profiles")
+
+        .select("*")
+
+        .eq(
+          "id",
+          user.id
+        )
+
+        .maybeSingle();
+
+
+    if (!profileError) {
+
+      profile = profileData;
+
+    }
+
+
+    /* --------------------------------------------------------
+       ROLE
+    -------------------------------------------------------- */
+
+    const role =
+      profile?.role ||
+      "member";
+
+
+    let roleLabel =
+      "MEMBER";
+
+
+    if (role === "owner") {
+
+      roleLabel = "OWNER";
+
+    }
+
+    else if (role === "admin") {
+
+      roleLabel = "ADMIN";
+
+    }
+
+
+    /* --------------------------------------------------------
+       HOUSE
+    -------------------------------------------------------- */
+
+    let houseName =
+      "Not assigned";
+
+
+    if (profile?.household_id) {
+
+      const {
+        data: household,
+        error: householdError
+      } =
+        await supabaseClient
+
+          .from("households")
+
+          .select("name")
+
+          .eq(
+            "id",
+            profile.household_id
+          )
+
+          .maybeSingle();
+
+
+      if (
+        !householdError &&
+        household?.name
+      ) {
+
+        houseName =
+          household.name;
+
+      }
+
+    }
+
+
+    /* --------------------------------------------------------
+       AVATAR
+    -------------------------------------------------------- */
+
+    let avatarHTML = `
+
+      <div
+        class="profile-avatar"
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:32px;
+        "
+      >
+        👤
+      </div>
+
+    `;
+
+
+    if (avatar) {
+
+      avatarHTML = `
+
+        <img
+          src="${esc(avatar)}"
+          class="profile-avatar"
+          alt="Aurora Profile"
+        >
+
+      `;
+
+    }
+
+
+    /* --------------------------------------------------------
+       PROFILE UI
+    -------------------------------------------------------- */
+
+    const content =
+      document.getElementById(
+        "profileContent"
+      );
+
+
+    content.className = "";
+
+
+    content.innerHTML = `
+
+      <!-- IDENTITY -->
+
+      <div class="profile-identity">
+
+        <div class="profile-avatar-wrap">
+
+          ${avatarHTML}
+
+          <span
+            class="profile-online"
+          ></span>
+
+        </div>
+
+
+        <div>
+
+          <div class="profile-authenticated">
+            ● AUTHENTICATED
+          </div>
+
+
+          <h2 class="profile-name">
+            ${esc(name)}
+          </h2>
+
+
+          <p class="profile-email">
+            ${esc(email)}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- INFORMATION -->
+
+      <div class="profile-info-grid">
+
+
+        <div class="profile-info-card">
+
+          <span class="profile-info-label">
+            ACCESS LEVEL
+          </span>
+
+          <strong
+            class="profile-info-value profile-role"
+          >
+            ${esc(roleLabel)}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-info-card">
+
+          <span class="profile-info-label">
+            HOUSE
+          </span>
+
+          <strong class="profile-info-value">
+            ${esc(houseName)}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-info-card">
+
+          <span class="profile-info-label">
+            ACCOUNT STATUS
+          </span>
+
+          <strong class="profile-info-value profile-role">
+            ACTIVE
+          </strong>
+
+        </div>
+
+
+        <div class="profile-info-card">
+
+          <span class="profile-info-label">
+            AUTH PROVIDER
+          </span>
+
+          <strong class="profile-info-value">
+            GOOGLE
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- USER ID -->
+
+      <div class="profile-id">
+
+        <span class="profile-id-label">
+          AURORA USER ID
+        </span>
+
+        <code>
+          ${esc(user.id)}
+        </code>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="profile-actions">
+
+
+        <button
+          class="profile-action"
+          type="button"
+          onclick="go('settings')"
+        >
+          ⚙ SETTINGS
+        </button>
+
+
+        <button
+          class="profile-action signout"
+          type="button"
+          id="profileSignOutBtn"
+        >
+          ⇥ SIGN OUT
+        </button>
+
+
+      </div>
+
+    `;
+
+
+    /* --------------------------------------------------------
+       SIGN OUT
+    -------------------------------------------------------- */
+
+    const signOutBtn =
+      document.getElementById(
+        "profileSignOutBtn"
+      );
+
+
+    if (signOutBtn) {
+
+      signOutBtn.addEventListener(
+        "click",
+        async () => {
+
+          signOutBtn.disabled =
+            true;
+
+          signOutBtn.textContent =
+            "SIGNING OUT...";
+
+
+          const {
+            error: signOutError
+          } =
+            await supabaseClient
+              .auth
+              .signOut();
+
+
+          if (signOutError) {
+
+            console.error(
+              "Aurora Sign Out Error:",
+              signOutError
+            );
+
+
+            signOutBtn.disabled =
+              false;
+
+            signOutBtn.textContent =
+              "⇥ SIGN OUT";
+
+            return;
+          }
+
+
+          window.location.reload();
+
+        }
+      );
+
+    }
+
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Aurora Profile Error:",
+      error
+    );
+
+
+    const content =
+      document.getElementById(
+        "profileContent"
+      );
+
+
+    if (content) {
+
+      content.innerHTML = `
+
+        <div class="empty">
+
+          <div class="emoji">
+            ⚠️
+          </div>
+
+          <h3>
+            Profile Error
+          </h3>
+
+          <p class="muted">
+            ${esc(
+        error?.message ||
+        "Unable to load profile."
+      )}
+          </p>
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+}
+
 
 
 /* ============================================================
@@ -13178,4 +13941,970 @@ if ("serviceWorker" in navigator) {
         );
       });
   });
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA PROFILE SYSTEM
+============================================================ */
+
+(function initAuroraProfileSystem() {
+
+  let profileInitialized = false;
+
+
+  /* ==========================================================
+     GET PROFILE ELEMENTS
+  ========================================================== */
+
+  function getProfileElements() {
+
+    return {
+      button:
+        document.getElementById("profileBtn"),
+
+      overlay:
+        document.getElementById("profileOverlay"),
+
+      close:
+        document.getElementById("profileClose"),
+
+      avatar:
+        document.getElementById("profileAvatar"),
+
+      name:
+        document.getElementById("profileName"),
+
+      email:
+        document.getElementById("profileEmail"),
+
+      role:
+        document.getElementById("profileRole"),
+
+      house:
+        document.getElementById("profileHouse"),
+
+      userId:
+        document.getElementById("profileUserId"),
+
+      settings:
+        document.getElementById("profileSettingsBtn"),
+
+      signOut:
+        document.getElementById("profileSignOut")
+    };
+
+  }
+
+
+
+
+  /* ============================================================
+                  AURORA // PROFILE + AUTH CORE
+  ============================================================ */
+
+  async function getCurrentAuroraUser() {
+    try {
+      const { data, error } =
+        await supabaseClient.auth.getSession();
+
+      if (error) {
+        throw error;
+      }
+
+      const session = data?.session;
+
+      if (!session?.user) {
+        return null;
+      }
+
+      return session.user;
+
+    } catch (error) {
+
+      console.error(
+        "AURORA AUTH SESSION ERROR:",
+        error
+      );
+
+      return null;
+    }
+  }
+
+
+
+  /* ==========================================================
+     FILL PROFILE
+  ========================================================== */
+
+  /* ============================================================
+   LOAD PROFILE
+============================================================ */
+
+  async function loadAuroraProfile() {
+
+    const user =
+      await getCurrentAuroraUser();
+
+    const avatar =
+      document.getElementById("profileAvatar");
+
+    const name =
+      document.getElementById("profileName");
+
+    const email =
+      document.getElementById("profileEmail");
+
+    const role =
+      document.getElementById("profileRole");
+
+    const house =
+      document.getElementById("profileHouse");
+
+    const userId =
+      document.getElementById("profileUserId");
+
+
+    /* ----------------------------------------------------------
+       NO SESSION
+    ---------------------------------------------------------- */
+
+    if (!user) {
+
+      if (avatar) {
+        avatar.src = "";
+      }
+
+      if (name) {
+        name.textContent =
+          "NOT AUTHENTICATED";
+      }
+
+      if (email) {
+        email.textContent =
+          "Please sign in with Google.";
+      }
+
+      if (role) {
+        role.textContent =
+          "GUEST";
+      }
+
+      if (house) {
+        house.textContent =
+          "Aurora Bachelor";
+      }
+
+      if (userId) {
+        userId.textContent =
+          "NO ACTIVE SESSION";
+      }
+
+      console.warn(
+        "AURORA PROFILE: No active Supabase session."
+      );
+
+      return;
+    }
+
+
+    /* ----------------------------------------------------------
+       GOOGLE USER DATA
+    ---------------------------------------------------------- */
+
+    const metadata =
+      user.user_metadata || {};
+
+    const fullName =
+      metadata.full_name ||
+      metadata.name ||
+      user.email ||
+      "Aurora User";
+
+    const avatarUrl =
+      metadata.avatar_url ||
+      metadata.picture ||
+      "";
+
+
+    if (avatar) {
+
+      avatar.src =
+        avatarUrl ||
+        "";
+
+      avatar.onerror = () => {
+        avatar.style.display = "none";
+      };
+
+    }
+
+
+    if (name) {
+      name.textContent =
+        fullName;
+    }
+
+
+    if (email) {
+      email.textContent =
+        user.email ||
+        "No email";
+    }
+
+
+    if (userId) {
+      userId.textContent =
+        user.id;
+    }
+
+
+    /* ----------------------------------------------------------
+       DEFAULT ROLE
+       Later Supabase profile table will control this.
+    ---------------------------------------------------------- */
+
+    if (role) {
+      role.textContent =
+        "OWNER";
+    }
+
+
+    if (house) {
+      house.textContent =
+        "Aurora Bachelor";
+    }
+
+
+    console.log(
+      "🌌 Aurora Profile Loaded:",
+      user
+    );
+  }
+
+
+
+  /* ============================================================
+     OPEN PROFILE
+  ============================================================ */
+
+  async function openAuroraProfile() {
+
+    const overlay =
+      document.getElementById(
+        "profileOverlay"
+      );
+
+    if (!overlay) {
+
+      console.error(
+        "AURORA PROFILE: profileOverlay not found."
+      );
+
+      return;
+    }
+
+
+    /* ----------------------------------------------------------
+       OPEN UI FIRST
+    ---------------------------------------------------------- */
+
+    overlay.classList.add(
+      "active"
+    );
+
+    overlay.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+
+    document.body.classList.add(
+      "profile-open"
+    );
+
+
+    /* ----------------------------------------------------------
+       LOAD USER
+    ---------------------------------------------------------- */
+
+    await loadAuroraProfile();
+  }
+
+
+  /* ============================================================
+     CLOSE PROFILE
+  ============================================================ */
+
+  function closeAuroraProfile() {
+
+    const overlay =
+      document.getElementById(
+        "profileOverlay"
+      );
+
+    if (!overlay) {
+      return;
+    }
+
+
+    overlay.classList.remove(
+      "active"
+    );
+
+    overlay.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    document.body.classList.remove(
+      "profile-open"
+    );
+  }
+
+
+  /* ============================================================
+    GOOGLE LOGIN
+ ============================================================ */
+
+  async function signInWithGoogle() {
+
+    try {
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithOAuth({
+
+          provider: "google",
+
+          options: {
+
+            redirectTo:
+              window.location.href
+
+          }
+
+        });
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      console.log(
+        "🌐 Google authentication started:",
+        data
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "Google login failed. Check the browser console."
+      );
+    }
+  }
+
+
+  window.signInWithGoogle = async function () {
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+
+    if (error) {
+      console.error("Google Login Error:", error);
+      return;
+    }
+
+    console.log("Google Login Started:", data);
+  };
+
+  /* ============================================================
+     SIGN OUT
+  ============================================================ */
+
+  async function signOutAurora() {
+
+    try {
+
+      const { error } =
+        await supabaseClient.auth.signOut();
+
+      if (error) {
+        throw error;
+      }
+
+
+      closeAuroraProfile();
+
+
+      console.log(
+        "🌌 Aurora user signed out."
+      );
+
+
+      location.reload();
+
+
+    } catch (error) {
+
+      console.error(
+        "AURORA SIGN OUT ERROR:",
+        error
+      );
+
+    }
+  }
+
+
+
+  /* ============================================================
+   PROFILE EVENTS
+============================================================ */
+
+  function bindAuroraProfileEvents() {
+
+    const profileBtn =
+      document.getElementById(
+        "profileBtn"
+      );
+
+    const closeBtn =
+      document.getElementById(
+        "profileClose"
+      );
+
+    const signOutBtn =
+      document.getElementById(
+        "profileSignOut"
+      );
+
+    const settingsBtn =
+      document.getElementById(
+        "profileSettingsBtn"
+      );
+
+    const overlay =
+      document.getElementById(
+        "profileOverlay"
+      );
+
+
+    /* ----------------------------------------------------------
+       PROFILE BUTTON
+    ---------------------------------------------------------- */
+
+    if (profileBtn) {
+
+      profileBtn.onclick = () => {
+
+        console.log(
+          "👤 Profile button clicked"
+        );
+
+        openAuroraProfile();
+
+      };
+
+    }
+
+
+    /* ----------------------------------------------------------
+       CLOSE
+    ---------------------------------------------------------- */
+
+    if (closeBtn) {
+
+      closeBtn.onclick = () => {
+
+        closeAuroraProfile();
+
+      };
+
+    }
+
+
+    /* ----------------------------------------------------------
+       SIGN OUT
+    ---------------------------------------------------------- */
+
+    if (signOutBtn) {
+
+      signOutBtn.onclick = () => {
+
+        signOutAurora();
+
+      };
+
+    }
+
+
+    /* ----------------------------------------------------------
+       SETTINGS
+    ---------------------------------------------------------- */
+
+    if (settingsBtn) {
+
+      settingsBtn.onclick = () => {
+
+        closeAuroraProfile();
+
+        if (
+          typeof go === "function"
+        ) {
+
+          go("settings");
+
+        }
+
+      };
+
+    }
+
+
+    /* ----------------------------------------------------------
+       CLICK OUTSIDE PANEL
+    ---------------------------------------------------------- */
+
+    if (overlay) {
+
+      overlay.onclick = event => {
+
+        if (
+          event.target === overlay
+        ) {
+
+          closeAuroraProfile();
+
+        }
+
+      };
+
+    }
+
+  }
+
+
+  /* ============================================================
+     AUTH STATE LISTENER
+  ============================================================ */
+
+  function bindAuroraAuthListener() {
+
+    supabaseClient.auth.onAuthStateChange(
+      async (event, session) => {
+
+        console.log(
+          "🔐 AURORA AUTH EVENT:",
+          event,
+          session
+        );
+
+
+        if (
+          event === "SIGNED_IN" &&
+          session?.user
+        ) {
+
+          console.log(
+            "✅ Aurora Google user authenticated."
+          );
+
+        }
+
+
+        if (
+          event === "SIGNED_OUT"
+        ) {
+
+          console.log(
+            "🚪 Aurora user signed out."
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+  /* ============================================================
+   PROFILE INITIALIZATION
+  ============================================================ */
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+      bindAuroraProfileEvents();
+
+      bindAuroraAuthListener();
+
+      console.log(
+        "👤 Aurora Profile Core Ready"
+      );
+
+    }
+  );
+
+  /* ==========================================================
+     SETTINGS BUTTON
+  ========================================================== */
+
+  function openProfileSettings() {
+
+    closeAuroraProfile();
+
+
+    if (
+      typeof AuroraApp !==
+      "undefined" &&
+      typeof AuroraApp.navigate ===
+      "function"
+    ) {
+
+      AuroraApp.navigate(
+        "settings"
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     GLOBAL EVENT DELEGATION
+     
+     IMPORTANT:
+     renderShell() can recreate profileBtn.
+     Therefore we DON'T bind directly to
+     profileBtn only once.
+  ========================================================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const profileButton =
+        event.target.closest(
+          "#profileBtn"
+        );
+
+
+      if (profileButton) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        openAuroraProfile();
+
+        return;
+      }
+
+
+      const closeButton =
+        event.target.closest(
+          "#profileClose"
+        );
+
+
+      if (closeButton) {
+
+        event.preventDefault();
+
+        closeAuroraProfile();
+
+        return;
+      }
+
+
+      const settingsButton =
+        event.target.closest(
+          "#profileSettingsBtn"
+        );
+
+
+      if (settingsButton) {
+
+        event.preventDefault();
+
+        openProfileSettings();
+
+        return;
+      }
+
+
+      const signOutButton =
+        event.target.closest(
+          "#profileSignOut"
+        );
+
+
+      if (signOutButton) {
+
+        event.preventDefault();
+
+        signOutAurora();
+
+        return;
+      }
+
+
+      /* ------------------------------------------------------
+         CLICK OUTSIDE PANEL
+      ------------------------------------------------------ */
+
+      const overlay =
+        event.target.closest(
+          "#profileOverlay"
+        );
+
+
+      if (
+        overlay &&
+        event.target === overlay
+      ) {
+
+        closeAuroraProfile();
+
+      }
+
+    }
+  );
+
+
+  /* ==========================================================
+     ESC KEY
+  ========================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        const overlay =
+          document.getElementById(
+            "profileOverlay"
+          );
+
+
+        if (
+          overlay?.classList.contains(
+            "active"
+          )
+        ) {
+
+          closeAuroraProfile();
+
+        }
+
+      }
+
+    }
+  );
+
+
+  /* ==========================================================
+     PUBLIC API
+  ========================================================== */
+
+  window.openAuroraProfile =
+    openAuroraProfile;
+
+  window.closeAuroraProfile =
+    closeAuroraProfile;
+
+})();
+
+
+// ============================================================
+// AURORA PROFILE BUTTON TEST
+// ============================================================
+
+window.openAuroraProfile = function () {
+
+  console.log("✅ PROFILE BUTTON CLICKED");
+
+  const overlay =
+    document.getElementById("profileOverlay");
+
+  if (!overlay) {
+
+    console.error(
+      "❌ profileOverlay NOT FOUND"
+    );
+
+    return;
+  }
+
+  overlay.classList.add("active");
+
+  overlay.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "profile-open"
+  );
+
+  console.log(
+    "✅ PROFILE OVERLAY OPENED"
+  );
+};
+
+
+window.closeAuroraProfile = function () {
+
+  const overlay =
+    document.getElementById("profileOverlay");
+
+  if (!overlay) {
+    return;
+  }
+
+  overlay.classList.remove("active");
+
+  overlay.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  document.body.classList.remove(
+    "profile-open"
+  );
+};
+
+
+// CLOSE BUTTON
+
+document.addEventListener(
+  "click",
+  function (event) {
+
+    if (
+      event.target.closest(
+        "#profileClose"
+      )
+    ) {
+
+      closeAuroraProfile();
+
+    }
+
+  }
+);
+
+async function ensureAuroraProfile(user) {
+
+  if (!user) {
+    console.warn("No authenticated user.");
+    return null;
+  }
+
+  const metadata = user.user_metadata || {};
+
+  const fullName =
+    metadata.full_name ||
+    metadata.name ||
+    user.email?.split("@")[0] ||
+    "Aurora User";
+
+  const avatarUrl =
+    metadata.avatar_url ||
+    metadata.picture ||
+    null;
+
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+          avatar_url: avatarUrl,
+          house_name: "Aurora Bachelor"
+        },
+        {
+          onConflict: "id"
+        }
+      )
+      .select()
+      .single();
+
+  if (error) {
+    console.error(
+      "❌ Aurora profile creation failed:",
+      error
+    );
+
+    return null;
+  }
+
+  console.log(
+    "✅ Aurora Profile Ready:",
+    data
+  );
+
+  return data;
+}
+
+
+async function loadAuroraAuthenticatedUser() {
+
+  const {
+    data: {
+      user
+    },
+    error
+  } = await supabaseClient.auth.getUser();
+
+  if (error) {
+    console.error(
+      "User loading error:",
+      error
+    );
+
+    return null;
+  }
+
+  if (!user) {
+    console.warn(
+      "AURORA PROFILE: No active Supabase session."
+    );
+
+    return null;
+  }
+
+  console.log(
+    "✅ Google User:",
+    user.email
+  );
+
+  console.log(
+    "🆔 User ID:",
+    user.id
+  );
+
+  return user;
 }

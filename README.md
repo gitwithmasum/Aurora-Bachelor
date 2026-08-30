@@ -52,6 +52,76 @@ Open `index.html` in a modern browser.
                        FINAL BALANCE
 
 
+##Final Architecture
+
+                        AURORA BACHELOR
+                                │
+                         Google Authentication
+                                │
+                         ┌──────▼──────┐
+                         │ Supabase    │
+                         │ Auth        │
+                         └──────┬──────┘
+                                │
+                         User / Google ID
+                                │
+                         ┌──────▼──────┐
+                         │ Household   │
+                         │ Membership  │
+                         └──────┬──────┘
+                                │
+              ┌─────────────────┼─────────────────┐
+              │                 │                 │
+           OWNER              ADMIN            MEMBER
+           YOU              Max 2              Others
+              │                 │                 │
+              └─────────────────┼─────────────────┘
+                                │
+                         RLS / Permissions
+                                │
+                    ┌───────────┴───────────┐
+                    │                       │
+              MEAL ACCOUNT             HOUSE ACCOUNT
+                    │                       │
+             Meals/Expenses             Rent/Bills
+                    │                       │
+                    └───────────┬───────────┘
+                                │
+                         Cloud Database
+                                │
+                    ┌───────────┴───────────┐
+                    │                       │
+                  Laptop                  Phone
+                    │                       │
+                    └────── Same Data ──────┘
+
+
+STEP 1  Supabase Project          ← এখন
+   ↓
+STEP 2  Google Authentication
+   ↓
+STEP 3  profiles table
+   ↓
+STEP 4  households table
+   ↓
+STEP 5  household_members
+   ↓
+STEP 6  invitations
+   ↓
+STEP 7  RLS + Owner/Admin/Member security
+   ↓
+STEP 8  Account UI
+   ↓
+STEP 9  Google Login
+   ↓
+STEP 10 Existing AuroraDataStore → Cloud
+   ↓
+STEP 11 Local data migration
+   ↓
+STEP 12 IndexedDB offline cache
+   ↓
+STEP 13 PWA + multi-device sync
+
 
 ## Important
 This v1 uses localStorage. Data is stored in the current browser/device. Export a backup before clearing browser data.
@@ -220,3 +290,6 @@ NEXT
 ├── renderReports()
 ├── renderSettlement()
 └── renderSettings()
+
+
+
