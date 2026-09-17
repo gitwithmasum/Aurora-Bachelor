@@ -15150,3 +15150,134 @@ html[data-accent] .title-cursor {
   }
 
 }
+
+
+
+/* ============================================================
+   AURORA ACCESS CONTROL // EXTENDED ACTIONS
+============================================================ */
+
+.aurora-access-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+.aac-btn.transfer-owner {
+  color: #dca6ff;
+
+  border:
+    1px solid rgba(180, 92, 255, 0.3);
+
+  background:
+    rgba(140, 50, 255, 0.08);
+}
+
+
+.aac-btn.transfer-owner:hover {
+  color: #ffffff;
+
+  box-shadow:
+    0 0 20px rgba(179, 77, 255, 0.18);
+}
+
+
+.aac-btn.remove-member {
+  color: #ff7899;
+
+  border:
+    1px solid rgba(255, 70, 115, 0.3);
+
+  background:
+    rgba(255, 50, 95, 0.07);
+}
+
+
+.aac-btn.remove-member:hover {
+  color: #ffffff;
+
+  background:
+    rgba(255, 65, 110, 0.18);
+
+  box-shadow:
+    0 0 20px rgba(255, 70, 115, 0.14);
+}
+
+
+.aac-role-badge.pending {
+  color: #ffc969;
+
+  background:
+    rgba(255, 184, 60, 0.08);
+
+  border-color:
+    rgba(255, 184, 60, 0.22);
+}
+
+
+.pending-avatar {
+  font-size: 15px;
+}
+
+
+.aurora-access-divider {
+  height: 1px;
+
+  margin: 26px 0;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      rgba(74, 220, 255, 0.22),
+      transparent);
+}
+
+
+.aurora-pending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 14px;
+}
+
+
+.aurora-pending-header h4 {
+  margin: 4px 0 0;
+
+  color: #eefaff;
+}
+
+
+.aurora-pending-count {
+  min-width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  color: #6ff2ff;
+
+  border:
+    1px solid rgba(76, 223, 255, 0.18);
+
+  background:
+    rgba(0, 221, 255, 0.05);
+}
+
+
+.aurora-no-pending {
+  padding: 18px;
+
+  text-align: center;
+
+  border-radius: 14px;
+
+  border:
+    1px dashed rgba(92, 183, 220, 0.14);
+}

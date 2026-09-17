@@ -5041,13 +5041,20 @@ async function addMember(event) {
     }
 
 
+    const currentRole =
+      String(
+        membership.role ||
+        "member"
+      ).toLowerCase();
+
+
     if (
-      membership.role !==
-      "owner"
+      currentRole !== "owner" &&
+      currentRole !== "admin"
     ) {
 
       throw new Error(
-        "Only the household owner can invite members."
+        "Only the owner or an admin can invite members."
       );
 
     }
@@ -6093,130 +6100,595 @@ async function loadAuroraAccessControl() {
       "auroraAccessControl"
     );
 
+
   if (!root) return;
 
 
   const client =
     getAuroraSupabaseClient();
 
-  if (!client?.auth) return;
+
+  if (!client?.auth) {
+    root.innerHTML = "";
+    return;
+  }
+
+
+  try {
+
+    const {
+      data: { user },
+      error: userError
+    } =
+      await client.auth
+        .getUser();
+
+
+    if (
+      userError ||
+      !user
+    ) {
+
+      root.innerHTML = "";
+      return;
+    }
+
+
+    /* =========================================
+       CURRENT MEMBERSHIP
+    ========================================= */
+
+    const {
+      data: membership,
+      error: membershipError
+    } =
+      await client
+        .from("house_members")
+        .select(
+          "household_id, role"
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+
+    if (
+      membershipError ||
+      !membership
+    ) {
+
+      root.innerHTML = "";
+      return;
+    }
+
+
+    /* =========================================
+              REAL HOUSE OWNER CHECK
+    ========================================= */
+
+    const currentRole =
+      String(
+        membership.role ||
+        "member"
+      )
+        .toLowerCase()
+        .trim();
+
+
+    const householdId =
+      membership.household_id;
+
+
+    /* GET REGISTERED HOUSE OWNER */
+
+    const {
+      data: household,
+      error: householdError
+    } =
+      await client
+        .from("households")
+        .select(
+          "id, owner_id, name"
+        )
+        .eq(
+          "id",
+          householdId
+        )
+        .maybeSingle();
+
+
+    if (
+      householdError ||
+      !household
+    ) {
+
+      throw new Error(
+        "Unable to verify household ownership."
+      );
+
+    }
+
+
+    /* SOURCE OF TRUTH */
+
+    const isOwner =
+      household.owner_id ===
+      user.id;
+
+
+    const isAdmin =
+      !isOwner &&
+      currentRole ===
+      "admin";
+
+
+    const isManager =
+      isOwner ||
+      isAdmin;
+
+
+    /* MEMBER CANNOT SEE ACCESS CONTROL */
+
+    if (!isManager) {
+
+      root.innerHTML = "";
+      return;
+
+    }
 
 
     root.innerHTML = `
-      <div class="card">
+
+      <div class="aac-shell">
+
         <div class="muted">
           Loading access control...
         </div>
+
       </div>
+
     `;
 
 
-    try {
+    /* =========================================
+       CONNECTED ACCOUNTS
+    ========================================= */
 
-      /* CURRENT USER */
-
-      const {
-        data: {
-          user
-        },
-        error: userError
-      } =
-        await client.auth.getUser();
-
-
-      if (
-        userError ||
-        !user
-      ) {
-
-        root.innerHTML = "";
-        return;
-      }
+    const {
+      data: members,
+      error: membersError
+    } =
+      await client.rpc(
+        "aurora_get_access_members",
+        {
+          p_household_id:
+            householdId
+        }
+      );
 
 
-      /* CURRENT USER MEMBERSHIP */
-
-      const {
-        data: membership,
-        error: membershipError
-      } =
-        await client
-          .from("house_members")
-          .select(
-            "household_id, role"
-          )
-          .eq(
-            "user_id",
-            user.id
-          )
-          .maybeSingle();
+    if (membersError) {
+      throw membersError;
+    }
 
 
-      if (
-        membershipError ||
-        !membership
-      ) {
+    /* =========================================
+       PENDING INVITATIONS
+    ========================================= */
 
-        root.innerHTML = "";
-        return;
-      }
-
-
-      /* ONLY OWNER SEES ROLE MANAGEMENT */
-
-      if (
-        membership.role !==
-        "owner"
-      ) {
-
-        root.innerHTML = "";
-        return;
-      }
+    const {
+      data: pendingInvites,
+      error: inviteError
+    } =
+      await client.rpc(
+        "aurora_get_pending_invitations",
+        {
+          p_household_id:
+            householdId
+        }
+      );
 
 
-      const householdId =
-        membership.household_id;
+    if (inviteError) {
+      throw inviteError;
+    }
 
 
-      /* SECURE ACCOUNT LIST */
+    const accessMembers =
+      members || [];
 
-      const {
-        data: members,
-        error: membersError
-      } =
-        await client.rpc(
-          "aurora_get_access_members",
-          {
-            p_household_id:
-              householdId
+
+    const pending =
+      pendingInvites || [];
+
+
+    const adminCount =
+      accessMembers
+        .filter(
+          member =>
+            member.role ===
+            "admin"
+        )
+        .length;
+
+
+    /* =========================================
+       CONNECTED MEMBER ROWS
+    ========================================= */
+
+    const memberRows =
+      accessMembers
+        .map(
+          member => {
+
+            const name =
+              esc(
+                member.display_name ||
+                "Aurora User"
+              );
+
+
+            const email =
+              esc(
+                member.email ||
+                ""
+              );
+
+
+            const role =
+              String(
+                member.role ||
+                "member"
+              )
+                .toLowerCase();
+
+
+            const userId =
+              member.user_id;
+
+
+            const initial =
+              name
+                .charAt(0)
+                .toUpperCase() ||
+              "?";
+
+
+            let actions = "";
+
+
+            /* OWNER ACCOUNT */
+
+            if (
+              role ===
+              "owner"
+            ) {
+
+              actions = `
+
+                <button
+                  class="aac-btn lock"
+                  type="button"
+                  disabled
+                >
+                  🔒 OWNER
+                </button>
+
+              `;
+
+            }
+
+            else {
+
+              /* OWNER + ADMIN CAN CHANGE ADMIN ROLE */
+
+              if (
+                role ===
+                "admin"
+              ) {
+
+                actions += `
+
+                  <button
+                    class="
+                      aac-btn
+                      remove-admin
+                    "
+                    type="button"
+                    onclick="
+                      changeAuroraMemberRole(
+                        '${userId}',
+                        '${householdId}',
+                        'member'
+                      )
+                    "
+                  >
+                    Remove Admin
+                  </button>
+
+                `;
+
+              }
+
+              else {
+
+                actions += `
+
+                  <button
+                    class="
+                      aac-btn
+                      make-admin
+                    "
+                    type="button"
+                    onclick="
+                      changeAuroraMemberRole(
+                        '${userId}',
+                        '${householdId}',
+                        'admin'
+                      )
+                    "
+                  >
+                    Make Admin
+                  </button>
+
+                `;
+
+              }
+
+
+              /* OWNER ONLY */
+
+              if (isOwner) {
+
+                actions += `
+
+                  <button
+                    class="
+                      aac-btn
+                      transfer-owner
+                    "
+                    type="button"
+                    onclick="
+                      transferAuroraOwnership(
+                        '${userId}',
+                        '${householdId}',
+                        '${encodeURIComponent(
+                  member.display_name ||
+                  member.email ||
+                  "Member"
+                )}'
+                      )
+                    "
+                  >
+                    Transfer Ownership
+                  </button>
+
+
+                  <button
+                    class="
+                      aac-btn
+                      remove-member
+                    "
+                    type="button"
+                    onclick="
+                      removeAuroraConnectedMember(
+                        '${userId}',
+                        '${householdId}',
+                        '${encodeURIComponent(
+                  member.email ||
+                  ""
+                )}'
+                      )
+                    "
+                  >
+                    Remove Member
+                  </button>
+
+                `;
+
+              }
+
+            }
+
+
+            return `
+
+              <div class="aac-row">
+
+                <div class="aac-account">
+
+                  <div class="aac-avatar">
+                    ${initial}
+                  </div>
+
+
+                  <div class="aac-user-meta">
+
+                    <strong>
+                      ${name}
+                    </strong>
+
+                    <span>
+                      ${email}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="aac-role">
+
+                  <span
+                    class="
+                      aac-role-badge
+                      ${role}
+                    "
+                  >
+                    ${role.toUpperCase()}
+                  </span>
+
+                </div>
+
+
+                <div class="aac-access">
+
+                  <div
+                    class="
+                      aurora-access-actions
+                    "
+                  >
+                    ${actions}
+                  </div>
+
+                </div>
+
+              </div>
+
+            `;
+
           }
-        );
+        )
+        .join("");
 
 
-      if (membersError) {
-        throw membersError;
-      }
+    /* =========================================
+       PENDING INVITATION ROWS
+    ========================================= */
+
+    const invitationRows =
+      pending.length
+
+        ? pending
+          .map(
+            invite => {
+
+              const name =
+                esc(
+                  invite.full_name ||
+                  "Pending Member"
+                );
 
 
-      const adminCount =
-        (members || [])
-          .filter(
-            member =>
-              member.role === "admin"
+              const email =
+                esc(
+                  invite.email ||
+                  ""
+                );
+
+
+              return `
+
+                <div
+                  class="
+                    aac-row
+                    aurora-pending-row
+                  "
+                >
+
+                  <div class="aac-account">
+
+                    <div
+                      class="
+                        aac-avatar
+                        pending-avatar
+                      "
+                    >
+                      ⏳
+                    </div>
+
+
+                    <div class="aac-user-meta">
+
+                      <strong>
+                        ${name}
+                      </strong>
+
+                      <span>
+                        ${email}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="aac-role">
+
+                    <span
+                      class="
+                        aac-role-badge
+                        pending
+                      "
+                    >
+                      PENDING
+                    </span>
+
+                  </div>
+
+
+                  <div class="aac-access">
+
+                    <button
+                      class="
+                        aac-btn
+                        remove-admin
+                      "
+                      type="button"
+                      onclick="
+                        revokeAuroraInvitation(
+                          '${invite.invitation_id}',
+                          '${householdId}',
+                          '${encodeURIComponent(
+                invite.email ||
+                ""
+              )}'
+                        )
+                      "
+                    >
+                      Revoke Invite
+                    </button>
+
+                  </div>
+
+                </div>
+
+              `;
+
+            }
           )
-          .length;
+          .join("")
+
+        : `
+
+          <div
+            class="
+              aurora-no-pending
+              muted
+            "
+          >
+            No pending invitations.
+          </div>
+
+        `;
 
 
-      root.innerHTML = `
+    /* =========================================
+       FINAL UI
+    ========================================= */
+
+    root.innerHTML = `
 
       <div class="aurora-access-control">
 
         <div class="aac-shell">
 
-          <!-- HEADER -->
+
           <div class="aac-header">
 
-            <div class="aac-title-wrap">
+            <div>
 
               <span class="aac-kicker">
                 AURORA // ACCESS CONTROL
@@ -6227,8 +6699,11 @@ async function loadAuroraAccessControl() {
               </h3>
 
               <p class="aac-subtitle">
-                Manage Google account access
-                for this household.
+
+                ${isOwner
+        ? "Owner security console"
+        : "Administrator security console"}
+
               </p>
 
             </div>
@@ -6249,7 +6724,6 @@ async function loadAuroraAccessControl() {
           </div>
 
 
-          <!-- TABLE HEADER -->
           <div class="aac-table-head">
 
             <div>
@@ -6267,179 +6741,48 @@ async function loadAuroraAccessControl() {
           </div>
 
 
-          <!-- ACCOUNT ROWS -->
-          ${(members || [])
-            .map(
-              member => {
-
-                const safeName =
-                  esc(
-                    member.display_name ||
-                    "Aurora User"
-                  );
-
-                const safeEmail =
-                  esc(
-                    member.email ||
-                    ""
-                  );
-
-                const role =
-                  String(
-                    member.role ||
-                    "member"
-                  )
-                    .toLowerCase();
+          ${memberRows}
 
 
-                const roleLabel =
-                  role.toUpperCase();
+          <div
+            class="
+              aurora-access-divider
+            "
+          ></div>
 
 
-                const initial =
-                  safeName
-                    .charAt(0)
-                    .toUpperCase() ||
-                  "?";
+          <div
+            class="
+              aurora-pending-header
+            "
+          >
+
+            <div>
+
+              <span class="aac-kicker">
+                INVITATION QUEUE
+              </span>
+
+              <h4>
+                Pending Invitations
+              </h4>
+
+            </div>
 
 
-                /* =============================================
-                  ACCESS BUTTON
-                ============================================= */
+            <span
+              class="
+                aurora-pending-count
+              "
+            >
+              ${pending.length}
+            </span>
 
-                let accessHTML = "";
-
-
-                if (role === "owner") {
-
-                  accessHTML = `
-
-                    <button
-                      class="aac-btn lock"
-                      type="button"
-                      disabled
-                    >
-                      🔒 OWNER
-                    </button>
-
-                  `;
-
-                }
+          </div>
 
 
-                else if (role === "admin") {
+          ${invitationRows}
 
-                  accessHTML = `
-
-                    <button
-                      class="
-                        aac-btn
-                        remove-admin
-                      "
-                      type="button"
-                      onclick="
-                        changeAuroraMemberRole(
-                          '${member.user_id}',
-                          '${householdId}',
-                          'member'
-                        )
-                      "
-                    >
-                      Remove Admin
-                    </button>
-
-                  `;
-
-                }
-
-
-                else {
-
-                  accessHTML = `
-
-                    <button
-                      class="
-                        aac-btn
-                        make-admin
-                      "
-                      type="button"
-                      onclick="
-                        changeAuroraMemberRole(
-                          '${member.user_id}',
-                          '${householdId}',
-                          'admin'
-                        )
-                      "
-                    >
-                      Make Admin
-                    </button>
-
-                  `;
-
-                }
-
-
-                return `
-
-                  <div class="aac-row">
-
-                    <!-- ACCOUNT -->
-                    <div class="aac-account">
-
-                      <div
-                        class="
-                          aac-avatar
-                          avatar-${role}
-                        "
-                      >
-                        ${initial}
-                      </div>
-
-
-                      <div class="aac-user-meta">
-
-                        <strong>
-                          ${safeName}
-                        </strong>
-
-                        <span>
-                          ${safeEmail}
-                        </span>
-
-                      </div>
-
-                    </div>
-
-
-                    <!-- ROLE -->
-                    <div class="aac-role">
-
-                      <span
-                        class="
-                          aac-role-badge
-                          ${role}
-                        "
-                      >
-                        ${roleLabel}
-                      </span>
-
-                    </div>
-
-
-                    <!-- ACCESS -->
-                    <div class="aac-access">
-
-                      ${accessHTML}
-
-                    </div>
-
-                  </div>
-
-                `;
-
-              }
-            )
-            .join("")}
 
         </div>
 
@@ -6448,27 +6791,32 @@ async function loadAuroraAccessControl() {
     `;
 
 
-    } catch (error) {
+  } catch (error) {
 
-      console.error(
-        "❌ Aurora Access Control:",
-        error
-      );
+    console.error(
+      "❌ Aurora Access Control:",
+      error
+    );
 
 
-      root.innerHTML = `
+    root.innerHTML = `
 
-        <div class="card">
+      <div class="aac-shell">
 
-          <div class="negative">
-            Unable to load Access Control.
-          </div>
-
+        <div class="negative">
+          ${esc(
+      error?.message ||
+      "Unable to load Access Control."
+    )}
         </div>
-      `;
-  }
-}
 
+      </div>
+
+    `;
+
+  }
+
+}
 
 async function changeAuroraMemberRole(
   userId,
@@ -6545,6 +6893,282 @@ async function changeAuroraMemberRole(
       "Unable to change member role."
     );
   }
+}
+
+
+/* ============================================================
+   OWNER ONLY // REMOVE CONNECTED MEMBER
+============================================================ */
+
+async function removeAuroraConnectedMember(
+  userId,
+  householdId,
+  encodedEmail
+) {
+
+  const email =
+    decodeURIComponent(
+      encodedEmail ||
+      ""
+    );
+
+
+  const confirmed =
+    confirm(
+      `Remove ${email} from Aurora Bachelor?\n\n` +
+      `Their Google account will NOT be deleted.\n` +
+      `Only household access will be removed.`
+    );
+
+
+  if (!confirmed) return;
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  try {
+
+    const {
+      error
+    } =
+      await client.rpc(
+        "aurora_remove_member",
+        {
+
+          p_household_id:
+            householdId,
+
+          p_user_id:
+            userId
+
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    toast(
+      "Member Google access removed."
+    );
+
+
+    await loadAuroraAccessControl();
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Remove Member:",
+      error
+    );
+
+
+    alert(
+      error?.message ||
+      "Unable to remove member."
+    );
+
+  }
+
+}
+
+
+
+/* ============================================================
+   OWNER ONLY // TRANSFER OWNERSHIP
+============================================================ */
+
+async function transferAuroraOwnership(
+  userId,
+  householdId,
+  encodedName
+) {
+
+  const name =
+    decodeURIComponent(
+      encodedName ||
+      "this member"
+    );
+
+
+  const confirmed =
+    confirm(
+
+      `TRANSFER OWNERSHIP?\n\n` +
+
+      `${name} will become the new OWNER.\n\n` +
+
+      `You will no longer be the household owner.\n` +
+
+      `This action changes the highest access level.`
+
+    );
+
+
+  if (!confirmed) return;
+
+
+  const secondConfirm =
+    confirm(
+
+      `FINAL CONFIRMATION\n\n` +
+
+      `Transfer Aurora Bachelor ownership to ${name}?`
+
+    );
+
+
+  if (!secondConfirm) return;
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await client.rpc(
+        "aurora_transfer_ownership",
+        {
+
+          p_household_id:
+            householdId,
+
+          p_new_owner_user_id:
+            userId
+
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    console.log(
+      "✅ Ownership transferred:",
+      data
+    );
+
+
+    alert(
+      `${name} is now the Aurora Bachelor owner.`
+    );
+
+
+    window.location.reload();
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Ownership Transfer:",
+      error
+    );
+
+
+    alert(
+      error?.message ||
+      "Unable to transfer ownership."
+    );
+
+  }
+
+}
+
+
+
+/* ============================================================
+   OWNER + ADMIN // REVOKE INVITATION
+============================================================ */
+
+async function revokeAuroraInvitation(
+  invitationId,
+  householdId,
+  encodedEmail
+) {
+
+  const email =
+    decodeURIComponent(
+      encodedEmail ||
+      ""
+    );
+
+
+  const confirmed =
+    confirm(
+
+      `Revoke invitation for ${email}?\n\n` +
+
+      `The invitation link will stop working immediately.`
+
+    );
+
+
+  if (!confirmed) return;
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  try {
+
+    const {
+      error
+    } =
+      await client.rpc(
+        "aurora_revoke_invitation",
+        {
+
+          p_household_id:
+            householdId,
+
+          p_invitation_id:
+            invitationId
+
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    toast(
+      "Invitation revoked."
+    );
+
+
+    await loadAuroraAccessControl();
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Revoke Invitation:",
+      error
+    );
+
+
+    alert(
+      error?.message ||
+      "Unable to revoke invitation."
+    );
+
+  }
+
 }
 
 
