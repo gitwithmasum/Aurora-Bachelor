@@ -1,89 +1,56 @@
-/* ============================================================
+ /* ============================================================
    AURORA BACHELOR — V3 CLEAN SCRIPT
    Single data store • Single renderer • Single boot
-============================================================ */
+ ============================================================ */
 
 
 /* ============================================================
    AURORA — SUPABASE CLIENT
+   Safe single initialization
 ============================================================ */
 
-const SUPABASE_URL =
+const AURORA_SUPABASE_URL =
   "https://jykzxgrfgdpefsocpsur.supabase.co";
 
-const SUPABASE_PUBLISHABLE_KEY =
+const AURORA_SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_aGr0tI4CKz1xuuD7uMmmCA_G1tkn8lC";
 
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY,
+let supabaseClient = null;
+
+function createAuroraSupabaseClient() {
+  if (supabaseClient?.auth) return supabaseClient;
+
+  const sdk =
+    window.supabase ||
+    (typeof supabase !== "undefined" ? supabase : null);
+
+  if (!sdk || typeof sdk.createClient !== "function") {
+    console.error(
+      "❌ Aurora: Supabase JS SDK is not available. Load @supabase/supabase-js before script.js."
+    );
+    return null;
+  }
+
+  supabaseClient = sdk.createClient(
+    AURORA_SUPABASE_URL,
+    AURORA_SUPABASE_PUBLISHABLE_KEY,
     {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        flowType: "pkce"
       }
     }
   );
 
-console.log("🌐 Aurora Supabase Client Ready");
-
-
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
-
-    console.log(
-      "AURORA AUTH EVENT:",
-      event,
-      session?.user?.email || null
-    );
-
-    if (event === "SIGNED_IN" && session) {
-      await ensureAuroraProfile(session.user);
-    }
-
-    if (event === "SIGNED_OUT") {
-      console.log("Aurora user signed out.");
-    }
-  }
-);
-
-
-
-
-
-
-
-async function testGoogleLogin() {
-
-  const { data, error } =
-    await supabaseClient.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
-
-  if (error) {
-
-    console.error(
-      "Google Login Error:",
-      error
-    );
-
-    return;
-  }
-
-  console.log(
-    "Google Login Started:",
-    data
-  );
+  console.log("🌐 Aurora Supabase Client Ready");
+  return supabaseClient;
 }
 
-
-
-
+function getAuroraSupabaseClient() {
+  return supabaseClient || createAuroraSupabaseClient();
+}
 
 async function initializeAuroraOwner() {
 
@@ -1285,7 +1252,6 @@ const AuroraDataStore = (() => {
 const AuroraApp = (() => {
 
   const pages = {
-
     dashboard: "Command Center",
     meals: "Daily Meals",
     members: "Members",
@@ -1294,8 +1260,8 @@ const AuroraApp = (() => {
     bills: "House Bills",
     reports: "Monthly Report",
     settlement: "Settlement",
-    settings: "Settings"
-
+    settings: "Settings",
+    profile: "Profile"
   };
 
 
@@ -1420,34 +1386,16 @@ const AuroraApp = (() => {
 ============================================================ */
 
 const pageTitles = {
-
-  dashboard:
-    "Command Center",
-
-  meals:
-    "Daily Meals",
-
-  members:
-    "Members",
-
-  expenses:
-    "Meal Expenses",
-
-  payments:
-    "Payments",
-
-  bills:
-    "House Bills",
-
-  reports:
-    "Monthly Report",
-
-  settlement:
-    "Settlement",
-
-  settings:
-    "Settings"
-
+  dashboard: "Command Center",
+  meals: "Daily Meals",
+  members: "Members",
+  expenses: "Meal Expenses",
+  payments: "Payments",
+  bills: "House Bills",
+  reports: "Monthly Report",
+  settlement: "Settlement",
+  settings: "Settings",
+  profile: "Profile"
 };
 
 
@@ -2238,71 +2186,186 @@ async function renderProfile() {
 
 
     /* --------------------------------------------------------
-       ROLE
-    -------------------------------------------------------- */
+   AURORA // SECURE DYNAMIC ROLE + HOUSE LOOKUP
+-------------------------------------------------------- */
 
-    const role =
-      profile?.role ||
-      "member";
+    let role = "member";
+    let roleLabel = "MEMBER";
 
+    let houseName = "Aurora Bachelor";
+    let householdId = null;
 
-    let roleLabel =
-      "MEMBER";
+    try {
 
-
-    if (role === "owner") {
-
-      roleLabel = "OWNER";
-
-    }
-
-    else if (role === "admin") {
-
-      roleLabel = "ADMIN";
-
-    }
-
-
-    /* --------------------------------------------------------
-       HOUSE
-    -------------------------------------------------------- */
-
-    let houseName =
-      "Not assigned";
-
-
-    if (profile?.household_id) {
+      /* ======================================================
+         MEMBERSHIP IS THE SOURCE OF TRUTH
+      ====================================================== */
 
       const {
-        data: household,
-        error: householdError
-      } =
-        await supabaseClient
-
-          .from("households")
-
-          .select("name")
-
-          .eq(
-            "id",
-            profile.household_id
-          )
-
-          .maybeSingle();
+        data: membership,
+        error: membershipError
+      } = await supabaseClient
+        .from("house_members")
+        .select("*")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
 
 
-      if (
-        !householdError &&
-        household?.name
-      ) {
+      if (membershipError) {
 
-        houseName =
-          household.name;
+        console.error(
+          "❌ Aurora Membership Lookup Error:",
+          membershipError
+        );
 
       }
 
-    }
 
+      /* ======================================================
+         USER HAS HOUSE MEMBERSHIP
+      ====================================================== */
+
+      if (membership) {
+
+        const membershipRole =
+          String(
+            membership.role || "member"
+          )
+            .toLowerCase()
+            .trim();
+
+
+        /* ROLE */
+
+        if (membershipRole === "owner") {
+
+          role = "owner";
+          roleLabel = "OWNER";
+
+        } else if (
+          membershipRole === "admin"
+        ) {
+
+          role = "admin";
+          roleLabel = "ADMIN";
+
+        } else {
+
+          role = "member";
+          roleLabel = "MEMBER";
+        }
+
+
+        /* HOUSEHOLD */
+
+        householdId =
+          membership.household_id || null;
+
+
+        /* Older schema fallback */
+
+        if (membership.house_name) {
+
+          houseName =
+            membership.house_name;
+        }
+
+
+        /* HOUSEHOLD TABLE LOOKUP */
+
+        if (householdId) {
+
+          const {
+            data: household,
+            error: householdError
+          } = await supabaseClient
+            .from("households")
+            .select("id, name, owner_id")
+            .eq("id", householdId)
+            .maybeSingle();
+
+
+          if (
+            !householdError &&
+            household
+          ) {
+
+            houseName =
+              household.name ||
+              houseName;
+
+
+            /*
+             * SECURITY CHECK:
+             * OWNER role must also match households.owner_id
+             */
+
+            if (role === "owner") {
+
+              if (
+                household.owner_id !== user.id
+              ) {
+
+                console.warn(
+                  "⚠️ Invalid owner membership detected."
+                );
+
+                role = "member";
+                roleLabel = "MEMBER";
+              }
+            }
+          }
+        }
+
+      } else {
+
+        /* ====================================================
+           NO MEMBERSHIP
+           New Google users are NOT owners automatically
+        ==================================================== */
+
+        role = "member";
+        roleLabel = "MEMBER";
+
+        houseName = "Not assigned";
+        householdId = null;
+
+        console.log(
+          "👤 Aurora User has no house membership."
+        );
+      }
+
+
+      console.log(
+        "🛡 Aurora Role:",
+        roleLabel
+      );
+
+      console.log(
+        "🏠 Aurora House:",
+        houseName
+      );
+
+      console.log(
+        "🏠 Aurora Household ID:",
+        householdId
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Role / House Lookup Error:",
+        error
+      );
+
+      role = "member";
+      roleLabel = "MEMBER";
+
+      houseName = "Not assigned";
+      householdId = null;
+    }
 
     /* --------------------------------------------------------
        AVATAR
@@ -4683,16 +4746,13 @@ function openMemberModal() {
             id="memberName"
             type="text"
             required
-            placeholder="e.g. Nabil"
+            placeholder="e.g. Billah"
           >
 
         </div>
 
 
-        <div
-          class="field"
-          style="margin-top:12px"
-        >
+        <div class="field" style="margin-top:12px">
 
           <label>
             PHONE
@@ -4724,6 +4784,32 @@ function openMemberModal() {
 
         </div>
 
+        <div
+            class="field"
+            style="margin-top:12px"
+          >
+
+            <label>
+              GOOGLE EMAIL
+            </label>
+
+            <input
+              id="memberGoogleEmail"
+              type="email"
+              required
+              placeholder="example@gmail.com"
+              autocomplete="email"
+            >
+
+            <div
+              class="muted"
+              style="margin-top:6px;font-size:11px"
+            >
+              An invitation will be sent to this Google account.
+            </div>
+
+        </div>
+
 
         <div class="actions">
 
@@ -4740,7 +4826,7 @@ function openMemberModal() {
             type="submit"
             class="btn primary"
           >
-            Add Member
+            Send Invitation
           </button>
 
         </div>
@@ -4767,11 +4853,13 @@ function openMemberModal() {
    ADD MEMBER
 ========================================================== */
 
-function addMember(
-  event
-) {
+async function addMember(event) {
 
   event.preventDefault();
+
+
+  const submitButton =
+    event.submitter;
 
 
   const name =
@@ -4803,6 +4891,20 @@ function addMember(
     "";
 
 
+  const googleEmail =
+    document
+      .getElementById(
+        "memberGoogleEmail"
+      )
+      ?.value
+      .trim()
+      .toLowerCase();
+
+
+  /* =========================================
+     VALIDATION
+  ========================================= */
+
   if (!name) {
 
     toast(
@@ -4810,7 +4912,16 @@ function addMember(
     );
 
     return;
+  }
 
+
+  if (!googleEmail) {
+
+    toast(
+      "Google email is required."
+    );
+
+    return;
   }
 
 
@@ -4821,65 +4932,303 @@ function addMember(
   const duplicate =
     database.members.find(
       member =>
-        member.name
-          .trim()
+        String(
+          member.googleEmail ||
+          ""
+        )
           .toLowerCase() ===
-        name
-          .trim()
-          .toLowerCase()
+        googleEmail
     );
 
 
   if (duplicate) {
 
     toast(
-      "A member with this name already exists."
+      "This Google account is already registered."
     );
 
     return;
-
   }
 
 
-  database.members.push({
-
-    id:
-      uid("m"),
-
-    name,
-
-    phone,
-
-    room,
-
-    joined:
-      todayISO(),
-
-    status:
-      "active",
-
-    createdAt:
-      new Date()
-        .toISOString()
-
-  });
+  const client =
+    getAuroraSupabaseClient();
 
 
-  AuroraDataStore.save();
+  if (!client?.auth) {
+
+    toast(
+      "Supabase is not available."
+    );
+
+    return;
+  }
 
 
-  closeModal();
+  try {
+
+    /* =========================================
+       BUTTON LOADING STATE
+    ========================================= */
+
+    if (submitButton) {
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        "Sending Invitation...";
+
+    }
 
 
-  toast(
-    `${name} added successfully.`
-  );
+    /* =========================================
+       CURRENT USER
+    ========================================= */
+
+    const {
+      data: {
+        user
+      },
+      error: userError
+    } =
+      await client.auth.getUser();
 
 
-  render();
+    if (
+      userError ||
+      !user
+    ) {
+
+      throw new Error(
+        "Please sign in with Google first."
+      );
+
+    }
+
+
+    /* =========================================
+       OWNER HOUSEHOLD
+    ========================================= */
+
+    const {
+      data: membership,
+      error: membershipError
+    } =
+      await client
+        .from(
+          "house_members"
+        )
+        .select(
+          "household_id, role"
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+
+    if (
+      membershipError ||
+      !membership?.household_id
+    ) {
+
+      throw new Error(
+        "Household membership could not be found."
+      );
+
+    }
+
+
+    if (
+      membership.role !==
+      "owner"
+    ) {
+
+      throw new Error(
+        "Only the household owner can invite members."
+      );
+
+    }
+
+
+    /* =========================================
+       SEND EMAIL INVITATION
+    ========================================= */
+
+    const {
+      data: inviteResult,
+      error: inviteError
+    } =
+      await client
+        .functions
+        .invoke(
+          "send-house-invite",
+          {
+
+            body: {
+
+              householdId:
+                membership.household_id,
+
+              email:
+                googleEmail,
+
+              fullName:
+                name,
+
+              phone:
+                phone,
+
+              room:
+                room
+
+            }
+
+          }
+        );
+
+
+    if (inviteError) {
+
+      console.error(
+        "Aurora Invitation Error:",
+        inviteError
+      );
+
+
+      let serverMessage =
+        null;
+
+
+      if (
+        inviteError.context
+      ) {
+
+        try {
+
+          const response =
+            await inviteError
+              .context
+              .json();
+
+          serverMessage =
+            response?.error ||
+            response?.message;
+
+        } catch (_) { }
+
+      }
+
+
+      throw new Error(
+        serverMessage ||
+        inviteError.message ||
+        "Unable to send invitation."
+      );
+
+    }
+
+
+    if (
+      !inviteResult?.success
+    ) {
+
+      throw new Error(
+        inviteResult?.error ||
+        "Invitation was not sent."
+      );
+
+    }
+
+
+    /* =========================================
+       ADD ACCOUNTING MEMBER LOCALLY
+       ONLY AFTER INVITATION SUCCESS
+    ========================================= */
+
+    database.members.push({
+
+      id:
+        uid("m"),
+
+      name,
+
+      phone,
+
+      room,
+
+      googleEmail,
+
+      joined:
+        todayISO(),
+
+      status:
+        "active",
+
+      inviteStatus:
+        "pending",
+
+      invitationId:
+        inviteResult
+          .invitationId ||
+        null,
+
+      createdAt:
+        new Date()
+          .toISOString()
+
+    });
+
+
+    AuroraDataStore.save();
+
+
+    closeModal();
+
+
+    toast(
+      `Invitation sent to ${googleEmail}`
+    );
+
+
+    render();
+
+
+    console.log(
+      "✅ Aurora Member Invitation:",
+      inviteResult
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Add Member Error:",
+      error
+    );
+
+
+    alert(
+      error?.message ||
+      "Unable to add member."
+    );
+
+
+    if (submitButton) {
+
+      submitButton.disabled =
+        false;
+
+      submitButton.textContent =
+        "Send Invitation";
+
+    }
+
+  }
 
 }
-
 
 /* ==========================================================
    EDIT MEMBER
@@ -5720,11 +6069,484 @@ function renderMembers() {
         `
     }
 
-    </div>
+       </div>
 
+    <!-- AURORA ACCESS CONTROL -->
+    <div
+      id="auroraAccessControl"
+      style="margin-top:20px"
+    ></div>
   `;
 
+  loadAuroraAccessControl();
 }
+
+
+/* ============================================================
+   AURORA // ACCESS CONTROL
+============================================================ */
+
+async function loadAuroraAccessControl() {
+
+  const root =
+    document.getElementById(
+      "auroraAccessControl"
+    );
+
+  if (!root) return;
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+  if (!client?.auth) return;
+
+
+    root.innerHTML = `
+      <div class="card">
+        <div class="muted">
+          Loading access control...
+        </div>
+      </div>
+    `;
+
+
+    try {
+
+      /* CURRENT USER */
+
+      const {
+        data: {
+          user
+        },
+        error: userError
+      } =
+        await client.auth.getUser();
+
+
+      if (
+        userError ||
+        !user
+      ) {
+
+        root.innerHTML = "";
+        return;
+      }
+
+
+      /* CURRENT USER MEMBERSHIP */
+
+      const {
+        data: membership,
+        error: membershipError
+      } =
+        await client
+          .from("house_members")
+          .select(
+            "household_id, role"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .maybeSingle();
+
+
+      if (
+        membershipError ||
+        !membership
+      ) {
+
+        root.innerHTML = "";
+        return;
+      }
+
+
+      /* ONLY OWNER SEES ROLE MANAGEMENT */
+
+      if (
+        membership.role !==
+        "owner"
+      ) {
+
+        root.innerHTML = "";
+        return;
+      }
+
+
+      const householdId =
+        membership.household_id;
+
+
+      /* SECURE ACCOUNT LIST */
+
+      const {
+        data: members,
+        error: membersError
+      } =
+        await client.rpc(
+          "aurora_get_access_members",
+          {
+            p_household_id:
+              householdId
+          }
+        );
+
+
+      if (membersError) {
+        throw membersError;
+      }
+
+
+      const adminCount =
+        (members || [])
+          .filter(
+            member =>
+              member.role === "admin"
+          )
+          .length;
+
+
+      root.innerHTML = `
+
+      <div class="aurora-access-control">
+
+        <div class="aac-shell">
+
+          <!-- HEADER -->
+          <div class="aac-header">
+
+            <div class="aac-title-wrap">
+
+              <span class="aac-kicker">
+                AURORA // ACCESS CONTROL
+              </span>
+
+              <h3 class="aac-title">
+                Account Permissions
+              </h3>
+
+              <p class="aac-subtitle">
+                Manage Google account access
+                for this household.
+              </p>
+
+            </div>
+
+
+            <div class="aac-admin-count">
+
+              <span class="aac-count-label">
+                ADMINS
+              </span>
+
+              <strong>
+                ${adminCount}/2
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- TABLE HEADER -->
+          <div class="aac-table-head">
+
+            <div>
+              ACCOUNT
+            </div>
+
+            <div>
+              ROLE
+            </div>
+
+            <div>
+              ACCESS
+            </div>
+
+          </div>
+
+
+          <!-- ACCOUNT ROWS -->
+          ${(members || [])
+            .map(
+              member => {
+
+                const safeName =
+                  esc(
+                    member.display_name ||
+                    "Aurora User"
+                  );
+
+                const safeEmail =
+                  esc(
+                    member.email ||
+                    ""
+                  );
+
+                const role =
+                  String(
+                    member.role ||
+                    "member"
+                  )
+                    .toLowerCase();
+
+
+                const roleLabel =
+                  role.toUpperCase();
+
+
+                const initial =
+                  safeName
+                    .charAt(0)
+                    .toUpperCase() ||
+                  "?";
+
+
+                /* =============================================
+                  ACCESS BUTTON
+                ============================================= */
+
+                let accessHTML = "";
+
+
+                if (role === "owner") {
+
+                  accessHTML = `
+
+                    <button
+                      class="aac-btn lock"
+                      type="button"
+                      disabled
+                    >
+                      🔒 OWNER
+                    </button>
+
+                  `;
+
+                }
+
+
+                else if (role === "admin") {
+
+                  accessHTML = `
+
+                    <button
+                      class="
+                        aac-btn
+                        remove-admin
+                      "
+                      type="button"
+                      onclick="
+                        changeAuroraMemberRole(
+                          '${member.user_id}',
+                          '${householdId}',
+                          'member'
+                        )
+                      "
+                    >
+                      Remove Admin
+                    </button>
+
+                  `;
+
+                }
+
+
+                else {
+
+                  accessHTML = `
+
+                    <button
+                      class="
+                        aac-btn
+                        make-admin
+                      "
+                      type="button"
+                      onclick="
+                        changeAuroraMemberRole(
+                          '${member.user_id}',
+                          '${householdId}',
+                          'admin'
+                        )
+                      "
+                    >
+                      Make Admin
+                    </button>
+
+                  `;
+
+                }
+
+
+                return `
+
+                  <div class="aac-row">
+
+                    <!-- ACCOUNT -->
+                    <div class="aac-account">
+
+                      <div
+                        class="
+                          aac-avatar
+                          avatar-${role}
+                        "
+                      >
+                        ${initial}
+                      </div>
+
+
+                      <div class="aac-user-meta">
+
+                        <strong>
+                          ${safeName}
+                        </strong>
+
+                        <span>
+                          ${safeEmail}
+                        </span>
+
+                      </div>
+
+                    </div>
+
+
+                    <!-- ROLE -->
+                    <div class="aac-role">
+
+                      <span
+                        class="
+                          aac-role-badge
+                          ${role}
+                        "
+                      >
+                        ${roleLabel}
+                      </span>
+
+                    </div>
+
+
+                    <!-- ACCESS -->
+                    <div class="aac-access">
+
+                      ${accessHTML}
+
+                    </div>
+
+                  </div>
+
+                `;
+
+              }
+            )
+            .join("")}
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Access Control:",
+        error
+      );
+
+
+      root.innerHTML = `
+
+        <div class="card">
+
+          <div class="negative">
+            Unable to load Access Control.
+          </div>
+
+        </div>
+      `;
+  }
+}
+
+
+async function changeAuroraMemberRole(
+  userId,
+  householdId,
+  newRole
+) {
+
+  const client =
+    getAuroraSupabaseClient();
+
+  if (!client) return;
+
+
+  const label =
+    newRole === "admin"
+      ? "promote this member to ADMIN"
+      : "change this admin back to MEMBER";
+
+
+  if (
+    !confirm(
+      `Are you sure you want to ${label}?`
+    )
+  ) {
+    return;
+  }
+
+
+  try {
+
+    const {
+      error
+    } =
+      await client.rpc(
+        "aurora_set_member_role",
+        {
+          p_household_id:
+            householdId,
+
+          p_user_id:
+            userId,
+
+          p_role:
+            newRole
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    toast(
+      newRole === "admin"
+        ? "Member promoted to admin."
+        : "Admin changed to member."
+    );
+
+
+    await loadAuroraAccessControl();
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Aurora Role Change:",
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to change member role."
+    );
+  }
+}
+
 
 
 /* ============================================================
@@ -13950,86 +14772,116 @@ if ("serviceWorker" in navigator) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ============================================================
-   AURORA PROFILE SYSTEM
+   AURORA // PROFILE + GOOGLE AUTH SYSTEM
+   CLEAN FINAL VERSION
 ============================================================ */
 
 (function initAuroraProfileSystem() {
 
-  let profileInitialized = false;
-
-
-  /* ==========================================================
-     GET PROFILE ELEMENTS
-  ========================================================== */
-
-  function getProfileElements() {
-
-    return {
-      button:
-        document.getElementById("profileBtn"),
-
-      overlay:
-        document.getElementById("profileOverlay"),
-
-      close:
-        document.getElementById("profileClose"),
-
-      avatar:
-        document.getElementById("profileAvatar"),
-
-      name:
-        document.getElementById("profileName"),
-
-      email:
-        document.getElementById("profileEmail"),
-
-      role:
-        document.getElementById("profileRole"),
-
-      house:
-        document.getElementById("profileHouse"),
-
-      userId:
-        document.getElementById("profileUserId"),
-
-      settings:
-        document.getElementById("profileSettingsBtn"),
-
-      signOut:
-        document.getElementById("profileSignOut")
-    };
-
-  }
-
-
+  console.log("🌌 Aurora Profile System Initializing...");
 
 
   /* ============================================================
-                  AURORA // PROFILE + AUTH CORE
+     ELEMENTS
   ============================================================ */
 
-  async function getCurrentAuroraUser() {
+  function getElements() {
+    return {
+      overlay: document.getElementById("profileOverlay"),
+      profileBtn: document.getElementById("profileBtn"),
+      closeBtn: document.getElementById("profileClose"),
+
+      loginView: document.getElementById("auroraLoginView"),
+      profileView: document.getElementById("auroraProfileView"),
+      googleLoginBtn: document.getElementById("googleLoginBtn"),
+
+      avatar: document.getElementById("profileAvatar"),
+      name: document.getElementById("profileName"),
+      email: document.getElementById("profileEmail"),
+      role: document.getElementById("profileRole"),
+      house: document.getElementById("profileHouse"),
+      provider: document.getElementById("profileProvider"),
+      userId: document.getElementById("profileUserId"),
+
+      settingsBtn: document.getElementById("profileSettingsBtn"),
+      signOutBtn: document.getElementById("profileSignOut")
+    };
+  }
+
+
+  /* ============================================================
+     SUPABASE SESSION
+  ============================================================ */
+
+  async function getAuroraSession() {
+
+    const client = getAuroraSupabaseClient();
+
+    if (!client?.auth) {
+      console.error(
+        "❌ Aurora: Supabase Auth is not available."
+      );
+      return null;
+    }
+
     try {
-      const { data, error } =
-        await supabaseClient.auth.getSession();
+
+      const {
+        data,
+        error
+      } = await client.auth.getSession();
 
       if (error) {
-        throw error;
-      }
-
-      const session = data?.session;
-
-      if (!session?.user) {
+        console.error(
+          "❌ Aurora Session Error:",
+          error
+        );
         return null;
       }
 
-      return session.user;
+      const session = data?.session || null;
+
+      if (session?.user) {
+
+        console.log(
+          "✅ Aurora Session Found:",
+          session.user.email
+        );
+
+        return session;
+      }
+
+      console.log(
+        "🔐 Aurora: No active Supabase session."
+      );
+
+      return null;
 
     } catch (error) {
 
       console.error(
-        "AURORA AUTH SESSION ERROR:",
+        "❌ Aurora Session Exception:",
         error
       );
 
@@ -14038,85 +14890,149 @@ if ("serviceWorker" in navigator) {
   }
 
 
+  /* ============================================================
+     GOOGLE LOGIN
+  ============================================================ */
 
-  /* ==========================================================
-     FILL PROFILE
-  ========================================================== */
+  async function startGoogleLogin() {
+
+    const client = getAuroraSupabaseClient();
+
+    if (!client?.auth) {
+      console.error(
+        "❌ Aurora: Supabase client unavailable."
+      );
+      return;
+    }
+
+    try {
+
+      const isLocal =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+
+      const redirectTo = isLocal
+        ? window.location.origin + window.location.pathname
+        : "https://gitwithmasum.github.io/Aurora-Bachelor/";
+
+      console.log(
+        "🔐 Aurora Google OAuth Redirect:",
+        redirectTo
+      );
+
+      const {
+        data,
+        error
+      } = await client.auth.signInWithOAuth({
+
+        provider: "google",
+
+        options: {
+
+          redirectTo,
+
+          queryParams: {
+            prompt: "select_account"
+          }
+
+        }
+
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log(
+        "🚀 Aurora Google OAuth Started",
+        data
+      );
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Google Login Error:",
+        error
+      );
+
+      alert(
+        "Google login failed.\n\n" +
+        (error?.message || "Unknown authentication error.")
+      );
+    }
+  }
+
 
   /* ============================================================
-   LOAD PROFILE
-============================================================ */
+     LOAD USER PROFILE
+  ============================================================ */
 
-  async function loadAuroraProfile() {
+  async function loadAuroraProfile(session = null) {
 
-    const user =
-      await getCurrentAuroraUser();
+    const el = getElements();
 
-    const avatar =
-      document.getElementById("profileAvatar");
+    if (!el.overlay) {
+      console.error(
+        "❌ Aurora: profileOverlay not found."
+      );
+      return;
+    }
 
-    const name =
-      document.getElementById("profileName");
+    if (!session?.user) {
+      session = await getAuroraSession();
+    }
 
-    const email =
-      document.getElementById("profileEmail");
-
-    const role =
-      document.getElementById("profileRole");
-
-    const house =
-      document.getElementById("profileHouse");
-
-    const userId =
-      document.getElementById("profileUserId");
+    const user = session?.user || null;
 
 
-    /* ----------------------------------------------------------
-       NO SESSION
-    ---------------------------------------------------------- */
+    /* ============================================================
+       NOT LOGGED IN
+    ============================================================ */
 
     if (!user) {
 
-      if (avatar) {
-        avatar.src = "";
-      }
-
-      if (name) {
-        name.textContent =
-          "NOT AUTHENTICATED";
-      }
-
-      if (email) {
-        email.textContent =
-          "Please sign in with Google.";
-      }
-
-      if (role) {
-        role.textContent =
-          "GUEST";
-      }
-
-      if (house) {
-        house.textContent =
-          "Aurora Bachelor";
-      }
-
-      if (userId) {
-        userId.textContent =
-          "NO ACTIVE SESSION";
-      }
-
-      console.warn(
-        "AURORA PROFILE: No active Supabase session."
+      console.log(
+        "🔐 Aurora: Authentication required."
       );
+
+      if (el.loginView) {
+        el.loginView.hidden = false;
+      }
+
+      if (el.profileView) {
+        el.profileView.hidden = true;
+      }
 
       return;
     }
 
 
-    /* ----------------------------------------------------------
-       GOOGLE USER DATA
-    ---------------------------------------------------------- */
+    /* ============================================================
+       AUTHENTICATED USER
+    ============================================================ */
+
+    console.log(
+      "✅ Aurora Authenticated User:",
+      user.email
+    );
+
+    console.log(
+      "🆔 Aurora User ID:",
+      user.id
+    );
+
+    if (el.loginView) {
+      el.loginView.hidden = true;
+    }
+
+    if (el.profileView) {
+      el.profileView.hidden = false;
+    }
+
+
+    /* ============================================================
+       GOOGLE USER METADATA
+    ============================================================ */
 
     const metadata =
       user.user_metadata || {};
@@ -14124,7 +15040,7 @@ if ("serviceWorker" in navigator) {
     const fullName =
       metadata.full_name ||
       metadata.name ||
-      user.email ||
+      user.email?.split("@")[0] ||
       "Aurora User";
 
     const avatarUrl =
@@ -14133,61 +15049,63 @@ if ("serviceWorker" in navigator) {
       "";
 
 
-    if (avatar) {
+    /* ============================================================
+       UPDATE PROFILE UI
+    ============================================================ */
 
-      avatar.src =
-        avatarUrl ||
-        "";
+    if (el.name) {
+      el.name.textContent = fullName;
+    }
 
-      avatar.onerror = () => {
-        avatar.style.display = "none";
-      };
+    if (el.email) {
+      el.email.textContent =
+        user.email || "No email";
+    }
 
+    if (el.userId) {
+      el.userId.textContent =
+        user.id || "—";
+    }
+
+    if (el.avatar) {
+
+      if (avatarUrl) {
+
+        el.avatar.src = avatarUrl;
+        el.avatar.alt = fullName;
+        el.avatar.style.display = "block";
+
+      } else {
+
+        el.avatar.removeAttribute("src");
+        el.avatar.style.display = "none";
+      }
     }
 
 
-    if (name) {
-      name.textContent =
-        fullName;
+    /* ============================================================
+       TEMP PROFILE DATA
+    ============================================================ */
+
+    /* Safe default — actual role/house comes from database */
+
+    if (el.role) {
+      el.role.textContent = "MEMBER";
     }
 
-
-    if (email) {
-      email.textContent =
-        user.email ||
-        "No email";
+    if (el.house) {
+      el.house.textContent = "Not assigned";
     }
 
-
-    if (userId) {
-      userId.textContent =
-        user.id;
+    if (el.provider) {
+      el.provider.textContent =
+        "GOOGLE";
     }
-
-
-    /* ----------------------------------------------------------
-       DEFAULT ROLE
-       Later Supabase profile table will control this.
-    ---------------------------------------------------------- */
-
-    if (role) {
-      role.textContent =
-        "OWNER";
-    }
-
-
-    if (house) {
-      house.textContent =
-        "Aurora Bachelor";
-    }
-
 
     console.log(
-      "🌌 Aurora Profile Loaded:",
-      user
+      "🌌 Aurora Profile Loaded Successfully"
     );
   }
-
 
 
   /* ============================================================
@@ -14196,43 +15114,27 @@ if ("serviceWorker" in navigator) {
 
   async function openAuroraProfile() {
 
-    const overlay =
-      document.getElementById(
-        "profileOverlay"
-      );
+    const el = getElements();
 
-    if (!overlay) {
-
+    if (!el.overlay) {
       console.error(
-        "AURORA PROFILE: profileOverlay not found."
+        "❌ Aurora: profileOverlay NOT FOUND."
       );
-
       return;
     }
 
-
-    /* ----------------------------------------------------------
-       OPEN UI FIRST
-    ---------------------------------------------------------- */
-
-    overlay.classList.add(
+    el.overlay.classList.add(
       "active"
     );
 
-    overlay.setAttribute(
+    el.overlay.setAttribute(
       "aria-hidden",
       "false"
     );
 
-
     document.body.classList.add(
       "profile-open"
     );
-
-
-    /* ----------------------------------------------------------
-       LOAD USER
-    ---------------------------------------------------------- */
 
     await loadAuroraProfile();
   }
@@ -14244,21 +15146,17 @@ if ("serviceWorker" in navigator) {
 
   function closeAuroraProfile() {
 
-    const overlay =
-      document.getElementById(
-        "profileOverlay"
-      );
+    const el = getElements();
 
-    if (!overlay) {
+    if (!el.overlay) {
       return;
     }
 
-
-    overlay.classList.remove(
+    el.overlay.classList.remove(
       "active"
     );
 
-    overlay.setAttribute(
+    el.overlay.setAttribute(
       "aria-hidden",
       "true"
     );
@@ -14270,359 +15168,212 @@ if ("serviceWorker" in navigator) {
 
 
   /* ============================================================
-    GOOGLE LOGIN
- ============================================================ */
-
-  async function signInWithGoogle() {
-
-    try {
-
-      const { data, error } =
-        await supabaseClient.auth.signInWithOAuth({
-
-          provider: "google",
-
-          options: {
-
-            redirectTo:
-              window.location.href
-
-          }
-
-        });
-
-
-      if (error) {
-        throw error;
-      }
-
-
-      console.log(
-        "🌐 Google authentication started:",
-        data
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "GOOGLE LOGIN ERROR:",
-        error
-      );
-
-      alert(
-        "Google login failed. Check the browser console."
-      );
-    }
-  }
-
-
-  window.signInWithGoogle = async function () {
-
-    const { data, error } =
-      await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-
-    if (error) {
-      console.error("Google Login Error:", error);
-      return;
-    }
-
-    console.log("Google Login Started:", data);
-  };
-
-  /* ============================================================
      SIGN OUT
   ============================================================ */
 
   async function signOutAurora() {
 
+    const client = getAuroraSupabaseClient();
+
+    if (!client?.auth) {
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        "Sign out from Aurora Bachelor?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
 
-      const { error } =
-        await supabaseClient.auth.signOut();
+      const {
+        error
+      } = await client.auth.signOut();
 
       if (error) {
         throw error;
       }
 
+      console.log(
+        "🚪 Aurora: Signed out successfully."
+      );
 
       closeAuroraProfile();
 
-
-      console.log(
-        "🌌 Aurora user signed out."
-      );
-
-
-      location.reload();
-
+      window.location.reload();
 
     } catch (error) {
 
       console.error(
-        "AURORA SIGN OUT ERROR:",
+        "❌ Aurora Sign Out Error:",
         error
       );
 
+      alert(
+        "Sign out failed.\n\n" +
+        (error?.message || "Unknown error.")
+      );
     }
   }
 
 
-
   /* ============================================================
-   PROFILE EVENTS
-============================================================ */
-
-  function bindAuroraProfileEvents() {
-
-    const profileBtn =
-      document.getElementById(
-        "profileBtn"
-      );
-
-    const closeBtn =
-      document.getElementById(
-        "profileClose"
-      );
-
-    const signOutBtn =
-      document.getElementById(
-        "profileSignOut"
-      );
-
-    const settingsBtn =
-      document.getElementById(
-        "profileSettingsBtn"
-      );
-
-    const overlay =
-      document.getElementById(
-        "profileOverlay"
-      );
-
-
-    /* ----------------------------------------------------------
-       PROFILE BUTTON
-    ---------------------------------------------------------- */
-
-    if (profileBtn) {
-
-      profileBtn.onclick = () => {
-
-        console.log(
-          "👤 Profile button clicked"
-        );
-
-        openAuroraProfile();
-
-      };
-
-    }
-
-
-    /* ----------------------------------------------------------
-       CLOSE
-    ---------------------------------------------------------- */
-
-    if (closeBtn) {
-
-      closeBtn.onclick = () => {
-
-        closeAuroraProfile();
-
-      };
-
-    }
-
-
-    /* ----------------------------------------------------------
-       SIGN OUT
-    ---------------------------------------------------------- */
-
-    if (signOutBtn) {
-
-      signOutBtn.onclick = () => {
-
-        signOutAurora();
-
-      };
-
-    }
-
-
-    /* ----------------------------------------------------------
-       SETTINGS
-    ---------------------------------------------------------- */
-
-    if (settingsBtn) {
-
-      settingsBtn.onclick = () => {
-
-        closeAuroraProfile();
-
-        if (
-          typeof go === "function"
-        ) {
-
-          go("settings");
-
-        }
-
-      };
-
-    }
-
-
-    /* ----------------------------------------------------------
-       CLICK OUTSIDE PANEL
-    ---------------------------------------------------------- */
-
-    if (overlay) {
-
-      overlay.onclick = event => {
-
-        if (
-          event.target === overlay
-        ) {
-
-          closeAuroraProfile();
-
-        }
-
-      };
-
-    }
-
-  }
-
-
-  /* ============================================================
-     AUTH STATE LISTENER
+     PROFILE SETTINGS
   ============================================================ */
-
-  function bindAuroraAuthListener() {
-
-    supabaseClient.auth.onAuthStateChange(
-      async (event, session) => {
-
-        console.log(
-          "🔐 AURORA AUTH EVENT:",
-          event,
-          session
-        );
-
-
-        if (
-          event === "SIGNED_IN" &&
-          session?.user
-        ) {
-
-          console.log(
-            "✅ Aurora Google user authenticated."
-          );
-
-        }
-
-
-        if (
-          event === "SIGNED_OUT"
-        ) {
-
-          console.log(
-            "🚪 Aurora user signed out."
-          );
-
-        }
-
-      }
-    );
-
-  }
-
-  /* ============================================================
-   PROFILE INITIALIZATION
-  ============================================================ */
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-      bindAuroraProfileEvents();
-
-      bindAuroraAuthListener();
-
-      console.log(
-        "👤 Aurora Profile Core Ready"
-      );
-
-    }
-  );
-
-  /* ==========================================================
-     SETTINGS BUTTON
-  ========================================================== */
 
   function openProfileSettings() {
 
     closeAuroraProfile();
 
+    if (
+      typeof go === "function"
+    ) {
+
+      go("settings");
+      return;
+    }
 
     if (
-      typeof AuroraApp !==
-      "undefined" &&
-      typeof AuroraApp.navigate ===
-      "function"
+      typeof AuroraApp !== "undefined" &&
+      typeof AuroraApp.navigate === "function"
     ) {
 
       AuroraApp.navigate(
         "settings"
       );
-
     }
-
   }
 
 
-  /* ==========================================================
-     GLOBAL EVENT DELEGATION
-     
-     IMPORTANT:
-     renderShell() can recreate profileBtn.
-     Therefore we DON'T bind directly to
-     profileBtn only once.
-  ========================================================== */
+  /* ============================================================
+     EVENT DELEGATION
+  ============================================================ */
+
+  /* ============================================================
+   PROFILE EVENT DELEGATION
+============================================================ */
 
   document.addEventListener(
     "click",
-    event => {
+    function (event) {
+
+      /* =========================================================
+         PROFILE BUTTON
+      ========================================================= */
 
       const profileButton =
-        event.target.closest(
-          "#profileBtn"
-        );
-
+        event.target.closest("#profileBtn");
 
       if (profileButton) {
 
         event.preventDefault();
-        event.stopPropagation();
 
-        openAuroraProfile();
+        console.log(
+          "👤 Aurora Profile Button Clicked"
+        );
+
+        const client =
+          getAuroraSupabaseClient();
+
+        if (!client?.auth) {
+
+          console.error(
+            "❌ Aurora: Supabase Auth unavailable."
+          );
+
+          return;
+        }
+
+        client.auth
+          .getSession()
+
+          .then(({ data, error }) => {
+
+            if (error) {
+
+              console.error(
+                "❌ Aurora Profile Session Error:",
+                error
+              );
+
+              openAuroraProfile();
+
+              return;
+            }
+
+            const session =
+              data?.session || null;
+
+
+            /* ==========================================
+               LOGGED IN → FULL PROFILE PAGE
+            ========================================== */
+
+            if (session?.user) {
+
+              console.log(
+                "✅ Aurora Session Active → Opening Full Profile"
+              );
+
+              closeAuroraProfile();
+
+              if (typeof go === "function") {
+
+                go("profile");
+
+              } else if (
+                typeof AuroraApp !== "undefined" &&
+                typeof AuroraApp.navigate === "function"
+              ) {
+
+                AuroraApp.navigate(
+                  "profile"
+                );
+              }
+
+              return;
+            }
+
+
+            /* ==========================================
+               NOT LOGGED IN → LOGIN OVERLAY
+            ========================================== */
+
+            console.log(
+              "🔐 Aurora Login Required"
+            );
+
+            openAuroraProfile();
+
+          })
+
+          .catch((error) => {
+
+            console.error(
+              "❌ Aurora Profile Session Exception:",
+              error
+            );
+
+            openAuroraProfile();
+
+          });
 
         return;
       }
 
 
+      /* =========================================================
+         CLOSE PROFILE
+      ========================================================= */
+
       const closeButton =
         event.target.closest(
           "#profileClose"
         );
-
 
       if (closeButton) {
 
@@ -14634,11 +15385,33 @@ if ("serviceWorker" in navigator) {
       }
 
 
+      /* =========================================================
+         GOOGLE LOGIN
+      ========================================================= */
+
+      const googleButton =
+        event.target.closest(
+          "#googleLoginBtn"
+        );
+
+      if (googleButton) {
+
+        event.preventDefault();
+
+        startGoogleLogin();
+
+        return;
+      }
+
+
+      /* =========================================================
+         PROFILE SETTINGS
+      ========================================================= */
+
       const settingsButton =
         event.target.closest(
           "#profileSettingsBtn"
         );
-
 
       if (settingsButton) {
 
@@ -14650,11 +15423,14 @@ if ("serviceWorker" in navigator) {
       }
 
 
+      /* =========================================================
+         SIGN OUT
+      ========================================================= */
+
       const signOutButton =
         event.target.closest(
           "#profileSignOut"
         );
-
 
       if (signOutButton) {
 
@@ -14666,66 +15442,269 @@ if ("serviceWorker" in navigator) {
       }
 
 
-      /* ------------------------------------------------------
-         CLICK OUTSIDE PANEL
-      ------------------------------------------------------ */
-
-      const overlay =
-        event.target.closest(
-          "#profileOverlay"
-        );
-
+      /* =========================================================
+         CLICK OUTSIDE PROFILE PANEL
+      ========================================================= */
 
       if (
-        overlay &&
-        event.target === overlay
+        event.target.id ===
+        "profileOverlay"
       ) {
 
         closeAuroraProfile();
-
       }
 
     }
   );
 
-
-  /* ==========================================================
+  /* ============================================================
      ESC KEY
-  ========================================================== */
+  ============================================================ */
 
   document.addEventListener(
     "keydown",
-    event => {
+    function (event) {
 
-      if (
-        event.key === "Escape"
-      ) {
-
-        const overlay =
-          document.getElementById(
-            "profileOverlay"
-          );
-
-
-        if (
-          overlay?.classList.contains(
-            "active"
-          )
-        ) {
-
-          closeAuroraProfile();
-
-        }
-
+      if (event.key !== "Escape") {
+        return;
       }
 
+      const overlay =
+        document.getElementById(
+          "profileOverlay"
+        );
+
+      if (
+        overlay?.classList.contains(
+          "active"
+        )
+      ) {
+
+        closeAuroraProfile();
+      }
     }
   );
 
 
-  /* ==========================================================
+  /* ============================================================
+     AUTH STATE LISTENER
+  ============================================================ */
+
+  function initAuthListener() {
+
+    const client =
+      getAuroraSupabaseClient();
+
+    if (!client?.auth) {
+
+      console.error(
+        "❌ Aurora: Supabase client unavailable."
+      );
+
+      return;
+    }
+
+    if (
+      window.__auroraProfileAuthListenerBound
+    ) {
+      return;
+    }
+
+    window.__auroraProfileAuthListenerBound =
+      true;
+
+    client.auth.onAuthStateChange(
+      function (event, session) {
+
+        console.log(
+          "🔐 AURORA AUTH EVENT:",
+          event,
+          session?.user?.email || null
+        );
+
+
+        if (
+          event === "SIGNED_IN" &&
+          session?.user
+        ) {
+
+          console.log(
+            "🎉 Aurora Google Login Successful:",
+            session.user.email
+          );
+
+          loadAuroraProfile(session);
+
+          /*
+           * OAuth সফল হওয়ার পরেই URL clean করবে।
+           * Login-এর আগে ?code= মুছবে না।
+           */
+
+          if (
+            window.location.search
+              .includes("code=")
+          ) {
+
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname +
+              window.location.hash
+            );
+          }
+
+          return;
+        }
+
+
+        if (
+          event === "INITIAL_SESSION"
+        ) {
+
+          if (session?.user) {
+
+            console.log(
+              "✅ Aurora Initial Session:",
+              session.user.email
+            );
+
+            loadAuroraProfile(session);
+
+          } else {
+
+            console.log(
+              "🔐 Aurora: No initial session."
+            );
+          }
+
+          return;
+        }
+
+
+        if (
+          (
+            event === "TOKEN_REFRESHED" ||
+            event === "USER_UPDATED"
+          ) &&
+          session?.user
+        ) {
+
+          loadAuroraProfile(session);
+
+          return;
+        }
+
+
+        if (
+          event === "SIGNED_OUT"
+        ) {
+
+          console.log(
+            "🚪 Aurora: User signed out."
+          );
+
+          const el =
+            getElements();
+
+          if (el.loginView) {
+            el.loginView.hidden =
+              false;
+          }
+
+          if (el.profileView) {
+            el.profileView.hidden =
+              true;
+          }
+        }
+      }
+    );
+  }
+
+
+  /* ============================================================
+     INITIAL SESSION CHECK
+  ============================================================ */
+
+  async function initializeAuroraAuth() {
+
+    const client =
+      getAuroraSupabaseClient();
+
+    console.log(
+      "🔍 Aurora: Checking existing session..."
+    );
+
+    if (!client?.auth) {
+
+      console.warn(
+        "⚠️ Aurora: Supabase is not ready yet."
+      );
+
+      return;
+    }
+
+    /*
+     * IMPORTANT:
+     * এখানে OAuth code manually exchange/remove করা হবে না।
+     * Supabase detectSessionInUrl:true নিজে handle করবে।
+     */
+
+    const session =
+      await getAuroraSession();
+
+    if (session?.user) {
+
+      console.log(
+        "✅ Existing Google Session Found:",
+        session.user.email
+      );
+
+    } else {
+
+      console.log(
+        "🔐 Aurora: No active session."
+      );
+    }
+  }
+
+
+  /* ============================================================
+     INITIALIZE
+  ============================================================ */
+
+  function initialize() {
+
+    initAuthListener();
+
+    initializeAuroraAuth();
+
+    console.log(
+      "🚀 Aurora Profile + Auth System Ready"
+    );
+  }
+
+
+  if (
+    document.readyState === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize,
+      {
+        once: true
+      }
+    );
+
+  } else {
+
+    initialize();
+  }
+
+
+  /* ============================================================
      PUBLIC API
-  ========================================================== */
+  ============================================================ */
 
   window.openAuroraProfile =
     openAuroraProfile;
@@ -14733,178 +15712,933 @@ if ("serviceWorker" in navigator) {
   window.closeAuroraProfile =
     closeAuroraProfile;
 
+  window.startGoogleLogin =
+    startGoogleLogin;
+
 })();
 
 
-// ============================================================
-// AURORA PROFILE BUTTON TEST
-// ============================================================
 
-window.openAuroraProfile = function () {
 
-  console.log("✅ PROFILE BUTTON CLICKED");
 
-  const overlay =
-    document.getElementById("profileOverlay");
 
-  if (!overlay) {
+/* ============================================================
+   AURORA // INVITATION ACCEPT FLOW
+============================================================ */
 
-    console.error(
-      "❌ profileOverlay NOT FOUND"
+const AURORA_INVITE_STORAGE_KEY =
+  "aurora_pending_invite_token";
+
+
+let auroraInviteProcessing =
+  false;
+
+
+/* ============================================================
+   GET INVITATION TOKEN
+============================================================ */
+
+function getAuroraInvitationToken() {
+
+  const url =
+    new URL(
+      window.location.href
     );
 
-    return;
-  }
 
-  overlay.classList.add("active");
-
-  overlay.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  document.body.classList.add(
-    "profile-open"
-  );
-
-  console.log(
-    "✅ PROFILE OVERLAY OPENED"
-  );
-};
+  const urlToken =
+    url.searchParams
+      .get("invite")
+      ?.trim();
 
 
-window.closeAuroraProfile = function () {
+  if (urlToken) {
 
-  const overlay =
-    document.getElementById("profileOverlay");
-
-  if (!overlay) {
-    return;
-  }
-
-  overlay.classList.remove("active");
-
-  overlay.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  document.body.classList.remove(
-    "profile-open"
-  );
-};
+    sessionStorage.setItem(
+      AURORA_INVITE_STORAGE_KEY,
+      urlToken
+    );
 
 
-// CLOSE BUTTON
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    if (
-      event.target.closest(
-        "#profileClose"
-      )
-    ) {
-
-      closeAuroraProfile();
-
-    }
+    return urlToken;
 
   }
-);
 
-async function ensureAuroraProfile(user) {
 
-  if (!user) {
-    console.warn("No authenticated user.");
-    return null;
-  }
-
-  const metadata = user.user_metadata || {};
-
-  const fullName =
-    metadata.full_name ||
-    metadata.name ||
-    user.email?.split("@")[0] ||
-    "Aurora User";
-
-  const avatarUrl =
-    metadata.avatar_url ||
-    metadata.picture ||
+  return sessionStorage
+    .getItem(
+      AURORA_INVITE_STORAGE_KEY
+    )
+    ?.trim() ||
     null;
 
-  const { data, error } =
-    await supabaseClient
-      .from("profiles")
-      .upsert(
-        {
-          id: user.id,
-          email: user.email,
-          full_name: fullName,
-          avatar_url: avatarUrl,
-          house_name: "Aurora Bachelor"
-        },
-        {
-          onConflict: "id"
-        }
-      )
-      .select()
-      .single();
-
-  if (error) {
-    console.error(
-      "❌ Aurora profile creation failed:",
-      error
-    );
-
-    return null;
-  }
-
-  console.log(
-    "✅ Aurora Profile Ready:",
-    data
-  );
-
-  return data;
 }
 
 
-async function loadAuroraAuthenticatedUser() {
+/* ============================================================
+   CLEAN INVITATION TOKEN
+============================================================ */
+
+function clearAuroraInvitationToken() {
+
+  sessionStorage.removeItem(
+    AURORA_INVITE_STORAGE_KEY
+  );
+
+
+  const url =
+    new URL(
+      window.location.href
+    );
+
+
+  url.searchParams.delete(
+    "invite"
+  );
+
+
+  window.history.replaceState(
+    {},
+    "",
+    url.pathname +
+    url.search +
+    url.hash
+  );
+
+}
+
+
+/* ============================================================
+   INVITATION OVERLAY
+============================================================ */
+
+function getAuroraInviteOverlay() {
+
+  let overlay =
+    document.getElementById(
+      "auroraInviteOverlay"
+    );
+
+
+  if (overlay) {
+    return overlay;
+  }
+
+
+  overlay =
+    document.createElement(
+      "div"
+    );
+
+
+  overlay.id =
+    "auroraInviteOverlay";
+
+
+  overlay.className =
+    "aurora-invite-overlay";
+
+
+  overlay.innerHTML = `
+
+    <div class="aurora-invite-card">
+
+      <div
+        class="aurora-invite-content"
+        id="auroraInviteContent"
+      >
+
+        <div class="aurora-invite-kicker">
+          AURORA // SECURE INVITATION
+        </div>
+
+        <h2 class="aurora-invite-title">
+          Verifying invitation...
+        </h2>
+
+        <p class="aurora-invite-subtitle">
+          Establishing secure household connection.
+        </p>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  return overlay;
+
+}
+
+
+/* ============================================================
+   INVITATION MESSAGE
+============================================================ */
+
+function setAuroraInviteMessage(
+  html
+) {
+
+  getAuroraInviteOverlay();
+
+
+  const content =
+    document.getElementById(
+      "auroraInviteContent"
+    );
+
+
+  if (content) {
+    content.innerHTML =
+      html;
+  }
+
+}
+
+
+/* ============================================================
+   PREVIEW INVITATION
+============================================================ */
+
+async function previewAuroraInvitation(
+  token
+) {
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  if (!client) {
+    throw new Error(
+      "Supabase connection unavailable."
+    );
+  }
+
 
   const {
-    data: {
-      user
-    },
+    data,
     error
-  } = await supabaseClient.auth.getUser();
+  } =
+    await client.rpc(
+      "aurora_preview_invitation",
+      {
+        p_token:
+          token
+      }
+    );
+
 
   if (error) {
+    throw error;
+  }
+
+
+  const invitation =
+    Array.isArray(data)
+      ? data[0]
+      : data;
+
+
+  if (!invitation) {
+
+    throw new Error(
+      "Invalid invitation link."
+    );
+
+  }
+
+
+  return invitation;
+
+}
+
+
+/* ============================================================
+   GOOGLE LOGIN FROM INVITATION
+============================================================ */
+
+async function loginForAuroraInvitation() {
+
+  const token =
+    getAuroraInvitationToken();
+
+
+  if (!token) {
+
+    alert(
+      "Invitation token is missing."
+    );
+
+    return;
+
+  }
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  if (!client) {
+    return;
+  }
+
+
+  sessionStorage.setItem(
+    AURORA_INVITE_STORAGE_KEY,
+    token
+  );
+
+
+  const button =
+    document.getElementById(
+      "auroraInviteGoogleBtn"
+    );
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Opening Google...";
+
+  }
+
+
+  /*
+    Redirect back to current Aurora
+    production page.
+
+    Invite token is also preserved
+    inside sessionStorage.
+  */
+
+  const redirectUrl =
+    window.location.origin +
+    window.location.pathname;
+
+
+  const {
+    error
+  } =
+    await client.auth
+      .signInWithOAuth(
+        {
+
+          provider:
+            "google",
+
+          options: {
+
+            redirectTo:
+              redirectUrl,
+
+            queryParams: {
+
+              prompt:
+                "select_account"
+
+            }
+
+          }
+
+        }
+      );
+
+
+  if (error) {
+
     console.error(
-      "User loading error:",
+      "❌ Aurora Invite Google Login:",
       error
     );
 
-    return null;
-  }
 
-  if (!user) {
-    console.warn(
-      "AURORA PROFILE: No active Supabase session."
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Continue with Google";
+
+    }
+
+
+    alert(
+      error.message ||
+      "Google login failed."
     );
 
-    return null;
   }
 
-  console.log(
-    "✅ Google User:",
-    user.email
+}
+
+
+/* ============================================================
+   ACCEPT INVITATION
+============================================================ */
+
+async function acceptAuroraInvitation(
+  token
+) {
+
+  if (
+    auroraInviteProcessing
+  ) {
+    return;
+  }
+
+
+  auroraInviteProcessing =
+    true;
+
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  if (!client) {
+
+    auroraInviteProcessing =
+      false;
+
+    return;
+
+  }
+
+
+  setAuroraInviteMessage(`
+
+    <div class="aurora-invite-kicker">
+      AURORA // AUTHENTICATED
+    </div>
+
+    <h2 class="aurora-invite-title">
+      Connecting your account
+    </h2>
+
+    <p class="aurora-invite-subtitle">
+      Verifying Google identity and
+      household permissions...
+    </p>
+
+    <div class="aurora-invite-status">
+      SECURE LINKING IN PROGRESS
+    </div>
+
+  `);
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await client.rpc(
+        "aurora_accept_invitation",
+        {
+          p_token:
+            token
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const result =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+
+    if (!result) {
+
+      throw new Error(
+        "Invitation acceptance failed."
+      );
+
+    }
+
+
+    clearAuroraInvitationToken();
+
+
+    setAuroraInviteMessage(`
+
+      <div class="aurora-invite-kicker">
+        AURORA // CONNECTION ESTABLISHED
+      </div>
+
+      <h2 class="aurora-invite-title">
+        Welcome to
+        ${esc(
+      result.house_name ||
+      "Aurora Bachelor"
+    )}
+      </h2>
+
+      <p class="aurora-invite-subtitle">
+        Your Google account has been
+        securely connected to this household.
+      </p>
+
+
+      <div class="aurora-invite-grid">
+
+        <div class="aurora-invite-info">
+
+          <span>
+            ACCESS LEVEL
+          </span>
+
+          <strong>
+            ${esc(
+      String(
+        result.member_role ||
+        "member"
+      )
+        .toUpperCase()
+    )}
+          </strong>
+
+        </div>
+
+
+        <div class="aurora-invite-info">
+
+          <span>
+            STATUS
+          </span>
+
+          <strong>
+            CONNECTED ✓
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="
+          aurora-invite-status
+          aurora-invite-success
+        "
+      >
+        GOOGLE ACCOUNT VERIFIED
+      </div>
+
+
+      <div class="aurora-invite-actions">
+
+        <button
+          class="aurora-invite-google"
+          type="button"
+          onclick="
+            finishAuroraInvitation()
+          "
+        >
+          Enter Aurora Bachelor
+        </button>
+
+      </div>
+
+    `);
+
+
+    console.log(
+      "✅ Aurora Invitation Accepted:",
+      result
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Aurora Invitation Accept:",
+      error
+    );
+
+
+    auroraInviteProcessing =
+      false;
+
+
+    setAuroraInviteMessage(`
+
+      <div class="aurora-invite-kicker">
+        AURORA // ACCESS DENIED
+      </div>
+
+      <h2 class="aurora-invite-title">
+        Invitation could not be accepted
+      </h2>
+
+      <p class="aurora-invite-subtitle">
+        The Google account you selected
+        may not match the invited email.
+      </p>
+
+
+      <div class="aurora-invite-error">
+
+        ${esc(
+      error?.message ||
+      "Unable to accept invitation."
+    )}
+
+      </div>
+
+
+      <div class="aurora-invite-actions">
+
+        <button
+          class="aurora-invite-google"
+          type="button"
+          onclick="
+            switchAuroraInvitationAccount()
+          "
+        >
+          Try Another Google Account
+        </button>
+
+      </div>
+
+    `);
+
+  }
+
+}
+
+
+/* ============================================================
+   SWITCH GOOGLE ACCOUNT
+============================================================ */
+
+async function switchAuroraInvitationAccount() {
+
+  const client =
+    getAuroraSupabaseClient();
+
+
+  if (!client) return;
+
+
+  await client.auth.signOut();
+
+
+  auroraInviteProcessing =
+    false;
+
+
+  await loginForAuroraInvitation();
+
+}
+
+
+/* ============================================================
+   FINISH INVITATION
+============================================================ */
+
+function finishAuroraInvitation() {
+
+  const overlay =
+    document.getElementById(
+      "auroraInviteOverlay"
+    );
+
+
+  if (overlay) {
+    overlay.remove();
+  }
+
+
+  auroraInviteProcessing =
+    false;
+
+
+  /*
+    Reload so profile, role,
+    Access Control and household
+    data refresh.
+  */
+
+  window.location.reload();
+
+}
+
+
+/* ============================================================
+   INITIALIZE INVITATION FLOW
+============================================================ */
+
+async function initializeAuroraInvitationFlow() {
+
+  const token =
+    getAuroraInvitationToken();
+
+
+  if (!token) {
+    return;
+  }
+
+
+  try {
+
+    /* =========================================
+       PREVIEW
+    ========================================= */
+
+    const invitation =
+      await previewAuroraInvitation(
+        token
+      );
+
+
+    if (
+      invitation
+        .invitation_status !==
+      "pending"
+    ) {
+
+      throw new Error(
+        "This invitation is no longer active."
+      );
+
+    }
+
+
+    if (
+      invitation.expires_at &&
+      new Date(
+        invitation.expires_at
+      ) < new Date()
+    ) {
+
+      throw new Error(
+        "This invitation has expired."
+      );
+
+    }
+
+
+    /* =========================================
+       CHECK CURRENT SESSION
+    ========================================= */
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    const {
+      data: {
+        session
+      }
+    } =
+      await client.auth
+        .getSession();
+
+
+    /*
+      Already signed in:
+      automatically attempt acceptance.
+    */
+
+    if (
+      session?.user
+    ) {
+
+      await acceptAuroraInvitation(
+        token
+      );
+
+      return;
+
+    }
+
+
+    /* =========================================
+       NOT LOGGED IN
+    ========================================= */
+
+    setAuroraInviteMessage(`
+
+      <div class="aurora-invite-kicker">
+        AURORA // HOUSE INVITATION
+      </div>
+
+
+      <h2 class="aurora-invite-title">
+        Join
+        ${esc(
+      invitation.house_name ||
+      "Aurora Bachelor"
+    )}
+      </h2>
+
+
+      <p class="aurora-invite-subtitle">
+        You have received secure member
+        access to this household.
+      </p>
+
+
+      <div class="aurora-invite-grid">
+
+        <div class="aurora-invite-info">
+
+          <span>
+            INVITED MEMBER
+          </span>
+
+          <strong>
+            ${esc(
+      invitation.full_name ||
+      "House Member"
+    )}
+          </strong>
+
+        </div>
+
+
+        <div class="aurora-invite-info">
+
+          <span>
+            GOOGLE ACCOUNT
+          </span>
+
+          <strong>
+            ${esc(
+      invitation.email_hint ||
+      "Verified account"
+    )}
+          </strong>
+
+        </div>
+
+
+        <div class="aurora-invite-info">
+
+          <span>
+            ACCESS LEVEL
+          </span>
+
+          <strong>
+            MEMBER
+          </strong>
+
+        </div>
+
+
+        <div class="aurora-invite-info">
+
+          <span>
+            STATUS
+          </span>
+
+          <strong>
+            PENDING
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="aurora-invite-status">
+        Sign in with the Google account
+        that received this invitation.
+      </div>
+
+
+      <div class="aurora-invite-actions">
+
+        <button
+          id="auroraInviteGoogleBtn"
+          class="aurora-invite-google"
+          type="button"
+          onclick="
+            loginForAuroraInvitation()
+          "
+        >
+          Continue with Google
+        </button>
+
+      </div>
+
+    `);
+
+
+  } catch (error) {
+
+    console.error(
+      "❌ Aurora Invitation:",
+      error
+    );
+
+
+    setAuroraInviteMessage(`
+
+      <div class="aurora-invite-kicker">
+        AURORA // INVALID LINK
+      </div>
+
+
+      <h2 class="aurora-invite-title">
+        Invitation unavailable
+      </h2>
+
+
+      <p class="aurora-invite-subtitle">
+        This link may be invalid,
+        expired or already used.
+      </p>
+
+
+      <div class="aurora-invite-error">
+
+        ${esc(
+      error?.message ||
+      "Invalid invitation."
+    )}
+
+      </div>
+
+    `);
+
+  }
+
+}
+
+
+/* ============================================================
+   START AFTER PAGE LOAD
+============================================================ */
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeAuroraInvitationFlow
   );
 
-  console.log(
-    "🆔 User ID:",
-    user.id
-  );
+} else {
 
-  return user;
+  initializeAuroraInvitationFlow();
+
 }

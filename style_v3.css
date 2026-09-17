@@ -12004,43 +12004,480 @@ html[data-accent] .title-cursor {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ============================================================
    AURORA PROFILE OVERLAY
 ============================================================ */
 
-.profile-overlay {
-  position: fixed;
+
+
+/* =========================================================
+   PROFILE — SAME HOVER STYLE AS NAV ITEMS
+========================================================= */
+
+/* =========================================================
+   AURORA GALAXY PROFILE // COSMIC HUD
+========================================================= */
+
+.sidebar-profile {
+  margin-top: auto;
+  width: 100%;
+  padding: 14px 0 8px;
+}
+
+/* ---------------------------------------------------------
+   MAIN PROFILE BUTTON
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn {
+  position: relative;
+
+  width: 100%;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  padding: 9px 13px;
+
+  border: 1px solid rgba(77, 214, 255, 0.18);
+  border-radius: 14px;
+
+  background:
+    radial-gradient(circle at 15% 50%,
+      rgba(6, 182, 212, 0.16),
+      transparent 35%),
+    radial-gradient(circle at 85% 20%,
+      rgba(124, 58, 237, 0.14),
+      transparent 40%),
+    linear-gradient(120deg,
+      rgba(6, 182, 212, 0.06),
+      rgba(79, 70, 229, 0.09),
+      rgba(15, 23, 42, 0.72));
+
+  color: #a7b8ca;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  box-shadow:
+    inset 0 0 18px rgba(6, 182, 212, 0.035),
+    0 0 8px rgba(6, 182, 212, 0.04);
+
+  transition:
+    .3s ease;
+}
+
+
+/* ---------------------------------------------------------
+   GALAXY STARS
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn::before {
+  content: "✦  ·   ˙     ✧   ·  ✦     ˙   ✧";
+
+  position: absolute;
+
+  top: 5px;
+  left: 10px;
+
+  width: 150%;
+  height: 100%;
+
+  color: rgba(137, 229, 255, .32);
+
+  font-size: 8px;
+  letter-spacing: 8px;
+
+  white-space: nowrap;
+
+  opacity: .35;
+
+  transform: translateX(0);
+
+  pointer-events: none;
+
+  animation: profileGalaxyStars 12s linear infinite;
+}
+
+@keyframes profileGalaxyStars {
+
+  0% {
+    transform: translateX(-20%);
+  }
+
+  50% {
+    transform: translateX(-5%);
+  }
+
+  100% {
+    transform: translateX(-20%);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   COSMIC ENERGY BORDER
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn::after {
+  content: "";
+
+  position: absolute;
   inset: 0;
 
-  z-index: 99999;
+  border-radius: 14px;
+
+  padding: 1px;
+
+  background:
+    linear-gradient(115deg,
+      transparent 10%,
+      rgba(6, 182, 212, .65),
+      transparent 38%,
+      rgba(139, 92, 246, .6),
+      transparent 70%,
+      rgba(6, 182, 212, .45));
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  opacity: .3;
+
+  pointer-events: none;
+
+  transition:
+    opacity .3s ease,
+    filter .3s ease;
+}
+
+
+/* ---------------------------------------------------------
+   PROFILE ICON CORE
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-icon {
+  position: relative;
+
+  z-index: 5;
+
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 20px;
+  border-radius: 50%;
+
+  font-size: 18px;
 
   background:
-    radial-gradient(circle at 50% 40%,
-      rgba(0, 229, 255, 0.10),
-      transparent 45%),
-    rgba(2, 7, 18, 0.82);
+    radial-gradient(circle,
+      rgba(6, 182, 212, .22),
+      rgba(79, 70, 229, .08) 55%,
+      transparent 70%);
 
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  opacity: 0;
-  visibility: hidden;
-
-  pointer-events: none;
+  filter:
+    drop-shadow(0 0 5px rgba(6, 182, 212, .5));
 
   transition:
-    opacity 0.25s ease,
-    visibility 0.25s ease;
+    .3s ease;
 }
 
 
-/* OPEN STATE */
+/* ---------------------------------------------------------
+   ORBITAL RING
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-ring {
+  position: absolute;
+
+  left: 10px;
+  top: 10px;
+
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(6, 182, 212, .4);
+
+  border-top-color: rgba(255, 255, 255, .7);
+  border-right-color: rgba(139, 92, 246, .7);
+
+  box-shadow:
+    0 0 7px rgba(6, 182, 212, .25);
+
+  pointer-events: none;
+
+  transition: .35s ease;
+
+  z-index: 4;
+}
+
+
+/* Small orbit */
+.sidebar-profile .profile-ring::before {
+  content: "";
+
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  top: -3px;
+  left: 8px;
+
+  border-radius: 50%;
+
+  background: #67e8f9;
+
+  box-shadow:
+    0 0 7px #67e8f9,
+    0 0 14px rgba(6, 182, 212, .8);
+}
+
+
+/* ---------------------------------------------------------
+   TECH PROFILE TEXT
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-label {
+  position: relative;
+
+  z-index: 5;
+
+  font-family:
+    "Orbitron",
+    "Rajdhani",
+    "Poppins",
+    sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  letter-spacing: 1.6px;
+
+  text-transform: uppercase;
+
+  color: #a9bdd0;
+
+  text-shadow:
+    0 0 6px rgba(6, 182, 212, .12);
+
+  transition:
+    .3s ease;
+}
+
+
+/* ---------------------------------------------------------
+   SECONDARY TECH LINE
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-label::after {
+  content: " // IDENTITY";
+
+  margin-left: 5px;
+
+  font-size: 7px;
+
+  letter-spacing: 1px;
+
+  color: rgba(103, 232, 249, .45);
+
+  transition: .3s ease;
+}
+
+
+/* ---------------------------------------------------------
+   HOVER — GALAXY ACTIVATION
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn:hover {
+
+  color: #ffffff;
+
+  border-color:
+    rgba(6, 182, 212, .65);
+
+  background:
+    radial-gradient(circle at 18% 50%,
+      rgba(6, 182, 212, .24),
+      transparent 38%),
+    radial-gradient(circle at 80% 30%,
+      rgba(124, 58, 237, .25),
+      transparent 45%),
+    linear-gradient(120deg,
+      rgba(6, 182, 212, .10),
+      rgba(79, 70, 229, .16),
+      rgba(15, 23, 42, .82));
+
+  box-shadow:
+    0 0 10px rgba(6, 182, 212, .25),
+    0 0 25px rgba(79, 70, 229, .18),
+    inset 0 0 20px rgba(6, 182, 212, .07);
+
+  transform:
+    translateX(3px);
+}
+
+
+/* Energy border */
+.sidebar-profile .profile-btn:hover::after {
+
+  opacity: 1;
+
+  filter:
+    drop-shadow(0 0 5px rgba(6, 182, 212, .55)) drop-shadow(0 0 10px rgba(139, 92, 246, .35));
+}
+
+
+/* Icon activation */
+.sidebar-profile .profile-btn:hover .profile-icon {
+
+  transform:
+    scale(1.15);
+
+  color: #ffffff;
+
+  filter:
+    drop-shadow(0 0 5px rgba(103, 232, 249, .9)) drop-shadow(0 0 12px rgba(139, 92, 246, .65));
+}
+
+
+/* Orbital activation */
+.sidebar-profile .profile-btn:hover .profile-ring {
+
+  transform:
+    rotate(180deg) scale(1.12);
+
+  border-color:
+    rgba(103, 232, 249, .7);
+
+  box-shadow:
+    0 0 8px rgba(6, 182, 212, .6),
+    0 0 18px rgba(139, 92, 246, .3);
+}
+
+
+/* Text activation */
+.sidebar-profile .profile-btn:hover .profile-label {
+
+  color: #ffffff;
+
+  letter-spacing: 2px;
+
+  text-shadow:
+    0 0 6px rgba(103, 232, 249, .7),
+    0 0 15px rgba(139, 92, 246, .45);
+}
+
+.sidebar-profile .profile-btn:hover .profile-label::after {
+
+  color: #67e8f9;
+
+  text-shadow:
+    0 0 7px rgba(103, 232, 249, .8);
+}
+
+
+/* ---------------------------------------------------------
+   CLICK
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn:active {
+
+  transform:
+    translateX(2px) scale(.98);
+}
+
+
+/* ---------------------------------------------------------
+   FOCUS
+--------------------------------------------------------- */
+
+.sidebar-profile .profile-btn:focus-visible {
+
+  outline: none;
+
+  border-color:
+    rgba(103, 232, 249, .8);
+
+  box-shadow:
+    0 0 0 2px rgba(6, 182, 212, .12),
+    0 0 20px rgba(6, 182, 212, .3);
+}
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // GALAXY FUTURISTIC PROFILE OVERLAY
+============================================================ */
+
+/* OVERLAY */
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 20% 20%,
+      rgba(0, 229, 255, 0.10),
+      transparent 32%),
+    radial-gradient(circle at 80% 30%,
+      rgba(139, 92, 246, 0.12),
+      transparent 38%),
+    radial-gradient(circle at 50% 100%,
+      rgba(0, 132, 255, 0.08),
+      transparent 42%),
+    rgba(2, 8, 20, 0.82);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition:
+    opacity 0.28s ease,
+    visibility 0.28s ease;
+}
 
 .profile-overlay.active {
   opacity: 1;
@@ -12049,369 +12486,659 @@ html[data-accent] .title-cursor {
 }
 
 
+/* GALAXY STARS */
+.profile-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(circle, rgba(99, 235, 255, 0.8) 1px, transparent 1px),
+    radial-gradient(circle, rgba(157, 110, 255, 0.65) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.45) 1px, transparent 1px);
+
+  background-size:
+    95px 95px,
+    150px 150px,
+    220px 220px;
+
+  background-position:
+    0 0,
+    35px 50px,
+    80px 120px;
+
+  opacity: 0.25;
+
+  animation:
+    auroraStarsMove 18s linear infinite;
+}
+
+@keyframes auroraStarsMove {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-60px);
+  }
+}
+
+
 /* ============================================================
-   PROFILE PANEL
+   MAIN PANEL
 ============================================================ */
 
 .aurora-profile-panel {
+  position: relative;
+  z-index: 2;
 
-  width: min(520px, 100%);
-
-  max-height: min(720px, 90vh);
-
+  width: min(720px, 94vw);
+  max-height: 90vh;
   overflow-y: auto;
 
   padding: 26px;
 
-  position: relative;
+  border-radius: 22px;
 
-  border: 1px solid rgba(0, 229, 255, 0.25);
-
-  border-radius: 24px;
+  border:
+    1px solid rgba(78, 226, 255, 0.25);
 
   background:
     linear-gradient(145deg,
-      rgba(10, 25, 45, 0.97),
-      rgba(3, 10, 25, 0.98));
+      rgba(7, 18, 34, 0.98),
+      rgba(10, 13, 30, 0.97));
 
   box-shadow:
-    0 0 30px rgba(0, 229, 255, 0.12),
-    0 0 80px rgba(76, 0, 255, 0.08),
-    inset 0 0 30px rgba(0, 229, 255, 0.03);
+    0 0 0 1px rgba(135, 95, 255, 0.06),
+    0 0 35px rgba(0, 229, 255, 0.10),
+    0 0 80px rgba(128, 80, 255, 0.08),
+    inset 0 0 45px rgba(0, 229, 255, 0.025);
 
-  transform: translateY(20px) scale(0.97);
-
-  transition:
-    transform 0.3s ease;
+  isolation: isolate;
 }
 
 
-.profile-overlay.active .aurora-profile-panel {
+/* PANEL GLOW */
+.aurora-profile-panel::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
 
-  transform:
-    translateY(0) scale(1);
+  z-index: -1;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(120deg,
+      rgba(0, 229, 255, 0.42),
+      transparent 25%,
+      transparent 70%,
+      rgba(139, 92, 246, 0.36));
+
+  opacity: 0.22;
+
+  filter: blur(10px);
+}
+
+
+/* TOP HUD LINE */
+.aurora-profile-panel::after {
+  content: "";
+  position: absolute;
+
+  top: 0;
+  left: 12%;
+  right: 12%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #50eaff,
+      #9d6cff,
+      transparent);
+
+  box-shadow:
+    0 0 15px rgba(80, 234, 255, 0.65);
 }
 
 
 /* ============================================================
-   TOP
+   HEADER
 ============================================================ */
 
 .profile-panel-top {
-
   display: flex;
-
   align-items: flex-start;
-
   justify-content: space-between;
 
-  margin-bottom: 28px;
+  gap: 20px;
+
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+
+  border-bottom:
+    1px solid rgba(91, 220, 255, 0.10);
 }
 
-
 .profile-eyebrow {
-
   display: block;
 
   margin-bottom: 7px;
 
-  font-size: 10px;
+  font-family:
+    "Orbitron",
+    "Rajdhani",
+    sans-serif;
 
+  font-size: 10px;
   font-weight: 700;
 
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 
-  color: #53e8ff;
-
-  text-transform: uppercase;
-}
-
-
-.profile-panel-top h2 {
-
-  margin: 0;
-
-  font-size: 30px;
-
-  font-weight: 800;
-
-  letter-spacing: 1px;
-
-  color: #f1f7ff;
+  color: #5aeaff;
 
   text-shadow:
-    0 0 15px rgba(83, 232, 255, 0.25);
+    0 0 12px rgba(90, 234, 255, 0.45);
+}
+
+#profilePanelTitle {
+  margin: 0;
+
+  font-family:
+    "Orbitron",
+    "Rajdhani",
+    sans-serif;
+
+  font-size: 30px;
+  letter-spacing: 2px;
+
+  color: #f2fbff;
+
+  text-shadow:
+    0 0 18px rgba(110, 235, 255, 0.20);
 }
 
 
-/* ============================================================
-   CLOSE
-============================================================ */
-
+/* CLOSE BUTTON */
 .profile-close {
+  width: 38px;
+  height: 38px;
 
-  width: 40px;
-  height: 40px;
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  border:
+    1px solid rgba(85, 226, 255, 0.22);
 
   border-radius: 50%;
 
-  border: 1px solid rgba(83, 232, 255, 0.25);
-
   background:
-    rgba(255, 255, 255, 0.04);
+    rgba(8, 24, 40, 0.75);
 
-  color: #bfefff;
+  color: #8cecff;
 
-  font-size: 25px;
+  font-size: 23px;
 
   cursor: pointer;
 
   transition:
-    0.2s ease;
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
-
 
 .profile-close:hover {
-
-  background:
-    rgba(83, 232, 255, 0.12);
-
-  border-color:
-    rgba(83, 232, 255, 0.6);
-
-  color: #ffffff;
-
   transform: rotate(90deg);
-}
 
-
-/* ============================================================
-   PROFILE CORE
-============================================================ */
-
-.profile-core {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 20px;
-
-  padding: 20px;
-
-  margin-bottom: 18px;
-
-  border-radius: 18px;
-
-  border: 1px solid rgba(83, 232, 255, 0.14);
-
-  background:
-    rgba(255, 255, 255, 0.025);
-}
-
-
-/* ============================================================
-   AVATAR
-============================================================ */
-
-.profile-avatar-wrap {
-
-  width: 92px;
-  height: 92px;
-
-  position: relative;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-}
-
-
-.profile-avatar-ring {
-
-  position: absolute;
-
-  inset: 0;
-
-  border-radius: 50%;
-
-  border: 2px solid transparent;
-
-  border-top-color: #36e8ff;
-
-  border-right-color: #7b5cff;
-
-  animation:
-    auroraProfileSpin 4s linear infinite;
-
-  filter:
-    drop-shadow(0 0 8px rgba(54, 232, 255, 0.7));
-}
-
-
-@keyframes auroraProfileSpin {
-
-  to {
-    transform: rotate(360deg);
-  }
-
-}
-
-
-.profile-avatar {
-
-  width: 72px;
-  height: 72px;
-
-  object-fit: cover;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(135deg,
-      #081426,
-      #122b45);
-
-  border: 2px solid rgba(255, 255, 255, 0.12);
-}
-
-
-.profile-online-dot {
-
-  position: absolute;
-
-  right: 4px;
-  bottom: 5px;
-
-  width: 15px;
-  height: 15px;
-
-  border-radius: 50%;
-
-  background: #38f6a3;
-
-  border: 3px solid #07101f;
+  border-color: #52eaff;
 
   box-shadow:
-    0 0 12px rgba(56, 246, 163, 0.8);
+    0 0 18px rgba(82, 234, 255, 0.35);
 }
 
 
 /* ============================================================
-   IDENTITY
+   LOGIN VIEW
 ============================================================ */
 
+.aurora-login-view {
+  text-align: center;
+
+  padding: 35px 20px 22px;
+}
+
+.login-core-icon {
+  width: 90px;
+  height: 90px;
+
+  display: grid;
+  place-items: center;
+
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  font-size: 37px;
+
+  background:
+    radial-gradient(circle,
+      rgba(95, 66, 180, 0.6),
+      rgba(4, 19, 35, 0.95) 65%);
+
+  border:
+    1px solid rgba(80, 234, 255, 0.40);
+
+  box-shadow:
+    0 0 22px rgba(80, 234, 255, 0.18),
+    0 0 45px rgba(139, 92, 246, 0.16),
+    inset 0 0 18px rgba(80, 234, 255, 0.08);
+
+  animation:
+    profileCorePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes profileCorePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 18px rgba(80, 234, 255, 0.14),
+      0 0 40px rgba(139, 92, 246, 0.12);
+  }
+
+  50% {
+    transform: scale(1.04);
+    box-shadow:
+      0 0 30px rgba(80, 234, 255, 0.30),
+      0 0 60px rgba(139, 92, 246, 0.20);
+  }
+}
+
 .profile-status {
+  display: inline-flex;
+  align-items: center;
 
-  display: inline-block;
+  gap: 6px;
 
-  margin-bottom: 7px;
-
-  font-size: 10px;
-
+  font-size: 9px;
   font-weight: 700;
+
+  letter-spacing: 1.6px;
+
+  color: #50efaa;
+}
+
+.aurora-login-view h3 {
+  margin: 14px 0 9px;
+
+  font-family:
+    "Orbitron",
+    sans-serif;
 
   letter-spacing: 1.5px;
 
-  color: #48f4aa;
+  color: #edfaff;
 }
 
+.aurora-login-view p {
+  max-width: 440px;
 
-.profile-identity h3 {
+  margin: 0 auto 24px;
 
-  margin: 0 0 5px;
-
-  font-size: 21px;
-
-  color: #f5f9ff;
-}
-
-
-.profile-identity p {
-
-  margin: 0;
+  color:
+    rgba(190, 210, 225, 0.68);
 
   font-size: 13px;
-
-  color: #91a5bc;
-
-  word-break: break-word;
+  line-height: 1.6;
 }
 
 
+/* GOOGLE LOGIN BUTTON */
 
-body.profile-open {
+.google-login-btn {
+  position: relative;
+
+  width: min(360px, 100%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin: 0 auto;
+
+  padding: 13px 20px;
+
   overflow: hidden;
+
+  border:
+    1px solid rgba(76, 230, 255, 0.30);
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(10, 27, 45, 0.95),
+      rgba(18, 19, 46, 0.95));
+
+  color: #eefcff;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.google-login-btn::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: -120%;
+
+  width: 70%;
+  height: 100%;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      rgba(90, 234, 255, 0.16),
+      transparent);
+
+  transform: skewX(-20deg);
+
+  transition: 0.55s;
+}
+
+.google-login-btn:hover::before {
+  left: 145%;
+}
+
+.google-login-btn:hover {
+  transform: translateY(-2px);
+
+  border-color: #55eaff;
+
+  box-shadow:
+    0 0 20px rgba(85, 234, 255, 0.22),
+    0 0 40px rgba(130, 80, 255, 0.10);
+}
+
+.google-logo {
+  width: 22px;
+  height: 22px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: white;
+
+  color: #4285f4;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.login-security-text {
+  display: block;
+
+  margin-top: 14px;
+
+  font-size: 8px;
+
+  letter-spacing: 1.6px;
+
+  color:
+    rgba(84, 234, 255, 0.45);
 }
 
 
 /* ============================================================
-   PROFILE GRID
+   AUTHENTICATED PROFILE
+============================================================ */
+
+#auroraProfileView:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+
+/* IDENTITY BLOCK */
+
+#auroraProfileView .profile-core {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 20px;
+
+  border-radius: 16px;
+
+  border:
+    1px solid rgba(82, 223, 255, 0.14);
+
+  background:
+    linear-gradient(135deg,
+      rgba(9, 26, 44, 0.82),
+      rgba(17, 16, 45, 0.72));
+
+  box-shadow:
+    inset 0 0 25px rgba(60, 210, 255, 0.025);
+}
+
+
+/* AVATAR */
+
+#auroraProfileView .profile-avatar-wrap {
+  position: relative;
+
+  width: 90px;
+  height: 90px;
+
+  flex: 0 0 90px;
+
+  display: grid;
+  place-items: center;
+}
+
+.profile-avatar-ring {
+  position: absolute;
+  inset: -7px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(77, 232, 255, 0.36);
+
+  border-top-color:
+    rgba(159, 96, 255, 0.85);
+
+  box-shadow:
+    0 0 20px rgba(80, 234, 255, 0.15);
+
+  animation:
+    auroraOrbit 7s linear infinite;
+}
+
+@keyframes auroraOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#auroraProfileView .profile-avatar {
+  width: 74px;
+  height: 74px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border:
+    1px solid rgba(110, 236, 255, 0.45);
+
+  background:
+    rgba(10, 23, 40, 0.95);
+
+  box-shadow:
+    0 0 20px rgba(80, 234, 255, 0.18);
+}
+
+.profile-online-dot {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  width: 11px;
+  height: 11px;
+
+  border-radius: 50%;
+
+  background: #34f2a2;
+
+  border: 2px solid #071522;
+
+  box-shadow:
+    0 0 12px rgba(52, 242, 162, 0.85);
+}
+
+
+#auroraProfileView .profile-identity {
+  min-width: 0;
+}
+
+#profileName {
+  margin: 6px 0 4px;
+
+  font-size: 24px;
+
+  color: #f1fbff;
+
+  letter-spacing: 0.3px;
+}
+
+#profileEmail {
+  margin: 0;
+
+  color:
+    rgba(190, 210, 225, 0.65);
+
+  font-size: 13px;
+
+  word-break: break-all;
+}
+
+
+/* ============================================================
+   PROFILE DATA GRID
 ============================================================ */
 
 .profile-grid {
-
   display: grid;
 
   grid-template-columns:
     repeat(2, minmax(0, 1fr));
 
   gap: 12px;
-
-  margin-bottom: 15px;
 }
 
-
 .profile-data-card {
+  position: relative;
+
+  min-height: 88px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 7px;
 
   padding: 16px;
 
-  border-radius: 15px;
+  overflow: hidden;
 
-  border: 1px solid rgba(83, 232, 255, 0.12);
+  border-radius: 13px;
+
+  border:
+    1px solid rgba(76, 226, 255, 0.13);
 
   background:
-    rgba(255, 255, 255, 0.025);
+    linear-gradient(145deg,
+      rgba(8, 23, 39, 0.84),
+      rgba(15, 17, 39, 0.75));
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+.profile-data-card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 18%;
+
+  width: 2px;
+  height: 64%;
+
+  background:
+    linear-gradient(#56eaff,
+      #9e6cff);
+
+  box-shadow:
+    0 0 10px rgba(86, 234, 255, 0.5);
+}
+
+.profile-data-card:hover {
+  transform: translateY(-3px);
+
+  border-color:
+    rgba(80, 234, 255, 0.30);
+
+  box-shadow:
+    0 0 20px rgba(80, 234, 255, 0.08);
+}
 
 .profile-data-card span {
-
-  display: block;
-
-  margin-bottom: 7px;
-
   font-size: 9px;
-
   font-weight: 700;
 
   letter-spacing: 1.5px;
 
-  color: #72879f;
+  color:
+    rgba(140, 170, 195, 0.58);
 }
-
 
 .profile-data-card strong {
+  font-size: 15px;
 
-  display: block;
-
-  font-size: 14px;
-
-  color: #eaf6ff;
-
-  word-break: break-word;
+  color: #edfaff;
 }
 
-
+#profileRole,
 .online-text {
-
-  color: #48f4aa !important;
-
-  text-shadow:
-    0 0 10px rgba(72, 244, 170, 0.3);
+  color: #55eab4;
 }
 
 
@@ -12420,45 +13147,42 @@ body.profile-open {
 ============================================================ */
 
 .profile-id {
+  padding: 15px 18px;
 
-  display: flex;
+  border:
+    1px solid rgba(80, 226, 255, 0.13);
 
-  flex-direction: column;
-
-  gap: 7px;
-
-  padding: 15px;
-
-  margin-bottom: 18px;
-
-  border-radius: 14px;
+  border-radius: 13px;
 
   background:
-    rgba(0, 0, 0, 0.20);
-
-  border: 1px solid rgba(83, 232, 255, 0.10);
+    rgba(7, 20, 35, 0.78);
 }
 
+.profile-id>span {
+  display: block;
 
-.profile-id span {
+  margin-bottom: 7px;
 
-  font-size: 9px;
-
-  letter-spacing: 1.5px;
-
+  font-size: 8px;
   font-weight: 700;
 
-  color: #72879f;
+  letter-spacing: 1.8px;
+
+  color:
+    rgba(150, 180, 202, 0.58);
 }
 
-
 .profile-id code {
+  display: block;
 
-  color: #57eaff;
+  color: #58eaff;
 
   font-size: 11px;
 
   word-break: break-all;
+
+  text-shadow:
+    0 0 8px rgba(88, 234, 255, 0.18);
 }
 
 
@@ -12467,74 +13191,84 @@ body.profile-open {
 ============================================================ */
 
 .profile-actions {
-
   display: grid;
 
   grid-template-columns:
-    1fr 1fr;
+    repeat(2, minmax(0, 1fr));
 
   gap: 12px;
 }
 
-
 .profile-action {
+  position: relative;
 
-  min-height: 46px;
+  min-height: 44px;
 
-  border-radius: 12px;
+  border-radius: 10px;
+
+  border:
+    1px solid rgba(80, 228, 255, 0.20);
+
+  background:
+    rgba(9, 25, 42, 0.90);
+
+  color: #dcfaff;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
 
   cursor: pointer;
 
-  font-size: 11px;
-
-  font-weight: 700;
-
-  letter-spacing: 1px;
-
   transition:
-    0.2s ease;
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
+.profile-action:hover {
+  transform: translateY(-2px);
 
-.profile-action.secondary {
+  border-color: #55eaff;
 
-  color: #8ceeff;
-
-  background:
-    rgba(83, 232, 255, 0.05);
-
-  border: 1px solid rgba(83, 232, 255, 0.22);
+  box-shadow:
+    0 0 18px rgba(85, 234, 255, 0.15);
 }
-
-
-.profile-action.secondary:hover {
-
-  background:
-    rgba(83, 232, 255, 0.12);
-
-  border-color:
-    rgba(83, 232, 255, 0.5);
-}
-
 
 .profile-action.danger {
+  border-color:
+    rgba(255, 92, 125, 0.22);
 
-  color: #ff8f9d;
+  color: #ff8da5;
+}
 
-  background:
-    rgba(255, 70, 90, 0.05);
+.profile-action.danger:hover {
+  border-color: #ff6482;
 
-  border: 1px solid rgba(255, 70, 90, 0.2);
+  box-shadow:
+    0 0 18px rgba(255, 80, 115, 0.16);
 }
 
 
-.profile-action.danger:hover {
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+
+.aurora-profile-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.aurora-profile-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aurora-profile-panel::-webkit-scrollbar-thumb {
+  border-radius: 10px;
 
   background:
-    rgba(255, 70, 90, 0.12);
-
-  border-color:
-    rgba(255, 70, 90, 0.5);
+    linear-gradient(#51eaff,
+      #906cff);
 }
 
 
@@ -12542,18 +13276,18 @@ body.profile-open {
    MOBILE
 ============================================================ */
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
 
   .profile-overlay {
     padding: 12px;
   }
 
   .aurora-profile-panel {
-    padding: 20px;
-    border-radius: 20px;
+    padding: 18px;
+    border-radius: 16px;
   }
 
-  .profile-core {
+  #auroraProfileView .profile-core {
     flex-direction: column;
     text-align: center;
   }
@@ -12566,127 +13300,1853 @@ body.profile-open {
     grid-template-columns: 1fr;
   }
 
+  #profileName {
+    font-size: 21px;
+  }
+}
+
+
+/* REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .profile-overlay::before,
+  .profile-avatar-ring,
+  .login-core-icon {
+    animation: none;
+  }
 }
 
 
 /* ============================================================
-   AURORA PROFILE OVERLAY
+   AURORA // FULL PROFILE PAGE
+   GALAXY + FUTURISTIC HUD
 ============================================================ */
 
-.profile-overlay {
+#page-profile {
+  position: relative;
 
-  position: fixed;
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  isolation: isolate;
+}
+
+
+/* ============================================================
+   GALAXY BACKGROUND
+============================================================ */
+
+#page-profile::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: -2;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 18% 15%,
+      rgba(0, 229, 255, 0.08),
+      transparent 30%),
+    radial-gradient(circle at 82% 20%,
+      rgba(132, 77, 255, 0.10),
+      transparent 32%),
+    radial-gradient(circle at 55% 90%,
+      rgba(0, 115, 255, 0.07),
+      transparent 40%);
+}
+
+
+/* GALAXY STARS */
+
+#page-profile::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: -1;
+
+  pointer-events: none;
+
+  opacity: 0.32;
+
+  background-image:
+    radial-gradient(circle,
+      rgba(91, 234, 255, 0.75) 1px,
+      transparent 1px),
+    radial-gradient(circle,
+      rgba(159, 108, 255, 0.60) 1px,
+      transparent 1px),
+    radial-gradient(circle,
+      rgba(255, 255, 255, 0.42) 1px,
+      transparent 1px);
+
+  background-size:
+    105px 105px,
+    165px 165px,
+    235px 235px;
+
+  background-position:
+    0 0,
+    42px 58px,
+    90px 130px;
+
+  animation:
+    auroraFullProfileStars 24s linear infinite;
+}
+
+
+@keyframes auroraFullProfileStars {
+
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-80px);
+  }
+}
+
+
+/* ============================================================
+   PAGE CONTAINER
+============================================================ */
+
+#page-profile .profile-page {
+  position: relative;
+
+  width: 100%;
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding: 24px;
+
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   MAIN PROFILE SHELL
+============================================================ */
+
+#page-profile .profile-core {
+  position: relative;
+
+  width: 100%;
+
+  padding: 28px;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(77, 224, 255, 0.18);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(7, 20, 36, 0.96),
+      rgba(11, 14, 31, 0.97));
+
+  box-shadow:
+    0 0 0 1px rgba(140, 92, 255, 0.04),
+    0 0 35px rgba(0, 229, 255, 0.06),
+    0 0 85px rgba(121, 83, 255, 0.05),
+    inset 0 0 40px rgba(0, 229, 255, 0.018);
+}
+
+
+/* TOP ENERGY LINE */
+
+#page-profile .profile-core::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 10%;
+  right: 10%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #53eaff,
+      #936dff,
+      transparent);
+
+  box-shadow:
+    0 0 15px rgba(83, 234, 255, 0.55);
+}
+
+
+/* SUBTLE HUD SCANNER */
+
+#page-profile .profile-core::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: -40%;
+
+  height: 30%;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(to bottom,
+      transparent,
+      rgba(89, 229, 255, 0.025),
+      transparent);
+
+  animation:
+    auroraProfileScan 8s linear infinite;
+}
+
+
+@keyframes auroraProfileScan {
+
+  from {
+    top: -35%;
+  }
+
+  to {
+    top: 110%;
+  }
+}
+
+
+/* ============================================================
+   PROFILE HEADER
+============================================================ */
+
+#page-profile .profile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 22px;
+  margin-bottom: 25px;
+
+  border-bottom:
+    1px solid rgba(78, 221, 255, 0.10);
+}
+
+
+#page-profile .profile-header-label {
+  display: inline-block;
+
+  margin-bottom: 7px;
+
+  font-family:
+    "Orbitron",
+    "Rajdhani",
+    sans-serif;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 2.4px;
+
+  color: #55eaff;
+
+  text-shadow:
+    0 0 12px rgba(85, 234, 255, 0.40);
+}
+
+
+#page-profile .profile-header h1 {
+  margin: 0;
+
+  font-family:
+    "Orbitron",
+    "Rajdhani",
+    sans-serif;
+
+  font-size: clamp(28px, 4vw, 40px);
+
+  line-height: 1;
+
+  letter-spacing: -1px;
+
+  color: #f2fbff;
+
+  text-shadow:
+    0 0 22px rgba(77, 230, 255, 0.14);
+}
+
+
+#page-profile .profile-header-description {
+  margin-top: 9px;
+
+  font-size: 12px;
+
+  letter-spacing: 0.3px;
+
+  color:
+    rgba(175, 198, 217, 0.60);
+}
+
+
+/* ============================================================
+   BACK BUTTON
+============================================================ */
+
+#page-profile .profile-back-btn {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 40px;
+
+  padding: 0;
+
+  border:
+    1px solid rgba(83, 229, 255, 0.22);
+
+  border-radius: 50%;
+
+  background:
+    rgba(8, 25, 42, 0.86);
+
+  color: #82ecff;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+#page-profile .profile-back-btn:hover {
+  transform: rotate(90deg);
+
+  border-color: #59eaff;
+
+  box-shadow:
+    0 0 18px rgba(89, 234, 255, 0.27);
+}
+
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
+#page-profile #profileContent {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+
+  width: 100%;
+}
+
+
+/* ============================================================
+   IDENTITY CARD
+============================================================ */
+
+#page-profile .profile-identity {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 22px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(75, 224, 255, 0.12);
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(9, 27, 46, 0.80),
+      rgba(19, 17, 47, 0.68));
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+
+#page-profile .profile-identity:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(80, 234, 255, 0.25);
+
+  box-shadow:
+    0 0 25px rgba(80, 234, 255, 0.06);
+}
+
+
+/* SIDE ENERGY BAR */
+
+#page-profile .profile-identity::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+
+  top: 18%;
+  bottom: 18%;
+
+  width: 2px;
+
+  background:
+    linear-gradient(#58eaff,
+      #9a6cff);
+
+  box-shadow:
+    0 0 12px rgba(88, 234, 255, 0.5);
+}
+
+
+/* ============================================================
+   AVATAR
+============================================================ */
+
+#page-profile .profile-avatar-wrap {
+  position: relative;
+
+  width: 86px;
+  height: 86px;
+
+  flex: 0 0 86px;
+
+  display: grid;
+  place-items: center;
+}
+
+
+#page-profile .profile-avatar {
+  width: 72px;
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border:
+    1px solid rgba(83, 232, 255, 0.42);
+
+  background:
+    radial-gradient(circle,
+      rgba(107, 69, 185, 0.38),
+      rgba(8, 24, 42, 0.94));
+
+  box-shadow:
+    0 0 20px rgba(80, 230, 255, 0.15),
+    0 0 40px rgba(139, 92, 255, 0.09);
+}
+
+
+/* ORBIT */
+
+#page-profile .profile-avatar-wrap::before {
+  content: "";
+
+  position: absolute;
 
   inset: 0;
 
-  width: 100%;
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(77, 231, 255, 0.20);
+
+  border-top-color:
+    rgba(158, 102, 255, 0.80);
+
+  animation:
+    auroraProfileOrbit 8s linear infinite;
+}
+
+
+@keyframes auroraProfileOrbit {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ONLINE DOT */
+
+#page-profile .profile-online {
+  position: absolute;
+
+  right: 4px;
+  bottom: 7px;
+
+  width: 11px;
+  height: 11px;
+
+  border-radius: 50%;
+
+  background: #35f0a2;
+
+  border:
+    2px solid #071421;
+
+  box-shadow:
+    0 0 12px rgba(53, 240, 162, 0.8);
+}
+
+
+/* ============================================================
+   IDENTITY TEXT
+============================================================ */
+
+#page-profile .profile-authenticated {
+  margin-bottom: 5px;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 1.6px;
+
+  color: #47efaa;
+}
+
+
+#page-profile .profile-name {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  color: #f0fbff;
+}
+
+
+#page-profile .profile-email {
+  margin: 5px 0 0;
+
+  font-size: 12px;
+
+  color:
+    rgba(177, 199, 217, 0.62);
+
+  word-break: break-all;
+}
+
+
+/* ============================================================
+   INFORMATION GRID
+============================================================ */
+
+#page-profile .profile-info-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+
+#page-profile .profile-info-card {
+  position: relative;
+
+  min-height: 86px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 17px 18px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(76, 226, 255, 0.11);
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(7, 21, 37, 0.84),
+      rgba(15, 17, 40, 0.74));
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+/* CARD ENERGY EDGE */
+
+#page-profile .profile-info-card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+
+  top: 22%;
+  bottom: 22%;
+
+  width: 2px;
+
+  background:
+    linear-gradient(#55eaff,
+      #966aff);
+
+  box-shadow:
+    0 0 10px rgba(85, 234, 255, 0.45);
+}
+
+
+#page-profile .profile-info-card:hover {
+  transform: translateY(-3px);
+
+  border-color:
+    rgba(82, 231, 255, 0.28);
+
+  box-shadow:
+    0 0 22px rgba(82, 231, 255, 0.07);
+}
+
+
+#page-profile .profile-info-label {
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1.6px;
+
+  color:
+    rgba(139, 169, 194, 0.58);
+}
+
+
+#page-profile .profile-info-value {
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #ecfaff;
+}
+
+
+#page-profile .profile-role {
+  color: #56e9b7;
+
+  text-shadow:
+    0 0 10px rgba(86, 233, 183, 0.14);
+}
+
+
+/* ============================================================
+   USER ID
+============================================================ */
+
+#page-profile .profile-id {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding: 16px 18px;
+
+  border:
+    1px solid rgba(78, 223, 255, 0.12);
+
+  border-radius: 13px;
+
+  background:
+    rgba(7, 19, 34, 0.76);
+
+  overflow: hidden;
+}
+
+
+#page-profile .profile-id::after {
+  content: "";
+
+  position: absolute;
+
+  left: -40%;
+  top: 0;
+
+  width: 30%;
   height: 100%;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      rgba(80, 234, 255, 0.06),
+      transparent);
+
+  transform: skewX(-25deg);
+
+  animation:
+    auroraIdScan 5s ease-in-out infinite;
+}
+
+
+@keyframes auroraIdScan {
+
+  0%,
+  55% {
+    left: -40%;
+  }
+
+  100% {
+    left: 130%;
+  }
+}
+
+
+#page-profile .profile-id-label {
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1.7px;
+
+  color:
+    rgba(142, 170, 192, 0.60);
+}
+
+
+#page-profile .profile-id code {
+  position: relative;
+  z-index: 2;
+
+  color: #58eaff;
+
+  font-size: 10px;
+
+  word-break: break-all;
+
+  text-shadow:
+    0 0 9px rgba(88, 234, 255, 0.20);
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+============================================================ */
+
+#page-profile .profile-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 12px;
+}
+
+
+#page-profile .profile-action {
+  position: relative;
+
+  min-width: 140px;
+
+  padding: 12px 18px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(78, 225, 255, 0.20);
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(8, 26, 44, 0.92),
+      rgba(17, 18, 43, 0.90));
+
+  color: #ddfaff;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+
+/* BUTTON SWEEP */
+
+#page-profile .profile-action::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: -120%;
+
+  width: 65%;
+  height: 100%;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      rgba(86, 235, 255, 0.13),
+      transparent);
+
+  transform: skewX(-25deg);
+
+  transition: 0.55s;
+}
+
+
+#page-profile .profile-action:hover::before {
+  left: 145%;
+}
+
+
+#page-profile .profile-action:hover {
+  transform: translateY(-2px);
+
+  border-color: #55eaff;
+
+  box-shadow:
+    0 0 18px rgba(85, 234, 255, 0.14);
+}
+
+
+/* SIGN OUT */
+
+#page-profile .profile-action.signout {
+  border-color:
+    rgba(255, 90, 120, 0.20);
+
+  color: #ff91a8;
+}
+
+
+#page-profile .profile-action.signout:hover {
+  border-color: #ff6483;
+
+  box-shadow:
+    0 0 18px rgba(255, 90, 120, 0.15);
+}
+
+
+/* ============================================================
+   LOADING STATE
+============================================================ */
+
+#page-profile .profile-loading {
+  padding: 35px;
+
+  text-align: center;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #58eaff;
+
+  text-shadow:
+    0 0 12px rgba(88, 234, 255, 0.25);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 720px) {
+
+  #page-profile .profile-page {
+    padding: 12px;
+  }
+
+  #page-profile .profile-core {
+    padding: 18px;
+  }
+
+  #page-profile .profile-header {
+    gap: 12px;
+  }
+
+  #page-profile .profile-header h1 {
+    font-size: 27px;
+  }
+
+  #page-profile .profile-identity {
+    flex-direction: column;
+
+    text-align: center;
+  }
+
+  #page-profile .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #page-profile .profile-id {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #page-profile .profile-actions {
+    flex-direction: column;
+  }
+
+  #page-profile .profile-action {
+    width: 100%;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #page-profile::after,
+  #page-profile .profile-core::after,
+  #page-profile .profile-avatar-wrap::before,
+  #page-profile .profile-id::after {
+    animation: none;
+  }
+}
+
+
+
+/* ============================================================
+   AURORA PROFILE VIEW VISIBILITY FIX
+============================================================ */
+
+#auroraLoginView[hidden],
+#auroraProfileView[hidden] {
+  display: none !important;
+}
+
+
+/* LOGIN VIEW VISIBLE */
+
+#auroraLoginView:not([hidden]) {
+  display: block;
+}
+
+
+/* AUTHENTICATED PROFILE VISIBLE */
+
+#auroraProfileView:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA GOOGLE LOGIN
+============================================================ */
+
+.aurora-login-view {
+  text-align: center;
+  padding: 35px 20px 25px;
+}
+
+.login-core-icon {
+  width: 86px;
+  height: 86px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 38px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(83, 232, 255, 0.55);
+
+  background:
+    radial-gradient(circle,
+      rgba(83, 232, 255, 0.18),
+      rgba(8, 20, 38, 0.8));
+
+  box-shadow:
+    0 0 20px rgba(83, 232, 255, 0.25),
+    inset 0 0 25px rgba(83, 232, 255, 0.08);
+
+  animation: auroraLoginPulse 2.5s infinite;
+}
+
+
+.aurora-login-view h3 {
+  margin: 14px 0 10px;
+
+  font-size: 24px;
+
+  letter-spacing: 2px;
+
+  color: #ffffff;
+}
+
+
+.aurora-login-view p {
+  max-width: 420px;
+
+  margin: 0 auto 25px;
+
+  line-height: 1.7;
+
+  font-size: 13px;
+
+  color: rgba(255, 255, 255, 0.65);
+}
+
+
+/* GOOGLE BUTTON */
+
+.google-login-btn {
+
+  width: 100%;
+  max-width: 340px;
+
+  min-height: 52px;
+
+  margin: 0 auto;
+
+  padding: 0 20px;
 
   display: flex;
 
   align-items: center;
   justify-content: center;
 
-  padding: 24px;
+  gap: 12px;
+
+  border: 1px solid rgba(83, 232, 255, 0.45);
+
+  border-radius: 12px;
 
   background:
-    rgba(2, 8, 20, 0.78);
+    rgba(8, 20, 38, 0.85);
 
-  backdrop-filter:
-    blur(18px);
+  color: #ffffff;
 
-  -webkit-backdrop-filter:
-    blur(18px);
+  font-size: 14px;
 
-  opacity: 0;
+  font-weight: 600;
 
-  visibility: hidden;
+  letter-spacing: 0.5px;
 
-  pointer-events: none;
+  cursor: pointer;
 
   transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
-
-  z-index: 99999;
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 
-/* OPEN STATE */
+.google-login-btn:hover {
 
-.profile-overlay.active {
+  transform: translateY(-2px);
 
-  opacity: 1;
-
-  visibility: visible;
-
-  pointer-events: auto;
-}
-
-
-/* PROFILE PANEL */
-
-.aurora-profile-panel {
-
-  width: min(560px, 100%);
-
-  max-height: 90vh;
-
-  overflow-y: auto;
-
-  padding: 28px;
-
-  border: 1px solid rgba(83, 232, 255, 0.28);
-
-  border-radius: 24px;
-
-  background:
-    rgba(7, 18, 38, 0.94);
+  border-color: rgba(83, 232, 255, 0.9);
 
   box-shadow:
-    0 0 40px rgba(83, 232, 255, 0.12);
-
-  transform: translateY(20px) scale(0.96);
-
-  transition:
-    transform 0.3s ease;
+    0 0 20px rgba(83, 232, 255, 0.25);
 }
 
 
-/* PANEL ANIMATION */
+.google-login-btn:active {
 
-.profile-overlay.active .aurora-profile-panel {
-
-  transform:
-    translateY(0) scale(1);
+  transform: translateY(0);
 }
 
 
-/* CLOSE */
+.google-logo {
 
-.profile-close {
+  width: 28px;
+  height: 28px;
 
-  width: 40px;
-  height: 40px;
+  display: flex;
 
-  border: 1px solid rgba(83, 232, 255, 0.25);
+  align-items: center;
+  justify-content: center;
 
   border-radius: 50%;
 
-  background:
-    rgba(83, 232, 255, 0.08);
+  background: #ffffff;
 
-  color: #fff;
+  color: #4285f4;
 
-  font-size: 25px;
+  font-size: 16px;
 
-  cursor: pointer;
+  font-weight: 700;
 }
 
 
-/* BODY LOCK */
+.login-security-text {
 
-body.profile-open {
+  display: block;
 
+  margin-top: 16px;
+
+  color: rgba(83, 232, 255, 0.55);
+
+  font-size: 9px;
+
+  letter-spacing: 1.5px;
+}
+
+
+@keyframes auroraLoginPulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(83, 232, 255, 0.20),
+      inset 0 0 25px rgba(83, 232, 255, 0.08);
+  }
+
+  50% {
+    box-shadow:
+      0 0 35px rgba(83, 232, 255, 0.40),
+      inset 0 0 30px rgba(83, 232, 255, 0.12);
+  }
+}
+
+
+
+/* =========================================================
+   AURORA ACCESS CONTROL - FUTURISTIC / GALAXY STYLE
+========================================================= */
+
+.aurora-access-control {
+  position: relative;
+  margin-top: 24px;
+  border-radius: 22px;
   overflow: hidden;
+}
+
+.aac-shell {
+  position: relative;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(72, 198, 255, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 255, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(86, 72, 255, 0.10), transparent 30%),
+    linear-gradient(145deg, rgba(4, 17, 40, 0.95), rgba(3, 10, 28, 0.96));
+  box-shadow:
+    0 0 0 1px rgba(80, 180, 255, 0.04) inset,
+    0 0 24px rgba(0, 170, 255, 0.08),
+    0 18px 50px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.aac-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(140, 220, 255, 0.18) 0.7px, transparent 0.7px);
+  background-size: 28px 28px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.aac-shell::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 21px;
+  pointer-events: none;
+  border: 1px solid rgba(0, 255, 255, 0.06);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.05) inset,
+    0 0 40px rgba(124, 58, 237, 0.04) inset;
+}
+
+/* HEADER */
+.aac-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.aac-kicker {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #66e7ff;
+  margin-bottom: 6px;
+}
+
+.aac-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #eef8ff;
+  letter-spacing: 0.4px;
+  text-shadow: 0 0 12px rgba(105, 233, 255, 0.18);
+}
+
+.aac-subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #8ba8c7;
+}
+
+.aac-admin-count {
+  min-width: 110px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  text-align: right;
+  border: 1px solid rgba(79, 209, 255, 0.18);
+  background: linear-gradient(145deg, rgba(10, 24, 50, 0.85), rgba(6, 15, 34, 0.95));
+  box-shadow:
+    0 0 18px rgba(0, 195, 255, 0.08),
+    inset 0 0 12px rgba(0, 229, 255, 0.05);
+}
+
+.aac-count-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #7fb7d8;
+  margin-bottom: 4px;
+}
+
+.aac-admin-count strong {
+  font-size: 20px;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(64, 220, 255, 0.18);
+}
+
+/* TABLE HEAD */
+.aac-table-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.7fr 0.7fr 0.8fr;
+  gap: 16px;
+  padding: 13px 16px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(79, 209, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  color: #81a6c8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+/* ROW */
+.aac-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.7fr 0.7fr 0.8fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(79, 209, 255, 0.12);
+  background:
+    linear-gradient(135deg, rgba(8, 22, 45, 0.92), rgba(6, 15, 34, 0.96));
+  box-shadow:
+    inset 0 0 14px rgba(0, 229, 255, 0.025),
+    0 0 18px rgba(0, 136, 255, 0.04);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.aac-row:hover {
+  transform: translateY(-2px);
+  border-color: rgba(79, 209, 255, 0.24);
+  box-shadow:
+    0 0 22px rgba(0, 195, 255, 0.09),
+    inset 0 0 16px rgba(0, 229, 255, 0.03);
+}
+
+/* ACCOUNT */
+.aac-account {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.aac-avatar {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: #dffbff;
+  background:
+    linear-gradient(145deg, rgba(31, 77, 148, 0.95), rgba(85, 34, 180, 0.92));
+  border: 1px solid rgba(109, 214, 255, 0.28);
+  box-shadow:
+    0 0 18px rgba(0, 217, 255, 0.14),
+    inset 0 0 10px rgba(255, 255, 255, 0.06);
+}
+
+.aac-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aac-user-meta strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f3fbff;
+}
+
+.aac-user-meta span {
+  font-size: 12px;
+  color: #8fa6be;
+  word-break: break-word;
+}
+
+/* ROLE BADGES */
+.aac-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.aac-role-badge.owner {
+  color: #ffd772;
+  background: rgba(255, 196, 72, 0.08);
+  border-color: rgba(255, 196, 72, 0.24);
+  box-shadow: 0 0 16px rgba(255, 196, 72, 0.08);
+}
+
+.aac-role-badge.admin {
+  color: #7df9ff;
+  background: rgba(0, 229, 255, 0.08);
+  border-color: rgba(0, 229, 255, 0.22);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.08);
+}
+
+.aac-role-badge.member {
+  color: #d7e8ff;
+  background: rgba(125, 143, 170, 0.12);
+  border-color: rgba(125, 143, 170, 0.2);
+}
+
+/* ACTION BUTTONS */
+.aac-access {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.aac-btn {
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  transition: 0.22s ease;
+}
+
+.aac-btn.make-admin {
+  color: #7dfbff;
+  border: 1px solid rgba(0, 229, 255, 0.24);
+  background: linear-gradient(145deg, rgba(5, 23, 46, 0.96), rgba(8, 30, 56, 0.96));
+  box-shadow:
+    0 0 12px rgba(0, 229, 255, 0.06),
+    inset 0 0 10px rgba(0, 229, 255, 0.03);
+}
+
+.aac-btn.make-admin:hover {
+  transform: translateY(-1px);
+  color: #041018;
+  background: linear-gradient(145deg, #4df1ff, #6ab6ff);
+  box-shadow: 0 0 22px rgba(77, 241, 255, 0.25);
+}
+
+.aac-btn.remove-admin {
+  color: #ff8ca8;
+  border: 1px solid rgba(255, 92, 143, 0.24);
+  background: linear-gradient(145deg, rgba(34, 8, 20, 0.96), rgba(48, 10, 24, 0.96));
+  box-shadow:
+    0 0 12px rgba(255, 92, 143, 0.06),
+    inset 0 0 10px rgba(255, 92, 143, 0.03);
+}
+
+.aac-btn.remove-admin:hover {
+  transform: translateY(-1px);
+  color: #fff;
+  background: linear-gradient(145deg, #ff4f87, #ff7ba1);
+  box-shadow: 0 0 20px rgba(255, 92, 143, 0.2);
+}
+
+.aac-btn.lock {
+  color: #ffd86c;
+  border: 1px solid rgba(255, 196, 72, 0.2);
+  background: linear-gradient(145deg, rgba(36, 28, 10, 0.95), rgba(49, 36, 11, 0.96));
+  cursor: not-allowed;
+  opacity: 0.92;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .aac-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .aac-admin-count {
+    text-align: left;
+    width: fit-content;
+  }
+
+  .aac-table-head {
+    display: none;
+  }
+
+  .aac-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .aac-role,
+  .aac-access {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .aac-shell {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .aac-title {
+    font-size: 23px;
+  }
+
+  .aac-account {
+    align-items: flex-start;
+  }
+
+  .aac-avatar {
+    width: 42px;
+    height: 42px;
+    font-size: 15px;
+  }
+
+  .aac-btn {
+    width: 100%;
+  }
+
+  .aac-access {
+    width: 100%;
+  }
+}
+
+/* ACCESS CONTROL - FINAL POLISH */
+
+.aac-shell {
+  border: 1px solid rgba(62, 220, 255, 0.22);
+  box-shadow:
+    0 0 28px rgba(0, 210, 255, 0.07),
+    inset 0 0 24px rgba(82, 62, 255, 0.03);
+}
+
+.aac-row:hover {
+  transform: translateY(-2px) scale(1.002);
+  border-color: rgba(65, 225, 255, 0.32);
+  box-shadow:
+    0 0 18px rgba(0, 220, 255, 0.08),
+    inset 0 0 16px rgba(0, 220, 255, 0.025);
+}
+
+.aac-avatar {
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px rgba(82, 219, 255, 0.10),
+    0 0 18px rgba(65, 160, 255, 0.18);
+}
+
+.aac-role-badge.owner {
+  text-shadow: 0 0 8px rgba(255, 206, 80, 0.35);
+}
+
+.aac-role-badge.admin {
+  text-shadow: 0 0 8px rgba(71, 238, 255, 0.35);
+}
+
+.aac-admin-count {
+  position: relative;
+  overflow: hidden;
+}
+
+.aac-admin-count::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg,
+      transparent,
+      rgba(72, 220, 255, 0.09),
+      transparent);
+  transform: translateX(-100%);
+  animation: auroraAdminScan 4s linear infinite;
+}
+
+@keyframes auroraAdminScan {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
+
+/* ============================================================
+   AURORA // INVITATION GATE
+============================================================ */
+
+.aurora-invite-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    radial-gradient(circle at 20% 15%,
+      rgba(0, 220, 255, 0.13),
+      transparent 30%),
+    radial-gradient(circle at 85% 80%,
+      rgba(125, 69, 255, 0.12),
+      transparent 34%),
+    rgba(1, 6, 18, 0.94);
+
+  backdrop-filter: blur(18px);
+}
+
+
+.aurora-invite-card {
+  position: relative;
+  width: min(560px, 100%);
+  overflow: hidden;
+
+  padding: 32px;
+
+  border-radius: 24px;
+
+  border:
+    1px solid rgba(73, 220, 255, 0.25);
+
+  background:
+    linear-gradient(145deg,
+      rgba(7, 23, 44, 0.97),
+      rgba(3, 10, 25, 0.98));
+
+  box-shadow:
+    0 0 45px rgba(0, 210, 255, 0.09),
+    inset 0 0 35px rgba(104, 74, 255, 0.04);
+}
+
+
+.aurora-invite-card::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(rgba(111, 225, 255, 0.18) 0.7px,
+      transparent 0.7px);
+
+  background-size:
+    26px 26px;
+
+  opacity: 0.15;
+}
+
+
+.aurora-invite-content {
+  position: relative;
+  z-index: 2;
+}
+
+
+.aurora-invite-kicker {
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+
+  color: #65eaff;
+
+  margin-bottom: 10px;
+}
+
+
+.aurora-invite-title {
+  margin: 0;
+
+  font-size: 30px;
+  line-height: 1.15;
+
+  color: #ffffff;
+}
+
+
+.aurora-invite-subtitle {
+  margin-top: 10px;
+
+  font-size: 14px;
+  line-height: 1.7;
+
+  color: #8caac1;
+}
+
+
+.aurora-invite-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+
+.aurora-invite-info {
+  padding: 16px;
+
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(76, 200, 255, 0.12);
+
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+
+.aurora-invite-info span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 1.4px;
+
+  color: #6d8ba4;
+}
+
+
+.aurora-invite-info strong {
+  color: #eefaff;
+
+  font-size: 14px;
+}
+
+
+.aurora-invite-status {
+  margin-top: 18px;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  font-size: 12px;
+
+  color: #70efff;
+
+  border:
+    1px solid rgba(0, 229, 255, 0.14);
+
+  background:
+    rgba(0, 229, 255, 0.045);
+}
+
+
+.aurora-invite-actions {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+
+.aurora-invite-google {
+  flex: 1;
+
+  border:
+    1px solid rgba(81, 221, 255, 0.28);
+
+  border-radius: 13px;
+
+  padding: 13px 18px;
+
+  cursor: pointer;
+
+  font-weight: 800;
+
+  color: #031119;
+
+  background:
+    linear-gradient(135deg,
+      #58efff,
+      #6fa8ff);
+
+  box-shadow:
+    0 0 20px rgba(74, 228, 255, 0.13);
+
+  transition:
+    0.2s ease;
+}
+
+
+.aurora-invite-google:hover {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 0 26px rgba(74, 228, 255, 0.22);
+}
+
+
+.aurora-invite-google:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+
+.aurora-invite-error {
+  margin-top: 16px;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  color: #ff91ad;
+
+  background:
+    rgba(255, 64, 115, 0.055);
+
+  border:
+    1px solid rgba(255, 84, 130, 0.18);
+}
+
+
+.aurora-invite-success {
+  color: #7affce;
+
+  border-color:
+    rgba(76, 255, 187, 0.18);
+
+  background:
+    rgba(46, 255, 171, 0.055);
+}
+
+
+@media (max-width: 620px) {
+
+  .aurora-invite-card {
+    padding: 23px;
+  }
+
+  .aurora-invite-title {
+    font-size: 25px;
+  }
+
+  .aurora-invite-grid {
+    grid-template-columns: 1fr;
+  }
+
 }
