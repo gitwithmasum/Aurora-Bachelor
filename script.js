@@ -1143,71 +1143,1438 @@ const AuroraDataStore = (() => {
      EXPORT BACKUP
   ========================================================== */
 
+  /* ============================================================
+   AURORA // EXCEL BACKUP EXPORT
+============================================================ */
+
   function exportBackup() {
 
-    const blob =
-      new Blob(
-        [
-          JSON.stringify(
-            db,
-            null,
-            2
-          )
-        ],
-        {
-          type:
-            "application/json"
+    const database =
+      AuroraDataStore.get();
+
+
+    if (!database) {
+
+      toast(
+        "No Aurora data found."
+      );
+
+      return;
+
+    }
+
+
+    if (
+      typeof XLSX ===
+      "undefined"
+    ) {
+
+      console.error(
+        "Aurora: SheetJS library not loaded."
+      );
+
+      toast(
+        "Excel engine is not available."
+      );
+
+      return;
+
+    }
+
+
+    /* ==========================================================
+       HELPERS
+    ========================================================== */
+
+    const clean =
+      value => {
+
+        if (
+          value === null ||
+          value === undefined
+        ) {
+
+          return "";
+
         }
+
+
+        if (
+          typeof value ===
+          "string" &&
+          /^[=+\-@]/.test(
+            value
+          )
+        ) {
+
+          /*
+            Prevent Excel from treating
+            user text as a formula.
+          */
+
+          return `'${value}`;
+
+        }
+
+
+        return value;
+
+      };
+
+
+    const members =
+      Array.isArray(
+        database.members
+      )
+        ? database.members
+        : [];
+
+
+    const memberMap =
+      Object.fromEntries(
+
+        members.map(
+          member => [
+
+            member.id,
+
+            member.name ||
+            member.fullName ||
+            member.displayName ||
+            member.email ||
+            member.id
+
+          ]
+        )
+
       );
 
 
-    const url =
-      URL.createObjectURL(
-        blob
+    function memberName(
+      memberId
+    ) {
+
+      return (
+        memberMap[
+        memberId
+        ] ||
+        memberId ||
+        ""
+      );
+
+    }
+
+
+    function addSheet(
+      workbook,
+      name,
+      rows,
+      widths = []
+    ) {
+
+      const worksheet =
+        XLSX.utils
+          .json_to_sheet(
+            rows
+          );
+
+
+      if (
+        widths.length
+      ) {
+
+        worksheet["!cols"] =
+          widths.map(
+            width => ({
+              wch: width
+            })
+          );
+
+      }
+
+
+      if (
+        rows.length
+      ) {
+
+        const range =
+          XLSX.utils.decode_range(
+            worksheet["!ref"]
+          );
+
+
+        worksheet[
+          "!autofilter"
+        ] = {
+
+          ref:
+            XLSX.utils.encode_range({
+              s: {
+                r: 0,
+                c: 0
+              },
+
+              e: {
+                r: range.e.r,
+                c: range.e.c
+              }
+            })
+
+        };
+
+      }
+
+
+      XLSX.utils
+        .book_append_sheet(
+          workbook,
+          worksheet,
+          name
+        );
+
+    }
+
+
+    const workbook =
+      XLSX.utils
+        .book_new();
+
+
+    /* ==========================================================
+       OVERVIEW
+    ========================================================== */
+
+    const houseName =
+      database.house?.name ||
+      database.house?.houseName ||
+      "Aurora Bachelor";
+
+
+    const monthKeys =
+      Object.keys(
+        database.months || {}
+      )
+        .sort();
+
+
+    const overview =
+      XLSX.utils
+        .aoa_to_sheet([
+
+          [
+            "AURORA BACHELOR",
+            "EXCEL BACKUP"
+          ],
+
+          [],
+
+          [
+            "House",
+            clean(
+              houseName
+            )
+          ],
+
+          [
+            "Exported At",
+            new Date()
+              .toLocaleString()
+          ],
+
+          [
+            "Current Month",
+            database.settings
+              ?.currentMonth ||
+            ""
+          ],
+
+          [
+            "Database Version",
+            database.version ||
+            ""
+          ],
+
+          [
+            "Total Members",
+            members.length
+          ],
+
+          [
+            "Total Months",
+            monthKeys.length
+          ]
+
+        ]);
+
+
+    overview["!cols"] = [
+      {
+        wch: 24
+      },
+      {
+        wch: 38
+      }
+    ];
+
+
+    XLSX.utils
+      .book_append_sheet(
+        workbook,
+        overview,
+        "Overview"
       );
 
 
-    const link =
-      document.createElement(
-        "a"
+    /* ==========================================================
+       MEMBERS
+    ========================================================== */
+
+    const memberRows =
+      members.map(
+        member => ({
+
+          "Member ID":
+            clean(
+              member.id
+            ),
+
+          "Name":
+            clean(
+              member.name ||
+              member.fullName ||
+              member.displayName ||
+              ""
+            ),
+
+          "Email":
+            clean(
+              member.email ||
+              ""
+            ),
+
+          "Phone":
+            clean(
+              member.phone ||
+              ""
+            ),
+
+          "Role":
+            clean(
+              member.role ||
+              ""
+            ),
+
+          "Status":
+            clean(
+              member.status ||
+              ""
+            )
+
+        })
       );
 
 
-    link.href = url;
-
-
-    link.download =
-      `aurora-bachelor-${todayISO()}.json`;
-
-
-    document.body.appendChild(
-      link
+    addSheet(
+      workbook,
+      "Members",
+      memberRows,
+      [
+        38,
+        25,
+        32,
+        18,
+        15,
+        15
+      ]
     );
 
 
-    link.click();
+    /* ==========================================================
+       DATA COLLECTIONS
+    ========================================================== */
+
+    const mealRows = [];
+
+    const mealExpenseRows = [];
+
+    const mealPaymentRows = [];
+
+    const rentRows = [];
+
+    const billRows = [];
+
+    const housePaymentRows = [];
+
+    const monthRows = [];
 
 
-    link.remove();
+    monthKeys.forEach(
+      monthKey => {
+
+        const month =
+          database
+            .months[
+          monthKey
+          ] || {};
 
 
-    URL.revokeObjectURL(
-      url
+        const mealAccount =
+          month.mealAccount ||
+          {};
+
+
+        const houseAccount =
+          month.houseAccount ||
+          {};
+
+
+        /* ------------------------------------------------------
+           MONTH STATUS
+        ------------------------------------------------------ */
+
+        monthRows.push({
+
+          Month:
+            monthKey,
+
+          Status:
+            month.closed
+              ? "LOCKED"
+              : "OPEN",
+
+          "Meal Days":
+            Array.isArray(
+              mealAccount.meals
+            )
+              ? mealAccount.meals.length
+              : 0,
+
+          "Meal Expenses":
+            Array.isArray(
+              mealAccount.expenses
+            )
+              ? mealAccount.expenses.length
+              : 0,
+
+          "Meal Payments":
+            Array.isArray(
+              mealAccount.payments
+            )
+              ? mealAccount.payments.length
+              : 0,
+
+          "Rent Entries":
+            Array.isArray(
+              houseAccount.rent
+            )
+              ? houseAccount.rent.length
+              : 0,
+
+          "Bill Entries":
+            Array.isArray(
+              houseAccount.bills
+            )
+              ? houseAccount.bills.length
+              : 0,
+
+          "House Payments":
+            Array.isArray(
+              houseAccount.payments
+            )
+              ? houseAccount.payments.length
+              : 0
+
+        });
+
+
+        /* ------------------------------------------------------
+           DAILY MEALS
+        ------------------------------------------------------ */
+
+        (
+          mealAccount.meals ||
+          []
+        )
+          .forEach(
+            day => {
+
+              const values =
+                day.values ||
+                {};
+
+
+              Object
+                .entries(
+                  values
+                )
+                .forEach(
+                  ([
+                    memberId,
+                    mealCount
+                  ]) => {
+
+                    mealRows.push({
+
+                      Month:
+                        monthKey,
+
+                      Date:
+                        clean(
+                          day.date ||
+                          ""
+                        ),
+
+                      "Member ID":
+                        clean(
+                          memberId
+                        ),
+
+                      Member:
+                        clean(
+                          memberName(
+                            memberId
+                          )
+                        ),
+
+                      Meals:
+                        Number(
+                          mealCount
+                        ) || 0
+
+                    });
+
+                  }
+                );
+
+            }
+          );
+
+
+        /* ------------------------------------------------------
+           MEAL EXPENSES
+        ------------------------------------------------------ */
+
+        (
+          mealAccount.expenses ||
+          []
+        )
+          .forEach(
+            item => {
+
+              mealExpenseRows.push({
+
+                Month:
+                  monthKey,
+
+                Date:
+                  clean(
+                    item.date ||
+                    ""
+                  ),
+
+                Category:
+                  clean(
+                    item.category ||
+                    ""
+                  ),
+
+                Description:
+                  clean(
+                    item.description ||
+                    ""
+                  ),
+
+                Amount:
+                  Number(
+                    item.amount
+                  ) || 0,
+
+                "Paid By":
+                  clean(
+                    memberName(
+                      item.paidBy
+                    )
+                  ),
+
+                "Entry ID":
+                  clean(
+                    item.id ||
+                    ""
+                  )
+
+              });
+
+            }
+          );
+
+
+        /* ------------------------------------------------------
+           MEAL PAYMENTS
+        ------------------------------------------------------ */
+
+        (
+          mealAccount.payments ||
+          []
+        )
+          .forEach(
+            item => {
+
+              mealPaymentRows.push({
+
+                Month:
+                  monthKey,
+
+                Date:
+                  clean(
+                    item.date ||
+                    ""
+                  ),
+
+                Member:
+                  clean(
+                    memberName(
+                      item.memberId
+                    )
+                  ),
+
+                Amount:
+                  Number(
+                    item.amount
+                  ) || 0,
+
+                Method:
+                  clean(
+                    item.method ||
+                    ""
+                  ),
+
+                Reference:
+                  clean(
+                    item.reference ||
+                    ""
+                  ),
+
+                Note:
+                  clean(
+                    item.note ||
+                    ""
+                  ),
+
+                "Entry ID":
+                  clean(
+                    item.id ||
+                    ""
+                  )
+
+              });
+
+            }
+          );
+
+
+        /* ------------------------------------------------------
+           RENT
+        ------------------------------------------------------ */
+
+        (
+          houseAccount.rent ||
+          []
+        )
+          .forEach(
+            item => {
+
+              rentRows.push({
+
+                Month:
+                  monthKey,
+
+                Date:
+                  clean(
+                    item.date ||
+                    ""
+                  ),
+
+                Description:
+                  clean(
+                    item.description ||
+                    ""
+                  ),
+
+                Amount:
+                  Number(
+                    item.amount
+                  ) || 0,
+
+                "Paid By":
+                  clean(
+                    memberName(
+                      item.paidBy
+                    )
+                  ),
+
+                "Entry ID":
+                  clean(
+                    item.id ||
+                    ""
+                  )
+
+              });
+
+            }
+          );
+
+
+        /* ------------------------------------------------------
+           HOUSE BILLS
+        ------------------------------------------------------ */
+
+        (
+          houseAccount.bills ||
+          []
+        )
+          .forEach(
+            item => {
+
+              billRows.push({
+
+                Month:
+                  monthKey,
+
+                Date:
+                  clean(
+                    item.date ||
+                    ""
+                  ),
+
+                Category:
+                  clean(
+                    item.category ||
+                    ""
+                  ),
+
+                Description:
+                  clean(
+                    item.description ||
+                    ""
+                  ),
+
+                Amount:
+                  Number(
+                    item.amount
+                  ) || 0,
+
+                "Paid By":
+                  clean(
+                    memberName(
+                      item.paidBy
+                    )
+                  ),
+
+                "Entry ID":
+                  clean(
+                    item.id ||
+                    ""
+                  )
+
+              });
+
+            }
+          );
+
+
+        /* ------------------------------------------------------
+           HOUSE PAYMENTS
+        ------------------------------------------------------ */
+
+        (
+          houseAccount.payments ||
+          []
+        )
+          .forEach(
+            item => {
+
+              housePaymentRows.push({
+
+                Month:
+                  monthKey,
+
+                Date:
+                  clean(
+                    item.date ||
+                    ""
+                  ),
+
+                Member:
+                  clean(
+                    memberName(
+                      item.memberId
+                    )
+                  ),
+
+                Amount:
+                  Number(
+                    item.amount
+                  ) || 0,
+
+                Method:
+                  clean(
+                    item.method ||
+                    ""
+                  ),
+
+                Reference:
+                  clean(
+                    item.reference ||
+                    ""
+                  ),
+
+                Note:
+                  clean(
+                    item.note ||
+                    ""
+                  ),
+
+                "Entry ID":
+                  clean(
+                    item.id ||
+                    ""
+                  )
+
+              });
+
+            }
+          );
+
+      }
+    );
+
+
+    /* ==========================================================
+       CREATE EXCEL SHEETS
+    ========================================================== */
+
+    addSheet(
+      workbook,
+      "Months",
+      monthRows,
+      [
+        14,
+        12,
+        14,
+        16,
+        16,
+        14,
+        14,
+        16
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "Daily Meals",
+      mealRows,
+      [
+        14,
+        14,
+        38,
+        25,
+        12
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "Meal Expenses",
+      mealExpenseRows,
+      [
+        14,
+        14,
+        20,
+        35,
+        15,
+        25,
+        38
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "Meal Payments",
+      mealPaymentRows,
+      [
+        14,
+        14,
+        25,
+        15,
+        18,
+        24,
+        35,
+        38
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "Rent",
+      rentRows,
+      [
+        14,
+        14,
+        35,
+        15,
+        25,
+        38
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "House Bills",
+      billRows,
+      [
+        14,
+        14,
+        20,
+        35,
+        15,
+        25,
+        38
+      ]
+    );
+
+
+    addSheet(
+      workbook,
+      "House Payments",
+      housePaymentRows,
+      [
+        14,
+        14,
+        25,
+        15,
+        18,
+        24,
+        35,
+        38
+      ]
+    );
+
+
+    /* ==========================================================
+       RAW DATABASE BACKUP
+  
+       Excel cells have a size limit,
+       so JSON is divided into chunks.
+    ========================================================== */
+
+    const rawJSON =
+      JSON.stringify(
+        database
+      );
+
+
+    const CHUNK_SIZE =
+      30000;
+
+
+    const rawRows = [];
+
+
+    for (
+      let index = 0;
+      index < rawJSON.length;
+      index += CHUNK_SIZE
+    ) {
+
+      rawRows.push({
+
+        Part:
+          rawRows.length + 1,
+
+        Data:
+          rawJSON.slice(
+            index,
+            index +
+            CHUNK_SIZE
+          )
+
+      });
+
+    }
+
+
+    addSheet(
+      workbook,
+      "RAW BACKUP",
+      rawRows,
+      [
+        10,
+        120
+      ]
+    );
+
+
+    /* ==========================================================
+       DOWNLOAD
+    ========================================================== */
+
+    const now =
+      new Date();
+
+
+    const date =
+      [
+        now.getFullYear(),
+
+        String(
+          now.getMonth() + 1
+        ).padStart(
+          2,
+          "0"
+        ),
+
+        String(
+          now.getDate()
+        ).padStart(
+          2,
+          "0"
+        )
+
+      ].join("-");
+
+
+    const fileName =
+      `Aurora-Bachelor-Backup-${date}.xlsx`;
+
+
+    XLSX.writeFile(
+      workbook,
+      fileName
     );
 
 
     toast(
-      "Backup exported."
+      "Excel backup downloaded."
     );
 
   }
 
 
+  /* ============================================================
+     AURORA // BACKUP RESTORE PREVIEW
+  ============================================================ */
+
+  function auroraBackupRestorePreview({
+    file,
+    database
+  }) {
+
+    return new Promise(
+      resolve => {
+
+        const old =
+          document.getElementById(
+            "auroraBackupRestorePortal"
+          );
+
+
+        if (old) {
+          old.remove();
+        }
+
+
+        const members =
+          Array.isArray(
+            database?.members
+          )
+            ? database.members.length
+            : 0;
+
+
+        const months =
+          Object.keys(
+            database?.months || {}
+          );
+
+
+        const lockedMonths =
+          months.filter(
+            key =>
+              database
+                ?.months
+                ?.[key]
+                ?.closed === true
+          ).length;
+
+
+        const currentMonth =
+          database
+            ?.settings
+            ?.currentMonth ||
+          "Unknown";
+
+
+        const houseName =
+          database
+            ?.house
+            ?.name ||
+          "Aurora Bachelor";
+
+
+        const databaseVersion =
+          database
+            ?.version ??
+          "Unknown";
+
+
+        const fileType =
+          file.name
+            .toLowerCase()
+            .endsWith(
+              ".xlsx"
+            )
+            ? "EXCEL"
+            : "JSON";
+
+
+        let monthText =
+          currentMonth;
+
+
+        try {
+
+          monthText =
+            monthLabel(
+              currentMonth
+            );
+
+        }
+
+        catch (_) { }
+
+
+        const portal =
+          document.createElement(
+            "div"
+          );
+
+
+        portal.id =
+          "auroraBackupRestorePortal";
+
+
+        portal.className =
+          "aurora-restore-portal";
+
+
+        portal.innerHTML = `
+
+        <div
+          class="aurora-restore-backdrop"
+        ></div>
+
+
+        <div
+          class="aurora-restore-modal"
+          role="dialog"
+          aria-modal="true"
+        >
+
+          <div
+            class="aurora-restore-line"
+          ></div>
+
+
+          <span
+            class="aurora-restore-code"
+          >
+            AURORA // DATABASE RESTORE PROTOCOL
+          </span>
+
+
+          <h2>
+            Backup
+            <span>
+              Detected
+            </span>
+          </h2>
+
+
+          <p class="aurora-restore-file">
+            ${esc(file.name)}
+          </p>
+
+
+          <div
+            class="aurora-restore-grid"
+          >
+
+            <div>
+              <span>HOUSE</span>
+              <strong>
+                ${esc(houseName)}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>FORMAT</span>
+              <strong>
+                ${fileType}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>MEMBERS</span>
+              <strong>
+                ${members}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>MONTHS</span>
+              <strong>
+                ${months.length}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>LOCKED MONTHS</span>
+              <strong>
+                ${lockedMonths}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>DATABASE VERSION</span>
+              <strong>
+                ${esc(
+          String(
+            databaseVersion
+          )
+        )}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-restore-current"
+          >
+
+            <span>
+              BACKUP CURRENT MONTH
+            </span>
+
+            <strong>
+              ${esc(monthText)}
+            </strong>
+
+          </div>
+
+
+          <div
+            class="aurora-restore-warning"
+          >
+
+            <span>
+              ⚠
+            </span>
+
+            <p>
+              Restoring this backup will replace
+              the current Aurora application data
+              and synchronize the restored version
+              with Aurora Cloud.
+            </p>
+
+          </div>
+
+
+          <div
+            class="aurora-restore-actions"
+          >
+
+            <button
+              type="button"
+              class="aurora-restore-confirm"
+              id="auroraRestoreConfirm"
+            >
+              ↻ RESTORE NOW
+            </button>
+
+
+            <button
+              type="button"
+              class="aurora-restore-cancel"
+              id="auroraRestoreCancel"
+            >
+              CANCEL
+            </button>
+
+          </div>
+
+
+          <small>
+            Only restore backups you trust.
+          </small>
+
+        </div>
+
+      `;
+
+
+        document.body
+          .appendChild(
+            portal
+          );
+
+
+        requestAnimationFrame(
+          () => {
+
+            portal.classList
+              .add(
+                "active"
+              );
+
+          }
+        );
+
+
+        function finish(
+          result
+        ) {
+
+          portal.classList
+            .remove(
+              "active"
+            );
+
+
+          setTimeout(
+            () => {
+
+              portal.remove();
+
+            },
+            220
+          );
+
+
+          resolve(
+            result
+          );
+
+        }
+
+
+        document
+          .getElementById(
+            "auroraRestoreConfirm"
+          )
+          ?.addEventListener(
+            "click",
+            () =>
+              finish(
+                true
+              )
+          );
+
+
+        document
+          .getElementById(
+            "auroraRestoreCancel"
+          )
+          ?.addEventListener(
+            "click",
+            () =>
+              finish(
+                false
+              )
+          );
+
+
+        portal
+          .querySelector(
+            ".aurora-restore-backdrop"
+          )
+          ?.addEventListener(
+            "click",
+            () =>
+              finish(
+                false
+              )
+          );
+
+      }
+    );
+
+  }
   /* ==========================================================
-     IMPORT BACKUP
+                IMPORT BACKUP // JSON + XLSX
   ========================================================== */
 
-  function importBackup() {
+  async function importBackup() {
+
+    /* --------------------------------------------------------
+       PERMISSION CHECK
+    -------------------------------------------------------- */
+
+    const cloudStatus =
+      window.AuroraCloudSync
+        ?.status?.();
+
+
+    if (
+      cloudStatus?.ready === true &&
+      cloudStatus?.canWrite === false
+    ) {
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       EXCEL ENGINE CHECK
+    -------------------------------------------------------- */
+
+    if (
+      typeof XLSX ===
+      "undefined"
+    ) {
+
+      console.error(
+        "Aurora Excel Engine not loaded."
+      );
+
+      toast(
+        "Excel engine unavailable."
+      );
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       FILE PICKER
+    -------------------------------------------------------- */
 
     const input =
       document.createElement(
@@ -1220,159 +2587,428 @@ const AuroraDataStore = (() => {
 
 
     input.accept =
-      ".json,application/json";
+      [
+        ".json",
+        ".xlsx",
+        "application/json",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ].join(",");
 
 
-    input.onchange = () => {
+    input.onchange =
+      async () => {
 
-      const file =
-        input.files?.[0];
-
-
-      if (!file) {
-        return;
-      }
+        const file =
+          input.files?.[0];
 
 
-      const reader =
-        new FileReader();
+        if (!file) {
+          return;
+        }
 
-
-      reader.onload = () => {
 
         try {
 
-          const incoming =
-            JSON.parse(
-              reader.result
-            );
+          let incoming =
+            null;
 
 
-          if (
-            !incoming ||
-            !Array.isArray(
-              incoming.members
-            ) ||
-            !incoming.months
-          ) {
-
-            throw new Error(
-              "Invalid Aurora database"
-            );
-
-          }
+          const fileName =
+            String(
+              file.name || ""
+            )
+              .toLowerCase();
 
 
-          db = incoming;
-
+          /* ====================================================
+             JSON BACKUP
+          ==================================================== */
 
           if (
-            !db.settings
+            fileName.endsWith(
+              ".json"
+            )
           ) {
 
-            db.settings = {};
+            const text =
+              await file.text();
 
-          }
 
-
-          if (
-            !db.settings.currentMonth
-          ) {
-
-            db.settings.currentMonth =
-              monthKey(
-                new Date()
+            incoming =
+              JSON.parse(
+                text
               );
 
           }
 
 
-          if (!db.house) {
+          /* ====================================================
+             EXCEL BACKUP
+          ==================================================== */
 
-            db.house = {
+          else if (
+            fileName.endsWith(
+              ".xlsx"
+            )
+          ) {
 
-              name:
-                "Aurora Bachelor",
+            const buffer =
+              await file
+                .arrayBuffer();
 
-              currency:
-                "৳"
 
-            };
+            const workbook =
+              XLSX.read(
+                buffer,
+                {
+                  type:
+                    "array"
+                }
+              );
+
+
+            const rawSheet =
+              workbook
+                .Sheets[
+              "RAW BACKUP"
+              ];
+
+
+            if (
+              !rawSheet
+            ) {
+
+              throw new Error(
+                "RAW BACKUP sheet not found."
+              );
+
+            }
+
+
+            const rows =
+              XLSX.utils
+                .sheet_to_json(
+                  rawSheet,
+                  {
+                    defval:
+                      ""
+                  }
+                );
+
+
+            if (
+              !Array.isArray(
+                rows
+              ) ||
+              !rows.length
+            ) {
+
+              throw new Error(
+                "RAW BACKUP sheet is empty."
+              );
+
+            }
+
+
+            /* --------------------------------------------------
+               Restore chunks in correct order
+            -------------------------------------------------- */
+
+            rows.sort(
+              (a, b) =>
+
+                Number(
+                  a.Part
+                ) -
+
+                Number(
+                  b.Part
+                )
+            );
+
+
+            const rawJSON =
+              rows
+                .map(
+                  row =>
+                    String(
+                      row.Data ??
+                      ""
+                    )
+                )
+                .join("");
+
+
+            if (
+              !rawJSON
+            ) {
+
+              throw new Error(
+                "Backup data missing."
+              );
+
+            }
+
+
+            incoming =
+              JSON.parse(
+                rawJSON
+              );
 
           }
+
+
+          else {
+
+            throw new Error(
+              "Unsupported backup format."
+            );
+
+          }
+
+
+          /* ====================================================
+             DATABASE VALIDATION
+          ==================================================== */
+
+          if (
+            !incoming ||
+            typeof incoming !==
+            "object" ||
+            !Array.isArray(
+              incoming.members
+            ) ||
+            !incoming.months ||
+            typeof incoming.months !==
+            "object" ||
+            Array.isArray(
+              incoming.months
+            )
+          ) {
+
+            throw new Error(
+              "Invalid Aurora database."
+            );
+
+          }
+
+          /* ====================================================
+                            RESTORE PREVIEW
+          ==================================================== */
+
+          const restoreApproved =
+            await auroraBackupRestorePreview({
+
+              file,
+
+              database:
+                incoming
+
+            });
 
 
           if (
-            !db.house.currency
+            !restoreApproved
           ) {
 
-            db.house.currency =
-              "৳";
+            toast(
+              "Backup restore cancelled."
+            );
+
+            return;
 
           }
+          /* ====================================================
+             KEEP CURRENT DATABASE FOR SAFETY
+          ==================================================== */
+
+          const previousDatabase =
+            structuredClone(
+              db
+            );
 
 
-          if (!db.months) {
+          try {
 
-            db.months = {};
+            /* ==================================================
+               APPLY DATABASE
+            ================================================== */
 
-          }
+            db =
+              incoming;
 
 
-          Object.keys(
-            db.months
-          ).forEach(
-            key => {
+            /* --------------------------------------------------
+               SETTINGS
+            -------------------------------------------------- */
 
-              db.months[key] =
-                normalizeMonth(
-                  db.months[key]
+            if (
+              !db.settings
+            ) {
+
+              db.settings =
+                {};
+
+            }
+
+
+            if (
+              !db.settings
+                .currentMonth
+            ) {
+
+              db.settings
+                .currentMonth =
+                monthKey(
+                  new Date()
                 );
 
             }
-          );
 
 
-          currentMonth =
-            db.settings.currentMonth;
+            /* --------------------------------------------------
+               HOUSE
+            -------------------------------------------------- */
+
+            if (
+              !db.house
+            ) {
+
+              db.house = {
+
+                name:
+                  "Aurora Bachelor",
+
+                currency:
+                  "৳"
+
+              };
+
+            }
 
 
-          ensureMonth(
-            currentMonth
-          );
+            if (
+              !db.house
+                .currency
+            ) {
+
+              db.house.currency =
+                "৳";
+
+            }
 
 
-          save();
+            /* --------------------------------------------------
+               MONTHS
+            -------------------------------------------------- */
+
+            if (
+              !db.months
+            ) {
+
+              db.months =
+                {};
+
+            }
 
 
-          toast(
-            "Backup restored."
-          );
+            Object
+              .keys(
+                db.months
+              )
+              .forEach(
+                key => {
+
+                  db.months[
+                    key
+                  ] =
+                    normalizeMonth(
+                      db.months[
+                      key
+                      ]
+                    );
+
+                }
+              );
 
 
-          render();
+            /* --------------------------------------------------
+               CURRENT MONTH
+            -------------------------------------------------- */
 
-        } catch (error) {
+            currentMonth =
+              db.settings
+                .currentMonth;
+
+
+            ensureMonth(
+              currentMonth
+            );
+
+
+            /* ==================================================
+               SAVE + CLOUD SYNC
+            ================================================== */
+
+            const saved =
+              save();
+
+
+            if (
+              saved === false
+            ) {
+
+              db =
+                previousDatabase;
+
+
+              throw new Error(
+                "Backup restore blocked."
+              );
+
+            }
+
+
+            toast(
+              fileName.endsWith(
+                ".xlsx"
+              )
+                ? "Excel backup restored."
+                : "JSON backup restored."
+            );
+
+
+            render();
+
+          }
+
+          catch (error) {
+
+            db =
+              previousDatabase;
+
+
+            throw error;
+
+          }
+
+        }
+
+        catch (error) {
 
           console.error(
+            "Aurora Backup Import:",
             error
           );
 
 
           toast(
-            "Invalid backup file."
+            "Invalid or unsupported backup file."
           );
 
         }
 
       };
-
-
-      reader.readAsText(
-        file
-      );
-
-    };
 
 
     input.click();
@@ -23524,7 +25160,7 @@ function renderSettings() {
           <div>
 
             <strong>
-              Local Database
+              cloud database | local cache architecture
             </strong>
 
             <small>
@@ -23954,8 +25590,9 @@ function renderSettings() {
           <div>
             <span>STORAGE</span>
             <strong>
-              LocalStorage
-            </strong>
+              Aurora Cloud Storage • Cloud synchronized
+            </strong>            
+            
           </div>
 
           <div>
@@ -33271,6 +34908,1538 @@ const AuroraUpdateSystem = (() => {
 
     close:
       closeModal
+
+  };
+
+})();
+
+
+
+/* ============================================================
+   AURORA // RESILIENCE & UX STATE ENGINE
+============================================================ */
+
+const AuroraUXState = (() => {
+
+  let currentState =
+    "connecting";
+
+
+  let lastPendingData =
+    null;
+
+
+  let hooked =
+    false;
+
+
+  let skeletonHidden =
+    false;
+
+
+  let lastErrorMessage =
+    "";
+
+
+  let previousNormalizedState =
+    "";
+
+
+  /* ==========================================================
+     SAFE CLONE
+  ========================================================== */
+
+  function cloneData(
+    data
+  ) {
+
+    try {
+
+      return structuredClone(
+        data
+      );
+
+    }
+
+    catch (_) {
+
+      try {
+
+        return JSON.parse(
+          JSON.stringify(
+            data
+          )
+        );
+
+      }
+
+      catch (_) {
+
+        return data;
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     CLOUD STATUS
+  ========================================================== */
+
+  function cloudStatus() {
+
+    try {
+
+      return (
+        window.AuroraCloudSync
+          ?.status?.() ||
+        {}
+      );
+
+    }
+
+    catch (_) {
+
+      return {};
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     NORMALIZE CLOUD STATE
+  ========================================================== */
+
+  function normalizeCloudState() {
+
+    const status =
+      cloudStatus();
+
+
+    /* --------------------------------------------------------
+       BROWSER OFFLINE IS AUTHORITATIVE
+    -------------------------------------------------------- */
+
+    if (
+      navigator.onLine ===
+      false
+    ) {
+
+      return {
+        state:
+          "offline",
+
+        status
+      };
+
+    }
+
+
+    /* --------------------------------------------------------
+       CONFLICT
+    -------------------------------------------------------- */
+
+    if (
+      status.conflict === true ||
+      status.hasConflict === true
+    ) {
+
+      return {
+        state:
+          "conflict",
+
+        status
+      };
+
+    }
+
+
+    /* --------------------------------------------------------
+       ERROR OBJECT / MESSAGE
+    -------------------------------------------------------- */
+
+    const error =
+      status.error ||
+      status.lastError ||
+      status.syncError ||
+      null;
+
+
+    if (error) {
+
+      return {
+        state:
+          "error",
+
+        error,
+
+        status
+      };
+
+    }
+
+
+    /* --------------------------------------------------------
+       STRING STATUS
+    -------------------------------------------------------- */
+
+    const rawState =
+      String(
+
+        status.state ||
+        status.syncState ||
+        status.status ||
+        status.connectionState ||
+        ""
+
+      )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+      rawState.includes(
+        "error"
+      ) ||
+      rawState.includes(
+        "fail"
+      )
+    ) {
+
+      return {
+        state:
+          "error",
+
+        status
+      };
+
+    }
+
+
+    if (
+      rawState.includes(
+        "conflict"
+      )
+    ) {
+
+      return {
+        state:
+          "conflict",
+
+        status
+      };
+
+    }
+
+
+    if (
+      rawState.includes(
+        "offline"
+      )
+    ) {
+
+      return {
+        state:
+          "offline",
+
+        status
+      };
+
+    }
+
+
+    if (
+      rawState.includes(
+        "syncing"
+      ) ||
+      rawState.includes(
+        "saving"
+      )
+    ) {
+
+      return {
+        state:
+          "syncing",
+
+        status
+      };
+
+    }
+
+
+    if (
+      rawState.includes(
+        "connect"
+      ) ||
+      rawState.includes(
+        "loading"
+      )
+    ) {
+
+      return {
+        state:
+          "connecting",
+
+        status
+      };
+
+    }
+
+
+    /* --------------------------------------------------------
+       BOOLEAN SIGNALS
+    -------------------------------------------------------- */
+
+    if (
+      status.syncing === true ||
+      status.saving === true ||
+      status.pending === true
+    ) {
+
+      return {
+        state:
+          "syncing",
+
+        status
+      };
+
+    }
+
+
+    if (
+      status.ready === true
+    ) {
+
+      return {
+        state:
+          "synced",
+
+        status
+      };
+
+    }
+
+
+    return {
+      state:
+        "connecting",
+
+      status
+    };
+
+  }
+
+
+  /* ==========================================================
+     UI
+  ========================================================== */
+
+  function ensureUI() {
+
+    /* --------------------------------------------------------
+       STATUS BANNER
+    -------------------------------------------------------- */
+
+    if (
+      !document.getElementById(
+        "auroraUxStatus"
+      )
+    ) {
+
+      const status =
+        document.createElement(
+          "div"
+        );
+
+
+      status.id =
+        "auroraUxStatus";
+
+
+      status.className =
+        "aurora-ux-status";
+
+
+      status.innerHTML = `
+
+        <span
+          class="aurora-ux-status-dot"
+        ></span>
+
+        <div>
+
+          <strong
+            id="auroraUxStatusTitle"
+          >
+            CONNECTING
+          </strong>
+
+          <small
+            id="auroraUxStatusText"
+          >
+            Establishing Aurora Cloud link...
+          </small>
+
+        </div>
+
+      `;
+
+
+      document.body
+        .appendChild(
+          status
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       RETRY PANEL
+    -------------------------------------------------------- */
+
+    if (
+      !document.getElementById(
+        "auroraSyncRetry"
+      )
+    ) {
+
+      const retry =
+        document.createElement(
+          "div"
+        );
+
+
+      retry.id =
+        "auroraSyncRetry";
+
+
+      retry.className =
+        "aurora-sync-retry";
+
+
+      retry.innerHTML = `
+
+        <div
+          class="aurora-sync-retry-icon"
+        >
+          !
+        </div>
+
+
+        <div
+          class="aurora-sync-retry-copy"
+        >
+
+          <span>
+            AURORA // CLOUD ERROR
+          </span>
+
+          <strong>
+            SAVE FAILED
+          </strong>
+
+          <small
+            id="auroraSyncRetryMessage"
+          >
+            Data could not be synchronized.
+          </small>
+
+        </div>
+
+
+        <button
+          type="button"
+          id="auroraSyncRetryBtn"
+        >
+          ↻ RETRY SYNC
+        </button>
+
+
+        <button
+          type="button"
+          id="auroraSyncRetryClose"
+          aria-label="Dismiss"
+        >
+          ×
+        </button>
+
+      `;
+
+
+      document.body
+        .appendChild(
+          retry
+        );
+
+
+      document
+        .getElementById(
+          "auroraSyncRetryBtn"
+        )
+        ?.addEventListener(
+          "click",
+          retrySync
+        );
+
+
+      document
+        .getElementById(
+          "auroraSyncRetryClose"
+        )
+        ?.addEventListener(
+          "click",
+          hideRetry
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       INITIAL SKELETON
+    -------------------------------------------------------- */
+
+    createSkeleton();
+
+  }
+
+
+  /* ==========================================================
+     SKELETON
+  ========================================================== */
+
+  function createSkeleton() {
+
+    if (
+      skeletonHidden
+    ) {
+      return;
+    }
+
+
+    if (
+      document.getElementById(
+        "auroraCloudSkeleton"
+      )
+    ) {
+      return;
+    }
+
+
+    const main =
+      document.querySelector(
+        ".main"
+      );
+
+
+    if (!main) {
+      return;
+    }
+
+
+    const skeleton =
+      document.createElement(
+        "div"
+      );
+
+
+    skeleton.id =
+      "auroraCloudSkeleton";
+
+
+    skeleton.className =
+      "aurora-cloud-skeleton";
+
+
+    skeleton.innerHTML = `
+
+      <div
+        class="aurora-skeleton-head"
+      >
+
+        <div>
+
+          <span
+            class="aurora-skeleton-code"
+          >
+            AURORA // CLOUD INITIALIZATION
+          </span>
+
+          <strong>
+            SYNCHRONIZING SYSTEM
+          </strong>
+
+        </div>
+
+
+        <div
+          class="aurora-skeleton-orbit"
+        >
+          <i></i>
+        </div>
+
+      </div>
+
+
+      <div
+        class="aurora-skeleton-grid"
+      >
+
+        <div
+          class="aurora-skeleton-card"
+        >
+          <i></i>
+          <b></b>
+          <span></span>
+        </div>
+
+
+        <div
+          class="aurora-skeleton-card"
+        >
+          <i></i>
+          <b></b>
+          <span></span>
+        </div>
+
+
+        <div
+          class="aurora-skeleton-card"
+        >
+          <i></i>
+          <b></b>
+          <span></span>
+        </div>
+
+
+        <div
+          class="aurora-skeleton-card"
+        >
+          <i></i>
+          <b></b>
+          <span></span>
+        </div>
+
+      </div>
+
+
+      <div
+        class="aurora-skeleton-large"
+      >
+
+        <i></i>
+
+        <span></span>
+
+        <span></span>
+
+        <span></span>
+
+        <span></span>
+
+      </div>
+
+    `;
+
+
+    main.prepend(
+      skeleton
+    );
+
+  }
+
+
+  function hideSkeleton() {
+
+    if (
+      skeletonHidden
+    ) {
+      return;
+    }
+
+
+    skeletonHidden =
+      true;
+
+
+    const skeleton =
+      document.getElementById(
+        "auroraCloudSkeleton"
+      );
+
+
+    if (!skeleton) {
+      return;
+    }
+
+
+    skeleton.classList
+      .add(
+        "leaving"
+      );
+
+
+    setTimeout(
+      () => {
+
+        skeleton.remove();
+
+      },
+      280
+    );
+
+  }
+
+
+  /* ==========================================================
+     STATUS BANNER
+  ========================================================== */
+
+  function setStatus(
+    state,
+    title,
+    message
+  ) {
+
+    ensureUI();
+
+
+    currentState =
+      state;
+
+
+    const box =
+      document.getElementById(
+        "auroraUxStatus"
+      );
+
+
+    const heading =
+      document.getElementById(
+        "auroraUxStatusTitle"
+      );
+
+
+    const text =
+      document.getElementById(
+        "auroraUxStatusText"
+      );
+
+
+    if (
+      !box ||
+      !heading ||
+      !text
+    ) {
+      return;
+    }
+
+
+    box.className =
+      `aurora-ux-status ${state}`;
+
+
+    heading.textContent =
+      title;
+
+
+    text.textContent =
+      message;
+
+
+    /* --------------------------------------------------------
+       SYNCED = TRANSIENT ONLY
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "synced"
+    ) {
+
+      box.classList
+        .add(
+          "visible"
+        );
+
+
+      setTimeout(
+        () => {
+
+          if (
+            currentState ===
+            "synced"
+          ) {
+
+            box.classList
+              .remove(
+                "visible"
+              );
+
+          }
+
+        },
+        1600
+      );
+
+
+      return;
+
+    }
+
+
+    box.classList
+      .add(
+        "visible"
+      );
+
+  }
+
+
+  /* ==========================================================
+     RETRY UI
+  ========================================================== */
+
+  function showRetry(
+    message =
+      "Data could not be synchronized with Aurora Cloud."
+  ) {
+
+    ensureUI();
+
+
+    const panel =
+      document.getElementById(
+        "auroraSyncRetry"
+      );
+
+
+    const text =
+      document.getElementById(
+        "auroraSyncRetryMessage"
+      );
+
+
+    if (text) {
+
+      text.textContent =
+        message;
+
+    }
+
+
+    panel
+      ?.classList
+      .add(
+        "visible"
+      );
+
+  }
+
+
+  function hideRetry() {
+
+    document
+      .getElementById(
+        "auroraSyncRetry"
+      )
+      ?.classList
+      .remove(
+        "visible"
+      );
+
+  }
+
+
+  /* ==========================================================
+     CLOUD QUEUE HOOK
+
+     Captures the last data that Aurora
+     attempted to send to Supabase.
+  ========================================================== */
+
+  function hookCloudQueue() {
+
+    if (
+      hooked
+    ) {
+      return true;
+    }
+
+
+    const cloud =
+      window.AuroraCloudSync;
+
+
+    if (
+      !cloud ||
+      typeof cloud.queueSave !==
+      "function"
+    ) {
+
+      return false;
+
+    }
+
+
+    if (
+      cloud.queueSave
+        .__auroraUxWrapped
+    ) {
+
+      hooked =
+        true;
+
+      return true;
+
+    }
+
+
+    const original =
+      cloud.queueSave
+        .bind(
+          cloud
+        );
+
+
+    function wrappedQueueSave(
+      data,
+      ...args
+    ) {
+
+      lastPendingData =
+        cloneData(
+          data
+        );
+
+
+      setStatus(
+        "syncing",
+        "SYNCING",
+        "Saving changes to Aurora Cloud..."
+      );
+
+
+      try {
+
+        const result =
+          original(
+            data,
+            ...args
+          );
+
+
+        /* Promise-based cloud implementation */
+
+        if (
+          result &&
+          typeof result.then ===
+          "function"
+        ) {
+
+          result
+            .then(
+              () => {
+
+                /*
+                  Do not clear immediately.
+                  The status monitor confirms
+                  the cloud reached READY.
+                */
+
+              }
+            )
+            .catch(
+              error => {
+
+                lastErrorMessage =
+                  error?.message ||
+                  "Cloud save failed.";
+
+
+                setStatus(
+                  "error",
+                  "SYNC FAILED",
+                  lastErrorMessage
+                );
+
+
+                showRetry(
+                  lastErrorMessage
+                );
+
+              }
+            );
+
+        }
+
+
+        return result;
+
+      }
+
+      catch (error) {
+
+        lastErrorMessage =
+          error?.message ||
+          "Cloud save failed.";
+
+
+        setStatus(
+          "error",
+          "SYNC FAILED",
+          lastErrorMessage
+        );
+
+
+        showRetry(
+          lastErrorMessage
+        );
+
+
+        throw error;
+
+      }
+
+    }
+
+
+    wrappedQueueSave
+      .__auroraUxWrapped =
+      true;
+
+
+    wrappedQueueSave
+      .__auroraOriginal =
+      original;
+
+
+    cloud.queueSave =
+      wrappedQueueSave;
+
+
+    hooked =
+      true;
+
+
+    console.log(
+      "🛡 Aurora resilience layer connected."
+    );
+
+
+    return true;
+
+  }
+
+
+  /* ==========================================================
+     RETRY SYNC
+  ========================================================== */
+
+  async function retrySync() {
+
+    if (
+      navigator.onLine ===
+      false
+    ) {
+
+      setStatus(
+        "offline",
+        "OFFLINE MODE",
+        "Internet connection is unavailable."
+      );
+
+
+      return;
+
+    }
+
+
+    const cloud =
+      window.AuroraCloudSync;
+
+
+    if (
+      !cloud ||
+      typeof cloud.queueSave !==
+      "function"
+    ) {
+
+      setStatus(
+        "error",
+        "CLOUD UNAVAILABLE",
+        "Aurora Cloud engine is not ready."
+      );
+
+
+      return;
+
+    }
+
+
+    const status =
+      cloudStatus();
+
+
+    if (
+      status.ready === true &&
+      status.canWrite === false
+    ) {
+
+      hideRetry();
+
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+
+      return;
+
+    }
+
+
+    const retryButton =
+      document.getElementById(
+        "auroraSyncRetryBtn"
+      );
+
+
+    if (
+      retryButton
+    ) {
+
+      retryButton.disabled =
+        true;
+
+
+      retryButton.textContent =
+        "RETRYING...";
+
+    }
+
+
+    setStatus(
+      "syncing",
+      "RETRYING SYNC",
+      "Reconnecting to Aurora Cloud..."
+    );
+
+
+    try {
+
+      const payload =
+        lastPendingData ||
+        cloneData(
+          AuroraDataStore.get()
+        );
+
+
+      const result =
+        cloud.queueSave(
+          payload
+        );
+
+
+      if (
+        result &&
+        typeof result.then ===
+        "function"
+      ) {
+
+        await result;
+
+      }
+
+
+      /*
+        Status monitor will confirm whether
+        the cloud save actually succeeded.
+      */
+
+    }
+
+    catch (error) {
+
+      lastErrorMessage =
+        error?.message ||
+        "Retry failed.";
+
+
+      showRetry(
+        lastErrorMessage
+      );
+
+    }
+
+    finally {
+
+      setTimeout(
+        () => {
+
+          if (
+            retryButton
+          ) {
+
+            retryButton.disabled =
+              false;
+
+
+            retryButton.textContent =
+              "↻ RETRY SYNC";
+
+          }
+
+        },
+        900
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     STATE MONITOR
+  ========================================================== */
+
+  function monitor() {
+
+    hookCloudQueue();
+
+
+    const normalized =
+      normalizeCloudState();
+
+
+    const state =
+      normalized.state;
+
+
+    /*
+      Avoid repeatedly repainting
+      identical state.
+    */
+
+    if (
+      state ===
+      previousNormalizedState
+    ) {
+
+      return;
+
+    }
+
+
+    previousNormalizedState =
+      state;
+
+
+    /* --------------------------------------------------------
+       CONNECTING
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "connecting"
+    ) {
+
+      setStatus(
+        "connecting",
+        "CONNECTING",
+        "Establishing Aurora Cloud link..."
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       SYNCING
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "syncing"
+    ) {
+
+      hideSkeleton();
+
+
+      setStatus(
+        "syncing",
+        "SYNCING",
+        "Synchronizing household data..."
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       SYNCED
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "synced"
+    ) {
+
+      hideSkeleton();
+
+
+      hideRetry();
+
+
+      lastPendingData =
+        null;
+
+
+      lastErrorMessage =
+        "";
+
+
+      setStatus(
+        "synced",
+        "CLOUD SYNCED",
+        "Aurora data is up to date."
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       OFFLINE
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "offline"
+    ) {
+
+      hideSkeleton();
+
+
+      setStatus(
+        "offline",
+        "OFFLINE MODE",
+        "Local cache active • Cloud sync paused"
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       CONFLICT
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "conflict"
+    ) {
+
+      hideSkeleton();
+
+
+      setStatus(
+        "conflict",
+        "SYNC CONFLICT",
+        "Cloud data changed on another device."
+      );
+
+
+      showRetry(
+        "Aurora detected a cloud revision conflict. Retry after reviewing the latest cloud state."
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       ERROR
+    -------------------------------------------------------- */
+
+    if (
+      state ===
+      "error"
+    ) {
+
+      hideSkeleton();
+
+
+      const message =
+        normalized.error
+          ?.message ||
+        String(
+          normalized.error ||
+          lastErrorMessage ||
+          "Aurora Cloud synchronization failed."
+        );
+
+
+      setStatus(
+        "error",
+        "SYNC FAILED",
+        message
+      );
+
+
+      showRetry(
+        message
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     ONLINE / OFFLINE
+  ========================================================== */
+
+  window.addEventListener(
+    "offline",
+    () => {
+
+      previousNormalizedState =
+        "";
+
+
+      setStatus(
+        "offline",
+        "OFFLINE MODE",
+        "Local cache active • Cloud sync paused"
+      );
+
+    }
+  );
+
+
+  window.addEventListener(
+    "online",
+    () => {
+
+      previousNormalizedState =
+        "";
+
+
+      setStatus(
+        "connecting",
+        "RECONNECTING",
+        "Internet restored • Contacting Aurora Cloud..."
+      );
+
+
+      /*
+        If Aurora had unsynced changes,
+        automatically retry once.
+      */
+
+      setTimeout(
+        () => {
+
+          if (
+            lastPendingData
+          ) {
+
+            retrySync();
+
+          }
+
+        },
+        900
+      );
+
+    }
+  );
+
+
+  /* ==========================================================
+     INIT
+  ========================================================== */
+
+  function init() {
+
+    ensureUI();
+
+
+    /*
+      Skeleton should never permanently
+      block the application.
+    */
+
+    setTimeout(
+      hideSkeleton,
+      7000
+    );
+
+
+    monitor();
+
+
+    setInterval(
+      monitor,
+      700
+    );
+
+  }
+
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      {
+        once:
+          true
+      }
+    );
+
+  }
+
+  else {
+
+    init();
+
+  }
+
+
+  return {
+
+    retry:
+      retrySync,
+
+    status:
+      () => ({
+        state:
+          currentState,
+
+        hasPendingData:
+          Boolean(
+            lastPendingData
+          ),
+
+        lastError:
+          lastErrorMessage
+      })
 
   };
 
