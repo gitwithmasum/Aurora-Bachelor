@@ -3,11 +3,26 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v1";
-
+    "aurora-bachelor-v2";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
+
+const AURORA_CACHE_PREFIX =
+    "aurora-bachelor-";
+
+
+/* ============================================================
+   CORE FILES
+============================================================ */
+
+const CORE_FILES = [
+    "./",
+    "./index.html",
+    "./script.js",
+    "./manifest.json",
+    "./style_v3.css"
+];
 
 
 /* ============================================================
@@ -19,26 +34,26 @@ self.addEventListener(
     event => {
 
         event.waitUntil(
-
             caches
                 .open(
                     STATIC_CACHE
                 )
                 .then(
                     cache =>
-                        cache.addAll([
-                            "./",
-                            "./index.html",
-                            "./style.css",
-                            "./script.js",
-                            "./manifest.json"
-                        ])
+                        cache.addAll(
+                            CORE_FILES
+                        )
                 )
-
         );
 
-
-        self.skipWaiting();
+        /*
+          IMPORTANT:
+          Do NOT call self.skipWaiting() here.
+    
+          Aurora Update System will send
+          AURORA_SKIP_WAITING when the user
+          presses UPDATE NOW.
+        */
 
     }
 );
@@ -53,16 +68,17 @@ self.addEventListener(
     event => {
 
         event.waitUntil(
-
             caches
                 .keys()
                 .then(
                     keys =>
                         Promise.all(
-
                             keys
                                 .filter(
                                     key =>
+                                        key.startsWith(
+                                            AURORA_CACHE_PREFIX
+                                        ) &&
                                         key !==
                                         STATIC_CACHE
                                 )
@@ -72,14 +88,13 @@ self.addEventListener(
                                             key
                                         )
                                 )
-
                         )
                 )
-
+                .then(
+                    () =>
+                        self.clients.claim()
+                )
         );
-
-
-        self.clients.claim();
 
     }
 );
@@ -112,7 +127,9 @@ self.addEventListener(
 
 
         /*
-          Do NOT cache Supabase/API requests.
+          Do not intercept Supabase,
+          Google login, CDN or any other
+          external network request.
         */
 
         if (
@@ -123,10 +140,10 @@ self.addEventListener(
         }
 
 
-        /* --------------------------------------------------------
+        /* ========================================================
            PAGE NAVIGATION
-           Network first → cache fallback
-        -------------------------------------------------------- */
+           Network first → cached app fallback
+        ======================================================== */
 
         if (
             request.mode ===
@@ -139,23 +156,31 @@ self.addEventListener(
                     request
                 )
                     .then(
-                        response => {
+                        async response => {
 
-                            const copy =
-                                response.clone();
+                            /*
+                              Save latest index.html
+                              only when network response
+                              is successful.
+                            */
+
+                            if (
+                                response &&
+                                response.ok
+                            ) {
+
+                                const cache =
+                                    await caches.open(
+                                        STATIC_CACHE
+                                    );
 
 
-                            caches
-                                .open(
-                                    STATIC_CACHE
-                                )
-                                .then(
-                                    cache =>
-                                        cache.put(
-                                            "./index.html",
-                                            copy
-                                        )
+                                await cache.put(
+                                    "./index.html",
+                                    response.clone()
                                 );
+
+                            }
 
 
                             return response;
@@ -163,10 +188,20 @@ self.addEventListener(
                         }
                     )
                     .catch(
-                        () =>
-                            caches.match(
-                                "./index.html"
-                            )
+                        async () => {
+
+                            const cachedPage =
+                                await caches.match(
+                                    "./index.html"
+                                );
+
+
+                            return cachedPage ||
+                                caches.match(
+                                    "./"
+                                );
+
+                        }
                     )
 
             );
@@ -177,10 +212,10 @@ self.addEventListener(
         }
 
 
-        /* --------------------------------------------------------
-           STATIC FILES
-           Cache first → network fallback
-        -------------------------------------------------------- */
+        /* ========================================================
+           STATIC ASSETS
+           Cache first → network → update cache
+        ======================================================== */
 
         event.respondWith(
 
@@ -189,57 +224,134 @@ self.addEventListener(
                     request
                 )
                 .then(
-                    cached => {
+                    async cached => {
 
                         if (cached) {
-
                             return cached;
-
                         }
 
 
-                        return fetch(
-                            request
-                        )
-                            .then(
-                                response => {
+                        try {
 
-                                    if (
-                                        !response ||
-                                        response.status !== 200
-                                    ) {
-
-                                        return response;
-
-                                    }
+                            const response =
+                                await fetch(
+                                    request
+                                );
 
 
-                                    const copy =
-                                        response.clone();
+                            if (
+                                !response ||
+                                !response.ok
+                            ) {
+
+                                return response;
+
+                            }
 
 
-                                    caches
-                                        .open(
-                                            STATIC_CACHE
-                                        )
-                                        .then(
-                                            cache =>
-                                                cache.put(
-                                                    request,
-                                                    copy
-                                                )
-                                        );
+                            const cache =
+                                await caches.open(
+                                    STATIC_CACHE
+                                );
 
 
-                                    return response;
-
-                                }
+                            await cache.put(
+                                request,
+                                response.clone()
                             );
+
+
+                            return response;
+
+                        }
+
+                        catch (error) {
+
+                            console.warn(
+                                "Aurora SW fetch failed:",
+                                request.url,
+                                error
+                            );
+
+
+                            throw error;
+
+                        }
 
                     }
                 )
 
         );
+
+    }
+);
+
+
+/* ============================================================
+   AURORA // UPDATE COMMAND CHANNEL
+============================================================ */
+
+self.addEventListener(
+    "message",
+    event => {
+
+        const type =
+            event.data?.type;
+
+
+        /* --------------------------------------------------------
+           USER PRESSED UPDATE NOW
+        -------------------------------------------------------- */
+
+        if (
+            type ===
+            "AURORA_SKIP_WAITING"
+        ) {
+
+            self.skipWaiting();
+
+            return;
+
+        }
+
+
+        /* --------------------------------------------------------
+           CLEAR ONLY AURORA CACHE
+        -------------------------------------------------------- */
+
+        if (
+            type ===
+            "AURORA_CLEAR_CACHE"
+        ) {
+
+            event.waitUntil(
+
+                caches
+                    .keys()
+                    .then(
+                        keys =>
+                            Promise.all(
+
+                                keys
+                                    .filter(
+                                        key =>
+                                            key.startsWith(
+                                                AURORA_CACHE_PREFIX
+                                            )
+                                    )
+                                    .map(
+                                        key =>
+                                            caches.delete(
+                                                key
+                                            )
+                                    )
+
+                            )
+                    )
+
+            );
+
+        }
 
     }
 );

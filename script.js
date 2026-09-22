@@ -16797,10 +16797,11 @@ function renderReports() {
 
 
       <button
-        class="btn"
-        onclick="window.print()"
+        class="btn primary"
+        type="button"
+        onclick="downloadMonthlyReportPDF()"
       >
-        PRINT REPORT
+        ⇩ DOWNLOAD PDF
       </button>
 
     </div>
@@ -17205,6 +17206,2335 @@ function renderReports() {
     </div>
 
   `;
+
+}
+
+
+
+/* ============================================================
+   AURORA // PDF IMAGE LOADER
+============================================================ */
+
+async function auroraLoadPDFImage(
+  src
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        src,
+        {
+          cache:
+            "no-store"
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        `Image load failed: ${response.status}`
+      );
+
+    }
+
+
+    const blob =
+      await response.blob();
+
+
+    return await new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          () =>
+            resolve(
+              reader.result
+            );
+
+
+        reader.onerror =
+          reject;
+
+
+        reader.readAsDataURL(
+          blob
+        );
+
+      }
+    );
+
+  }
+
+  catch (error) {
+
+    console.warn(
+      "Aurora PDF Logo:",
+      error
+    );
+
+
+    return null;
+
+  }
+
+}
+
+
+/* ============================================================
+   AURORA // MONTHLY PDF REPORT ENGINE
+============================================================ */
+
+async function downloadMonthlyReportPDF() {
+
+  try {
+
+    /* ========================================================
+       PDF ENGINE CHECK
+    ======================================================== */
+
+    if (
+      !window.jspdf ||
+      !window.jspdf.jsPDF
+    ) {
+
+      toast(
+        "PDF engine is not available."
+      );
+
+      console.error(
+        "Aurora PDF: jsPDF not loaded."
+      );
+
+      return;
+
+    }
+
+
+    const {
+      jsPDF
+    } =
+      window.jspdf;
+
+
+    /* ========================================================
+       ACTIVE MONTH
+    ======================================================== */
+
+    const activeMonth =
+      AuroraApp
+        .getCurrentMonth();
+
+
+    if (!activeMonth) {
+
+      toast(
+        "No active month selected."
+      );
+
+      return;
+
+    }
+
+
+    const month =
+      AuroraDataStore
+        .getMonth(
+          activeMonth
+        );
+
+
+    if (!month) {
+
+      toast(
+        "Month data not found."
+      );
+
+      return;
+
+    }
+
+
+    const members =
+      AuroraDataStore
+        .getMembers() || [];
+
+
+    /* ========================================================
+       ACCOUNT DATA
+    ======================================================== */
+
+    const mealAccount =
+      month.mealAccount || {
+        meals: [],
+        expenses: [],
+        payments: []
+      };
+
+
+    const houseAccount =
+      month.houseAccount || {
+        rent: [],
+        bills: [],
+        payments: []
+      };
+
+
+    const meals =
+      mealAccount.meals || [];
+
+
+    const mealExpenses =
+      mealAccount.expenses || [];
+
+
+    const mealPayments =
+      mealAccount.payments || [];
+
+
+    const rents =
+      houseAccount.rent || [];
+
+
+    const bills =
+      houseAccount.bills || [];
+
+
+    const housePayments =
+      houseAccount.payments || [];
+
+
+    /* ========================================================
+       HELPERS
+    ======================================================== */
+
+    const number =
+      value =>
+        Number(
+          value || 0
+        );
+
+
+    const pdfMoney =
+      value =>
+        `BDT ${number(value)
+          .toLocaleString(
+            "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          )}`;
+
+
+    const pdfDate =
+      value => {
+
+        if (!value) {
+          return "-";
+        }
+
+
+        const date =
+          new Date(
+            `${value}T00:00:00`
+          );
+
+
+        if (
+          Number.isNaN(
+            date.getTime()
+          )
+        ) {
+
+          return String(
+            value
+          );
+
+        }
+
+
+        return date
+          .toLocaleDateString(
+            "en-GB",
+            {
+              day:
+                "2-digit",
+
+              month:
+                "short",
+
+              year:
+                "numeric"
+            }
+          );
+
+      };
+
+
+    const memberName =
+      id => {
+
+        if (!id) {
+          return "-";
+        }
+
+
+        return (
+          members.find(
+            member =>
+              String(
+                member.id
+              ) ===
+              String(
+                id
+              )
+          )
+            ?.name ||
+          "Unknown"
+        );
+
+      };
+
+
+    /* ========================================================
+       CORE CALCULATIONS
+    ======================================================== */
+
+    const totalMeals =
+      AuroraMealAccount
+        .totalMeals();
+
+
+    const mealExpenseTotal =
+      AuroraMealAccount
+        .totalExpense();
+
+
+    const mealRate =
+      AuroraMealAccount
+        .mealRate();
+
+
+    const rentTotal =
+      rents.reduce(
+        (sum, item) =>
+          sum +
+          number(
+            item.amount
+          ),
+        0
+      );
+
+
+    const billTotal =
+      bills.reduce(
+        (sum, item) =>
+          sum +
+          number(
+            item.amount
+          ),
+        0
+      );
+
+
+    const houseCost =
+      rentTotal +
+      billTotal;
+
+
+    const mealPaymentTotal =
+      mealPayments.reduce(
+        (sum, item) =>
+          sum +
+          number(
+            item.amount
+          ),
+        0
+      );
+
+
+    const housePaymentTotal =
+      housePayments.reduce(
+        (sum, item) =>
+          sum +
+          number(
+            item.amount
+          ),
+        0
+      );
+
+
+    const totalPaid =
+      mealPaymentTotal +
+      housePaymentTotal;
+
+
+    const totalExpense =
+      mealExpenseTotal +
+      houseCost;
+
+
+    const outstanding =
+      Math.max(
+        0,
+        totalExpense -
+        totalPaid
+      );
+
+
+    const houseShare =
+      members.length
+        ? houseCost /
+        members.length
+        : 0;
+
+
+    /* ========================================================
+       PDF DOCUMENT
+    ======================================================== */
+
+    const doc =
+      new jsPDF({
+        orientation:
+          "landscape",
+
+        unit:
+          "mm",
+
+        format:
+          "a4"
+      });
+
+
+    const pageWidth =
+      doc.internal
+        .pageSize
+        .getWidth();
+
+
+    const pageHeight =
+      doc.internal
+        .pageSize
+        .getHeight();
+
+
+    const margin =
+      14;
+
+
+    let y =
+      16;
+
+
+    /* ========================================================
+       COLOR SYSTEM
+    ======================================================== */
+
+    const COLORS = {
+
+      cyan:
+        [43, 205, 235],
+
+      purple:
+        [126, 95, 220],
+
+      dark:
+        [12, 21, 34],
+
+      text:
+        [38, 53, 68],
+
+      muted:
+        [105, 119, 132],
+
+      green:
+        [45, 160, 115],
+
+      amber:
+        [205, 139, 48],
+
+      red:
+        [195, 75, 91]
+
+    };
+
+
+    /* ========================================================
+       PAGE NUMBER / FOOTER
+    ======================================================== */
+
+    function addFooter() {
+
+      const pages =
+        doc.internal
+          .getNumberOfPages();
+
+
+      for (
+        let i = 2;
+        i <= pages;
+        i++
+      ) {
+
+        doc.setPage(
+          i
+        );
+
+
+        doc.setDrawColor(
+          220,
+          226,
+          232
+        );
+
+
+        doc.line(
+          margin,
+          pageHeight - 10,
+          pageWidth - margin,
+          pageHeight - 10
+        );
+
+
+        doc.setFontSize(
+          7
+        );
+
+
+        doc.setTextColor(
+          ...COLORS.muted
+        );
+
+
+        doc.text(
+          "AURORA BACHELOR // MONTHLY ACCOUNT REPORT",
+          margin,
+          pageHeight - 5
+        );
+
+
+        doc.text(
+          `PAGE ${i - 1} / ${pages - 1}`,
+          pageWidth - margin,
+          pageHeight - 5,
+          {
+            align:
+              "right"
+          }
+        );
+
+      }
+
+    }
+
+
+    /* ========================================================
+       SECTION TITLE
+    ======================================================== */
+
+    function sectionTitle(
+      code,
+      title,
+      description = ""
+    ) {
+
+      y += 5;
+
+
+      if (
+        y >
+        pageHeight - 35
+      ) {
+
+        doc.addPage();
+
+        y =
+          16;
+
+      }
+
+
+      doc.setFontSize(
+        7
+      );
+
+
+      doc.setTextColor(
+        ...COLORS.cyan
+      );
+
+
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
+
+      doc.text(
+        code,
+        margin,
+        y
+      );
+
+
+      y +=
+        6;
+
+
+      doc.setFontSize(
+        14
+      );
+
+
+      doc.setTextColor(
+        ...COLORS.dark
+      );
+
+
+      doc.text(
+        title,
+        margin,
+        y
+      );
+
+
+      if (
+        description
+      ) {
+
+        y +=
+          5;
+
+
+        doc.setFontSize(
+          7.5
+        );
+
+
+        doc.setFont(
+          "helvetica",
+          "normal"
+        );
+
+
+        doc.setTextColor(
+          ...COLORS.muted
+        );
+
+
+        doc.text(
+          description,
+          margin,
+          y
+        );
+
+      }
+
+
+      y +=
+        5;
+
+    }
+
+
+    /* ========================================================
+                      PREMIUM COVER PAGE
+    ======================================================== */
+
+    let logoData =
+      null;
+
+
+    try {
+
+      logoData =
+        await auroraLoadPDFImage(
+          "./Assets/AURORA BACHELOR LOGO.png"
+        );
+
+    }
+
+    catch (error) {
+
+      logoData =
+        null;
+
+    }
+
+
+    /* --------------------------------------------------------
+       BACKGROUND
+    -------------------------------------------------------- */
+    doc.setFillColor(
+      8,
+      8,
+      8
+    );
+
+    doc.rect(
+      0,
+      0,
+      pageWidth,
+      pageHeight,
+      "F"
+    );
+
+
+    /* --------------------------------------------------------
+       FUTURISTIC GLOW PANELS
+    -------------------------------------------------------- */
+
+    doc.setFillColor(
+      28,
+      28,
+      28
+    );
+
+    doc.circle(
+      pageWidth - 25,
+      25,
+      46,
+      "F"
+    );
+
+    doc.setFillColor(
+      18,
+      18,
+      18
+    );
+
+    doc.circle(
+      18,
+      pageHeight - 5,
+      42,
+      "F"
+    );
+
+
+    /* --------------------------------------------------------
+       TOP ACCENT LINE
+    -------------------------------------------------------- */
+
+    doc.setDrawColor(
+      ...COLORS.cyan
+    );
+
+
+    doc.setLineWidth(
+      .6
+    );
+
+
+    doc.line(
+      margin,
+      14,
+      pageWidth - margin,
+      14
+    );
+
+
+    /* --------------------------------------------------------
+       LOGO
+    -------------------------------------------------------- */
+
+    if (
+      logoData
+    ) {
+
+      const format =
+        String(
+          logoData
+        )
+          .startsWith(
+            "data:image/png"
+          )
+
+          ? "PNG"
+
+          : "JPEG";
+
+
+      try {
+
+        doc.addImage(
+          logoData,
+          format,
+          margin,
+          23,
+          30,
+          30,
+          undefined,
+          "FAST"
+        );
+
+      }
+
+      catch (error) {
+
+        console.warn(
+          "Aurora PDF Logo Render:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* --------------------------------------------------------
+       BRAND
+    -------------------------------------------------------- */
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+
+    doc.setTextColor(
+      ...COLORS.cyan
+    );
+
+
+    doc.setFontSize(
+      8
+    );
+
+
+    doc.text(
+      "AURORA // HOUSE MANAGEMENT OS",
+      logoData
+        ? margin + 38
+        : margin,
+      29
+    );
+
+
+    doc.setTextColor(
+      255,
+      255,
+      255
+    );
+
+
+    doc.setFontSize(
+      25
+    );
+
+
+    doc.text(
+      "AURORA",
+      logoData
+        ? margin + 38
+        : margin,
+      40
+    );
+
+
+    doc.setFontSize(
+      10
+    );
+
+
+    doc.setTextColor(
+      170,
+      195,
+      215
+    );
+
+
+    doc.text(
+      "BACHELOR HOUSE MANAGEMENT",
+      logoData
+        ? margin + 38
+        : margin,
+      47
+    );
+
+
+    /* --------------------------------------------------------
+       REPORT IDENTITY
+    -------------------------------------------------------- */
+
+    doc.setFontSize(
+      7
+    );
+
+
+    doc.setTextColor(
+      130,
+      160,
+      182
+    );
+
+
+    doc.text(
+      "FINANCIAL INTELLIGENCE // MONTHLY ARCHIVE",
+      margin,
+      76
+    );
+
+
+    doc.setTextColor(
+      255,
+      255,
+      255
+    );
+
+
+    doc.setFontSize(
+      29
+    );
+
+
+    doc.text(
+      "MONTHLY",
+      margin,
+      92
+    );
+
+
+    doc.text(
+      "ACCOUNT REPORT",
+      margin,
+      105
+    );
+
+
+    /* --------------------------------------------------------
+       ACTIVE MONTH
+    -------------------------------------------------------- */
+
+    doc.setFontSize(
+      13
+    );
+
+
+    doc.setTextColor(
+      ...COLORS.cyan
+    );
+
+
+    doc.text(
+      monthLabel(
+        activeMonth
+      ).toUpperCase(),
+      margin,
+      119
+    );
+
+
+    /* --------------------------------------------------------
+       STATUS AREA
+    -------------------------------------------------------- */
+
+    const statusText =
+      month?.closed
+        ? "LOCKED"
+        : "OPEN";
+
+
+    const statusColor =
+      month?.closed
+        ? COLORS.amber
+        : COLORS.green;
+
+
+    doc.setDrawColor(
+      ...statusColor
+    );
+
+
+    doc.setFillColor(
+      9,
+      20,
+      32
+    );
+
+
+    doc.roundedRect(
+      margin,
+      130,
+      41,
+      11,
+      2,
+      2,
+      "FD"
+    );
+
+
+    doc.setTextColor(
+      ...statusColor
+    );
+
+
+    doc.setFontSize(
+      7
+    );
+
+
+    doc.text(
+      `● ${statusText}`,
+      margin + 5,
+      137
+    );
+
+
+    /* --------------------------------------------------------
+       SUMMARY CARDS
+    -------------------------------------------------------- */
+
+    const coverCards = [
+
+      {
+        label:
+          "TOTAL MEALS",
+
+        value:
+          String(
+            totalMeals
+          )
+      },
+
+      {
+        label:
+          "MEAL RATE",
+
+        value:
+          pdfMoney(
+            mealRate
+          )
+      },
+
+      {
+        label:
+          "TOTAL COST",
+
+        value:
+          pdfMoney(
+            totalExpense
+          )
+      },
+
+      {
+        label:
+          "TOTAL PAID",
+
+        value:
+          pdfMoney(
+            totalPaid
+          )
+      },
+
+      {
+        label:
+          "OUTSTANDING",
+
+        value:
+          pdfMoney(
+            outstanding
+          )
+      }
+
+    ];
+
+
+    const coverGap =
+      5;
+
+
+    const coverWidth =
+      (
+        pageWidth -
+        (
+          margin * 2
+        ) -
+        (
+          coverGap *
+          (
+            coverCards.length -
+            1
+          )
+        )
+      ) /
+      coverCards.length;
+
+
+    coverCards.forEach(
+      (
+        card,
+        index
+      ) => {
+
+        const x =
+          margin +
+          index *
+          (
+            coverWidth +
+            coverGap
+          );
+
+
+        doc.setFillColor(
+          8,
+          18,
+          31
+        );
+
+
+        doc.setDrawColor(
+          32,
+          67,
+          88
+        );
+
+
+        doc.roundedRect(
+          x,
+          153,
+          coverWidth,
+          24,
+          2,
+          2,
+          "FD"
+        );
+
+
+        doc.setFontSize(
+          6
+        );
+
+
+        doc.setTextColor(
+          105,
+          145,
+          169
+        );
+
+
+        doc.text(
+          card.label,
+          x + 4,
+          161
+        );
+
+
+        doc.setFontSize(
+          10
+        );
+
+
+        doc.setTextColor(
+          235,
+          248,
+          255
+        );
+
+
+        doc.text(
+          card.value,
+          x + 4,
+          170
+        );
+
+      }
+    );
+
+
+    /* --------------------------------------------------------
+       COVER FOOTER INFO
+    -------------------------------------------------------- */
+
+    doc.setFontSize(
+      7
+    );
+
+
+    doc.setTextColor(
+      98,
+      126,
+      146
+    );
+
+
+    doc.text(
+      `ACTIVE MEMBERS // ${members.length}`,
+      margin,
+      pageHeight - 22
+    );
+
+
+    doc.text(
+      `GENERATED // ${new Date()
+        .toLocaleString(
+          "en-GB"
+        )
+      }`,
+      margin,
+      pageHeight - 15
+    );
+
+
+    doc.setTextColor(
+      ...COLORS.cyan
+    );
+
+
+    doc.text(
+      "AURORA BACHELOR",
+      pageWidth - margin,
+      pageHeight - 15,
+      {
+        align:
+          "right"
+      }
+    );
+
+
+    /* --------------------------------------------------------
+       REPORT CONTENT STARTS ON PAGE 2
+    -------------------------------------------------------- */
+
+    doc.addPage();
+
+
+    y =
+      18;
+
+
+    /* ========================================================
+       01 // MONTHLY SUMMARY
+    ======================================================== */
+
+    sectionTitle(
+      "01 // FINANCIAL CORE",
+      "Monthly Summary",
+      "Combined Meal Account and House Account overview."
+    );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "grid",
+
+      head: [[
+        "TOTAL MEALS",
+        "MEAL EXPENSE",
+        "MEAL RATE",
+        "HOUSE COST",
+        "TOTAL COST",
+        "TOTAL PAID",
+        "OUTSTANDING"
+      ]],
+
+      body: [[
+        String(
+          totalMeals
+        ),
+
+        pdfMoney(
+          mealExpenseTotal
+        ),
+
+        pdfMoney(
+          mealRate
+        ),
+
+        pdfMoney(
+          houseCost
+        ),
+
+        pdfMoney(
+          totalExpense
+        ),
+
+        pdfMoney(
+          totalPaid
+        ),
+
+        pdfMoney(
+          outstanding
+        )
+      ]],
+
+      styles: {
+        font:
+          "helvetica",
+
+        fontSize:
+          8,
+
+        cellPadding:
+          3,
+
+        halign:
+          "center"
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.dark,
+
+        textColor:
+          [255, 255, 255],
+
+        fontStyle:
+          "bold"
+      },
+
+      alternateRowStyles: {
+        fillColor:
+          [247, 250, 252]
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       02 // MEMBER SUMMARY
+    ======================================================== */
+
+    sectionTitle(
+      "02 // MEMBER NETWORK",
+      "Member Account Summary",
+      "Meal dues, house share, payments and final balances."
+    );
+
+
+    const memberRows =
+      members.map(
+        member => {
+
+          const mealCount =
+            AuroraMealAccount
+              .memberMeals(
+                member.id
+              );
+
+
+          const mealDue =
+            mealCount *
+            mealRate;
+
+
+          const mealPaid =
+            mealPayments
+
+              .filter(
+                payment =>
+                  String(
+                    payment.memberId
+                  ) ===
+                  String(
+                    member.id
+                  )
+              )
+
+              .reduce(
+                (sum, payment) =>
+                  sum +
+                  number(
+                    payment.amount
+                  ),
+                0
+              );
+
+
+          const mealBalance =
+            mealPaid -
+            mealDue;
+
+
+          const housePaid =
+            housePayments
+
+              .filter(
+                payment =>
+                  String(
+                    payment.memberId
+                  ) ===
+                  String(
+                    member.id
+                  )
+              )
+
+              .reduce(
+                (sum, payment) =>
+                  sum +
+                  number(
+                    payment.amount
+                  ),
+                0
+              );
+
+
+          const houseBalance =
+            housePaid -
+            houseShare;
+
+
+          const finalBalance =
+            mealBalance +
+            houseBalance;
+
+
+          return [
+
+            member.name ||
+            "Unknown",
+
+            String(
+              mealCount
+            ),
+
+            pdfMoney(
+              mealDue
+            ),
+
+            pdfMoney(
+              mealPaid
+            ),
+
+            pdfMoney(
+              mealBalance
+            ),
+
+            pdfMoney(
+              houseShare
+            ),
+
+            pdfMoney(
+              housePaid
+            ),
+
+            pdfMoney(
+              houseBalance
+            ),
+
+            pdfMoney(
+              finalBalance
+            )
+
+          ];
+
+        }
+      );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "MEMBER",
+        "MEALS",
+        "MEAL DUE",
+        "MEAL PAID",
+        "MEAL BAL.",
+        "HOUSE SHARE",
+        "HOUSE PAID",
+        "HOUSE BAL.",
+        "FINAL BAL."
+      ]],
+
+      body:
+        memberRows.length
+          ? memberRows
+          : [[
+            "No members",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-"
+          ]],
+
+      styles: {
+        fontSize:
+          7.2,
+
+        cellPadding:
+          2.2
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.purple,
+
+        textColor:
+          [255, 255, 255]
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       03 // DAILY MEAL MATRIX
+    ======================================================== */
+
+    sectionTitle(
+      "03 // MEAL ACCOUNT",
+      "Daily Meal Matrix",
+      "Complete day-by-day meal consumption for the active month."
+    );
+
+
+    const mealHead = [
+      "DATE",
+      ...members.map(
+        member =>
+          String(
+            member.name ||
+            "Member"
+          )
+      ),
+      "DAY TOTAL"
+    ];
+
+
+    const sortedMeals =
+      [...meals]
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        );
+
+
+    const mealRows =
+      sortedMeals.map(
+        day => {
+
+          let dayTotal =
+            0;
+
+
+          const values =
+            members.map(
+              member => {
+
+                const value =
+                  number(
+                    day
+                      ?.values
+                    ?.[member.id]
+                  );
+
+
+                dayTotal +=
+                  value;
+
+
+                return String(
+                  value
+                );
+
+              }
+            );
+
+
+          return [
+            pdfDate(
+              day.date
+            ),
+            ...values,
+            String(
+              dayTotal
+            )
+          ];
+
+        }
+      );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "grid",
+
+      head: [
+        mealHead
+      ],
+
+      body:
+        mealRows.length
+          ? mealRows
+          : [[
+            "No meal records",
+            ...members.map(
+              () => "-"
+            ),
+            "-"
+          ]],
+
+      styles: {
+        fontSize:
+          7,
+
+        cellPadding:
+          2,
+
+        halign:
+          "center"
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.cyan,
+
+        textColor:
+          COLORS.dark
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       04 // MEAL EXPENSES
+    ======================================================== */
+
+    sectionTitle(
+      "04 // MEAL ACCOUNT",
+      "Meal Expense Ledger",
+      "All recorded meal-account expenses."
+    );
+
+
+    const mealExpenseRows =
+      [...mealExpenses]
+
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        )
+
+        .map(
+          expense => [
+
+            pdfDate(
+              expense.date
+            ),
+
+            expense.category ||
+            "Other",
+
+            expense.description ||
+            "-",
+
+            memberName(
+              expense.paidBy
+            ),
+
+            pdfMoney(
+              expense.amount
+            )
+
+          ]
+        );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "DATE",
+        "CATEGORY",
+        "DESCRIPTION",
+        "PAID BY",
+        "AMOUNT"
+      ]],
+
+      body:
+        mealExpenseRows.length
+          ? mealExpenseRows
+          : [[
+            "-",
+            "-",
+            "No meal expenses recorded",
+            "-",
+            pdfMoney(0)
+          ]],
+
+      styles: {
+        fontSize:
+          7.5,
+
+        cellPadding:
+          2.3
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.cyan,
+
+        textColor:
+          COLORS.dark
+      },
+
+      columnStyles: {
+        4: {
+          halign:
+            "right"
+        }
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       05 // MEAL PAYMENTS
+    ======================================================== */
+
+    sectionTitle(
+      "05 // MEAL ACCOUNT",
+      "Meal Payment Ledger",
+      "Member contributions recorded under the meal account."
+    );
+
+
+    const mealPaymentRows =
+      [...mealPayments]
+
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        )
+
+        .map(
+          payment => [
+
+            pdfDate(
+              payment.date
+            ),
+
+            memberName(
+              payment.memberId
+            ),
+
+            payment.method ||
+            "Cash",
+
+            payment.reference ||
+            payment.note ||
+            "-",
+
+            pdfMoney(
+              payment.amount
+            )
+
+          ]
+        );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "DATE",
+        "MEMBER",
+        "METHOD",
+        "REFERENCE / NOTE",
+        "AMOUNT"
+      ]],
+
+      body:
+        mealPaymentRows.length
+          ? mealPaymentRows
+          : [[
+            "-",
+            "-",
+            "-",
+            "No meal payments recorded",
+            pdfMoney(0)
+          ]],
+
+      styles: {
+        fontSize:
+          7.5
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.green,
+
+        textColor:
+          [255, 255, 255]
+      },
+
+      columnStyles: {
+        4: {
+          halign:
+            "right"
+        }
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       06 // HOUSE RENT
+    ======================================================== */
+
+    sectionTitle(
+      "06 // HOUSE ACCOUNT",
+      "House Rent Ledger",
+      "Rent entries recorded for the active month."
+    );
+
+
+    const rentRows =
+      [...rents]
+
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        )
+
+        .map(
+          rent => [
+
+            pdfDate(
+              rent.date
+            ),
+
+            rent.description ||
+            "House Rent",
+
+            pdfMoney(
+              rent.amount
+            )
+
+          ]
+        );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "DATE",
+        "DESCRIPTION",
+        "AMOUNT"
+      ]],
+
+      body:
+        rentRows.length
+          ? rentRows
+          : [[
+            "-",
+            "No rent recorded",
+            pdfMoney(0)
+          ]],
+
+      styles: {
+        fontSize:
+          7.5
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.amber,
+
+        textColor:
+          [255, 255, 255]
+      },
+
+      columnStyles: {
+        2: {
+          halign:
+            "right"
+        }
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       07 // HOUSE BILLS
+    ======================================================== */
+
+    sectionTitle(
+      "07 // HOUSE ACCOUNT",
+      "House Bill Ledger",
+      "Electricity, gas, water and all other house bills."
+    );
+
+
+    const billRows =
+      [...bills]
+
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        )
+
+        .map(
+          bill => [
+
+            pdfDate(
+              bill.date
+            ),
+
+            bill.category ||
+            "Other",
+
+            bill.description ||
+            "-",
+
+            pdfMoney(
+              bill.amount
+            )
+
+          ]
+        );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "DATE",
+        "CATEGORY",
+        "DESCRIPTION",
+        "AMOUNT"
+      ]],
+
+      body:
+        billRows.length
+          ? billRows
+          : [[
+            "-",
+            "-",
+            "No house bills recorded",
+            pdfMoney(0)
+          ]],
+
+      styles: {
+        fontSize:
+          7.5
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.amber,
+
+        textColor:
+          [255, 255, 255]
+      },
+
+      columnStyles: {
+        3: {
+          halign:
+            "right"
+        }
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       08 // HOUSE PAYMENTS
+    ======================================================== */
+
+    sectionTitle(
+      "08 // HOUSE ACCOUNT",
+      "House Payment Ledger",
+      "Member payments contributed toward the house account."
+    );
+
+
+    const housePaymentRows =
+      [...housePayments]
+
+        .sort(
+          (a, b) =>
+            String(
+              a.date || ""
+            )
+              .localeCompare(
+                String(
+                  b.date || ""
+                )
+              )
+        )
+
+        .map(
+          payment => [
+
+            pdfDate(
+              payment.date
+            ),
+
+            memberName(
+              payment.memberId
+            ),
+
+            payment.method ||
+            "Cash",
+
+            payment.reference ||
+            payment.note ||
+            "-",
+
+            pdfMoney(
+              payment.amount
+            )
+
+          ]
+        );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "striped",
+
+      head: [[
+        "DATE",
+        "MEMBER",
+        "METHOD",
+        "REFERENCE / NOTE",
+        "AMOUNT"
+      ]],
+
+      body:
+        housePaymentRows.length
+          ? housePaymentRows
+          : [[
+            "-",
+            "-",
+            "-",
+            "No house payments recorded",
+            pdfMoney(0)
+          ]],
+
+      styles: {
+        fontSize:
+          7.5
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.green,
+
+        textColor:
+          [255, 255, 255]
+      },
+
+      columnStyles: {
+        4: {
+          halign:
+            "right"
+        }
+      }
+
+    });
+
+
+    y =
+      doc.lastAutoTable
+        .finalY +
+      5;
+
+
+    /* ========================================================
+       09 // FINAL ACCOUNT STATUS
+    ======================================================== */
+
+    sectionTitle(
+      "09 // SETTLEMENT CORE",
+      "Final Account Position",
+      "Closing financial position for the selected accounting cycle."
+    );
+
+
+    doc.autoTable({
+
+      startY:
+        y,
+
+      theme:
+        "grid",
+
+      head: [[
+        "ACCOUNT",
+        "COST",
+        "PAID",
+        "BALANCE"
+      ]],
+
+      body: [
+
+        [
+          "MEAL ACCOUNT",
+
+          pdfMoney(
+            mealExpenseTotal
+          ),
+
+          pdfMoney(
+            mealPaymentTotal
+          ),
+
+          pdfMoney(
+            mealPaymentTotal -
+            mealExpenseTotal
+          )
+        ],
+
+        [
+          "HOUSE ACCOUNT",
+
+          pdfMoney(
+            houseCost
+          ),
+
+          pdfMoney(
+            housePaymentTotal
+          ),
+
+          pdfMoney(
+            housePaymentTotal -
+            houseCost
+          )
+        ],
+
+        [
+          "COMBINED TOTAL",
+
+          pdfMoney(
+            totalExpense
+          ),
+
+          pdfMoney(
+            totalPaid
+          ),
+
+          pdfMoney(
+            totalPaid -
+            totalExpense
+          )
+        ]
+
+      ],
+
+      styles: {
+        fontSize:
+          8,
+
+        cellPadding:
+          3
+      },
+
+      headStyles: {
+        fillColor:
+          COLORS.dark,
+
+        textColor:
+          [255, 255, 255]
+      },
+
+      columnStyles: {
+
+        1: {
+          halign:
+            "right"
+        },
+
+        2: {
+          halign:
+            "right"
+        },
+
+        3: {
+          halign:
+            "right"
+        }
+
+      }
+
+    });
+
+
+    /* ========================================================
+       FOOTER
+    ======================================================== */
+
+    addFooter();
+
+
+    /* ========================================================
+       DOWNLOAD
+    ======================================================== */
+
+    const safeMonth =
+      String(
+        activeMonth
+      )
+        .replace(
+          /[^0-9-]/g,
+          ""
+        );
+
+
+    const fileName =
+      `Aurora-Bachelor-Monthly-Report-${safeMonth}.pdf`;
+
+
+    doc.save(
+      fileName
+    );
+
+
+    toast(
+      `${monthLabel(activeMonth)} PDF downloaded.`
+    );
+
+
+    console.log(
+      "📄 Aurora Monthly PDF:",
+      fileName
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Aurora PDF Error:",
+      error
+    );
+
+
+    toast(
+      "PDF generation failed."
+    );
+
+  }
 
 }
 
@@ -28813,3 +31143,2135 @@ if (
   );
 
 }
+
+
+
+
+/* ============================================================
+   AURORA // PWA INSTALL ENGINE
+============================================================ */
+
+/* ============================================================
+   AURORA // FUTURISTIC PWA INSTALL PORTAL
+============================================================ */
+
+const AuroraInstall = (() => {
+
+  let deferredPrompt = null;
+
+
+  /* ==========================================================
+     HELPERS
+  ========================================================== */
+
+  function installButton() {
+    return document.getElementById(
+      "auroraInstallBtn"
+    );
+  }
+
+
+  function isInstalled() {
+
+    return (
+      window.matchMedia(
+        "(display-mode: standalone)"
+      ).matches ||
+
+      window.navigator
+        .standalone === true
+    );
+
+  }
+
+
+  function updateButton() {
+
+    const btn =
+      installButton();
+
+
+    if (!btn) {
+      return;
+    }
+
+
+    if (isInstalled()) {
+
+      btn.hidden = true;
+      return;
+
+    }
+
+
+    btn.hidden =
+      !deferredPrompt;
+
+  }
+
+
+  /* ==========================================================
+     CREATE FUTURISTIC MODAL
+  ========================================================== */
+
+  function ensureModal() {
+
+    let modal =
+      document.getElementById(
+        "auroraInstallPortal"
+      );
+
+
+    if (modal) {
+      return modal;
+    }
+
+
+    modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.id =
+      "auroraInstallPortal";
+
+
+    modal.className =
+      "aurora-install-portal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="aurora-install-backdrop"
+        data-install-close
+      ></div>
+
+
+      <div
+        class="aurora-install-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auroraInstallTitle"
+      >
+
+        <div
+          class="aurora-install-scanline"
+        ></div>
+
+
+        <div
+          class="aurora-install-corner top-left"
+        ></div>
+
+        <div
+          class="aurora-install-corner top-right"
+        ></div>
+
+        <div
+          class="aurora-install-corner bottom-left"
+        ></div>
+
+        <div
+          class="aurora-install-corner bottom-right"
+        ></div>
+
+
+        <!-- ================================================
+             HEADER
+        ================================================= -->
+
+        <div
+          class="aurora-install-header"
+        >
+
+          <div>
+
+            <span
+              class="aurora-install-code"
+            >
+              AURORA // APPLICATION DEPLOYMENT
+            </span>
+
+
+            <h2
+              id="auroraInstallTitle"
+            >
+              Install
+              <span>
+                Aurora Bachelor
+              </span>
+            </h2>
+
+
+            <p>
+              Deploy Aurora to this device
+              for faster access and a dedicated
+              application experience.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="aurora-install-close"
+            data-install-close
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+
+        <!-- ================================================
+             SYSTEM CORE
+        ================================================= -->
+
+        <div
+          class="aurora-install-core"
+        >
+
+          <div
+            class="aurora-install-orb"
+          >
+
+            <div
+              class="aurora-install-orb-inner"
+            >
+              A
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-install-core-copy"
+          >
+
+            <span>
+              AURORA BACHELOR
+            </span>
+
+            <strong>
+              HOUSE MANAGEMENT OS
+            </strong>
+
+            <small>
+              PWA // SECURE CLOUD CLIENT
+            </small>
+
+          </div>
+
+
+          <div
+            class="aurora-install-status"
+          >
+
+            <i></i>
+
+            READY TO DEPLOY
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ================================================
+             FEATURES
+        ================================================= -->
+
+        <div
+          class="aurora-install-features"
+        >
+
+          <div
+            class="aurora-install-feature"
+          >
+
+            <span
+              class="aurora-install-feature-icon"
+            >
+              ◫
+            </span>
+
+            <div>
+
+              <strong>
+                Dedicated App Window
+              </strong>
+
+              <p>
+                Aurora opens like a standalone
+                desktop or mobile application.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-install-feature"
+          >
+
+            <span
+              class="aurora-install-feature-icon purple"
+            >
+              ⚡
+            </span>
+
+            <div>
+
+              <strong>
+                Instant Access
+              </strong>
+
+              <p>
+                Launch from your desktop,
+                Start menu or taskbar.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-install-feature"
+          >
+
+            <span
+              class="aurora-install-feature-icon green"
+            >
+              ⟳
+            </span>
+
+            <div>
+
+              <strong>
+                Multi-Device Cloud Sync
+              </strong>
+
+              <p>
+                Household data stays connected
+                through Aurora Cloud.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-install-feature"
+          >
+
+            <span
+              class="aurora-install-feature-icon amber"
+            >
+              ◈
+            </span>
+
+            <div>
+
+              <strong>
+                Secure Household Access
+              </strong>
+
+              <p>
+                Owner, Admin and Member permissions
+                remain connected to your account.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ================================================
+             STATUS
+        ================================================= -->
+
+        <div
+          class="aurora-install-terminal"
+          id="auroraInstallTerminal"
+        >
+
+          <span>
+            SYSTEM
+          </span>
+
+          <strong>
+            INSTALL PACKAGE READY
+          </strong>
+
+        </div>
+
+
+
+        <!-- ================================================
+             ACTIONS
+        ================================================= -->
+
+        <div
+          class="aurora-install-actions"
+        >
+
+          <button
+            type="button"
+            class="aurora-install-primary"
+            id="auroraInstallConfirm"
+          >
+
+            <span>
+              ⇩
+            </span>
+
+            INSTALL NOW
+
+            <i>
+              ››
+            </i>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="aurora-install-secondary"
+            data-install-close
+          >
+            NOT NOW
+          </button>
+
+        </div>
+
+
+        <div
+          class="aurora-install-footer"
+        >
+
+          <span>
+            ◉ CLOUD LINK READY
+          </span>
+
+          <span>
+            AURORA BACHELOR // PWA
+          </span>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body
+      .appendChild(
+        modal
+      );
+
+
+    /* ------------------------------------------------------
+       CLOSE EVENTS
+    ------------------------------------------------------ */
+
+    modal
+      .querySelectorAll(
+        "[data-install-close]"
+      )
+      .forEach(
+        element => {
+
+          element
+            .addEventListener(
+              "click",
+              close
+            );
+
+        }
+      );
+
+
+    /* ------------------------------------------------------
+       INSTALL
+    ------------------------------------------------------ */
+
+    modal
+      .querySelector(
+        "#auroraInstallConfirm"
+      )
+      ?.addEventListener(
+        "click",
+        install
+      );
+
+
+    return modal;
+
+  }
+
+
+  /* ==========================================================
+     OPEN
+  ========================================================== */
+
+  function open() {
+
+    if (
+      isInstalled()
+    ) {
+
+      if (
+        typeof toast ===
+        "function"
+      ) {
+
+        toast(
+          "Aurora is already installed."
+        );
+
+      }
+
+      return;
+
+    }
+
+
+    const modal =
+      ensureModal();
+
+
+    requestAnimationFrame(
+      () => {
+
+        modal.classList
+          .add(
+            "active"
+          );
+
+      }
+    );
+
+
+    document.body
+      .classList
+      .add(
+        "aurora-install-open"
+      );
+
+  }
+
+
+  /* ==========================================================
+     CLOSE
+  ========================================================== */
+
+  function close() {
+
+    const modal =
+      document.getElementById(
+        "auroraInstallPortal"
+      );
+
+
+    modal
+      ?.classList
+      .remove(
+        "active"
+      );
+
+
+    document.body
+      .classList
+      .remove(
+        "aurora-install-open"
+      );
+
+  }
+
+
+  /* ==========================================================
+     INSTALL
+  ========================================================== */
+
+  async function install() {
+
+    const confirmBtn =
+      document.getElementById(
+        "auroraInstallConfirm"
+      );
+
+
+    const terminal =
+      document.getElementById(
+        "auroraInstallTerminal"
+      );
+
+
+    if (
+      !deferredPrompt
+    ) {
+
+      if (terminal) {
+
+        terminal.innerHTML = `
+
+          <span>
+            SYSTEM
+          </span>
+
+          <strong>
+            INSTALL SIGNAL UNAVAILABLE
+          </strong>
+
+        `;
+
+      }
+
+
+      return;
+
+    }
+
+
+    try {
+
+      if (confirmBtn) {
+
+        confirmBtn.disabled =
+          true;
+
+      }
+
+
+      if (terminal) {
+
+        terminal.innerHTML = `
+
+          <span>
+            DEPLOYMENT
+          </span>
+
+          <strong>
+            HANDING OFF TO SYSTEM INSTALLER...
+          </strong>
+
+        `;
+
+      }
+
+
+      deferredPrompt
+        .prompt();
+
+
+      const {
+        outcome
+      } =
+        await deferredPrompt
+          .userChoice;
+
+
+      if (
+        outcome ===
+        "accepted"
+      ) {
+
+        if (terminal) {
+
+          terminal.innerHTML = `
+
+            <span>
+              DEPLOYMENT
+            </span>
+
+            <strong>
+              INSTALLATION ACCEPTED
+            </strong>
+
+          `;
+
+        }
+
+      }
+
+      else {
+
+        if (terminal) {
+
+          terminal.innerHTML = `
+
+            <span>
+              DEPLOYMENT
+            </span>
+
+            <strong>
+              INSTALLATION CANCELLED
+            </strong>
+
+          `;
+
+        }
+
+      }
+
+
+      deferredPrompt =
+        null;
+
+
+      setTimeout(
+        close,
+        450
+      );
+
+
+      updateButton();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Install Error:",
+        error
+      );
+
+
+      if (terminal) {
+
+        terminal.innerHTML = `
+
+          <span>
+            ERROR
+          </span>
+
+          <strong>
+            DEPLOYMENT FAILED
+          </strong>
+
+        `;
+
+      }
+
+    }
+
+    finally {
+
+      if (confirmBtn) {
+
+        confirmBtn.disabled =
+          false;
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     BROWSER INSTALL EVENT
+  ========================================================== */
+
+  window.addEventListener(
+    "beforeinstallprompt",
+    event => {
+
+      event.preventDefault();
+
+
+      deferredPrompt =
+        event;
+
+
+      updateButton();
+
+
+      console.log(
+        "📦 Aurora deployment package ready."
+      );
+
+    }
+  );
+
+
+  /* ==========================================================
+     TOPBAR BUTTON
+  ========================================================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          "#auroraInstallBtn"
+        );
+
+
+      if (!button) {
+        return;
+      }
+
+
+      event.preventDefault();
+
+
+      open();
+
+    }
+  );
+
+
+  /* ==========================================================
+     ESC KEY
+  ========================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key ===
+        "Escape"
+      ) {
+
+        close();
+
+      }
+
+    }
+  );
+
+
+  /* ==========================================================
+     INSTALLED
+  ========================================================== */
+
+  window.addEventListener(
+    "appinstalled",
+    () => {
+
+      deferredPrompt =
+        null;
+
+
+      close();
+
+
+      updateButton();
+
+
+      if (
+        typeof toast ===
+        "function"
+      ) {
+
+        toast(
+          "Aurora installed successfully."
+        );
+
+      }
+
+
+      console.log(
+        "🌌 Aurora deployment complete."
+      );
+
+    }
+  );
+
+
+  window.addEventListener(
+    "load",
+    updateButton
+  );
+
+
+  return {
+
+    open,
+    close,
+    install,
+    isInstalled,
+    updateButton
+
+  };
+
+})();
+
+
+
+
+/* ============================================================
+   AURORA // SMART UPDATE DETECTION SYSTEM
+============================================================ */
+
+const AuroraUpdateSystem = (() => {
+
+  const STORAGE_KEY =
+    "aurora_build_fingerprint_v1";
+
+
+  const CHECK_INTERVAL =
+    120000;
+
+
+  let latestFingerprint =
+    null;
+
+
+  let updateDetected =
+    false;
+
+
+  let reloading =
+    false;
+
+
+  let registration =
+    null;
+
+
+  /* ==========================================================
+     SAME-ORIGIN CORE FILES
+  ========================================================== */
+
+  function getCoreFiles() {
+
+    const urls =
+      new Set();
+
+
+    /* CURRENT PAGE */
+
+    urls.add(
+      new URL(
+        "./index.html",
+        location.href
+      ).href
+    );
+
+
+    /* LOCAL JAVASCRIPT */
+
+    document
+      .querySelectorAll(
+        "script[src]"
+      )
+      .forEach(
+        script => {
+
+          try {
+
+            const url =
+              new URL(
+                script.src,
+                location.href
+              );
+
+
+            if (
+              url.origin ===
+              location.origin
+            ) {
+
+              urls.add(
+                url.href
+              );
+
+            }
+
+          }
+
+          catch (_) { }
+
+        }
+      );
+
+
+    /* LOCAL STYLES */
+
+    document
+      .querySelectorAll(
+        'link[rel="stylesheet"][href]'
+      )
+      .forEach(
+        link => {
+
+          try {
+
+            const url =
+              new URL(
+                link.href,
+                location.href
+              );
+
+
+            if (
+              url.origin ===
+              location.origin
+            ) {
+
+              urls.add(
+                url.href
+              );
+
+            }
+
+          }
+
+          catch (_) { }
+
+        }
+      );
+
+
+    /* MANIFEST */
+
+    const manifest =
+      document.querySelector(
+        'link[rel="manifest"]'
+      );
+
+
+    if (
+      manifest?.href
+    ) {
+
+      urls.add(
+        manifest.href
+      );
+
+    }
+
+
+    /* SERVICE WORKER */
+
+    urls.add(
+      new URL(
+        "./sw.js",
+        location.href
+      ).href
+    );
+
+
+    return [
+      ...urls
+    ];
+
+  }
+
+
+  /* ==========================================================
+     NETWORK FILE SIGNATURE
+  ========================================================== */
+
+  async function getFileSignature(
+    sourceUrl
+  ) {
+
+    try {
+
+      const url =
+        new URL(
+          sourceUrl
+        );
+
+
+      url.searchParams.set(
+        "__aurora_update_check",
+        Date.now()
+      );
+
+
+      let response =
+        await fetch(
+          url.href,
+          {
+
+            method:
+              "HEAD",
+
+            cache:
+              "no-store"
+
+          }
+        );
+
+
+      /*
+        Fallback for servers that
+        do not support HEAD.
+      */
+
+      if (
+        !response.ok
+      ) {
+
+        response =
+          await fetch(
+            url.href,
+            {
+              cache:
+                "no-store"
+            }
+          );
+
+      }
+
+
+      if (
+        !response.ok
+      ) {
+
+        return (
+          `${url.pathname}:unavailable`
+        );
+
+      }
+
+
+      const etag =
+        response.headers
+          .get(
+            "etag"
+          );
+
+
+      const modified =
+        response.headers
+          .get(
+            "last-modified"
+          );
+
+
+      const length =
+        response.headers
+          .get(
+            "content-length"
+          );
+
+
+      return [
+
+        url.pathname,
+
+        etag ||
+        modified ||
+        length ||
+        response.status
+
+      ].join(
+        ":"
+      );
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora Update Probe:",
+        sourceUrl,
+        error
+      );
+
+
+      return (
+        `${sourceUrl}:error`
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     CREATE BUILD FINGERPRINT
+  ========================================================== */
+
+  async function createFingerprint() {
+
+    const files =
+      getCoreFiles();
+
+
+    const signatures =
+      await Promise.all(
+
+        files.map(
+          getFileSignature
+        )
+
+      );
+
+
+    const raw =
+      signatures
+        .sort()
+        .join(
+          "||"
+        );
+
+
+    /*
+      SHA-256 if supported.
+    */
+
+    if (
+      window.crypto?.subtle
+    ) {
+
+      const data =
+        new TextEncoder()
+          .encode(
+            raw
+          );
+
+
+      const digest =
+        await crypto.subtle
+          .digest(
+            "SHA-256",
+            data
+          );
+
+
+      return Array
+        .from(
+          new Uint8Array(
+            digest
+          )
+        )
+        .map(
+          byte =>
+            byte
+              .toString(16)
+              .padStart(
+                2,
+                "0"
+              )
+        )
+        .join("")
+        .slice(
+          0,
+          20
+        );
+
+    }
+
+
+    return raw;
+
+  }
+
+
+  /* ==========================================================
+     UPDATE MODAL
+  ========================================================== */
+
+  function ensureModal() {
+
+    let portal =
+      document.getElementById(
+        "auroraUpdatePortal"
+      );
+
+
+    if (portal) {
+
+      return portal;
+
+    }
+
+
+    portal =
+      document.createElement(
+        "div"
+      );
+
+
+    portal.id =
+      "auroraUpdatePortal";
+
+
+    portal.className =
+      "aurora-update-portal";
+
+
+    portal.innerHTML = `
+
+      <div
+        class="aurora-update-backdrop"
+      ></div>
+
+
+      <div
+        class="aurora-update-modal"
+      >
+
+        <div
+          class="aurora-update-line"
+        ></div>
+
+
+        <div
+          class="aurora-update-orbit"
+        >
+
+          <span>
+            ↻
+          </span>
+
+        </div>
+
+
+        <span
+          class="aurora-update-code"
+        >
+          AURORA // SYSTEM UPGRADE
+        </span>
+
+
+        <h2>
+          Aurora Update
+          <span>
+            Detected
+          </span>
+        </h2>
+
+
+        <p>
+          A newer Aurora Bachelor system
+          build is available from the
+          deployment network.
+        </p>
+
+
+        <div
+          class="aurora-update-status"
+          id="auroraUpdateStatus"
+        >
+
+          <span>
+            ●
+          </span>
+
+          NEW BUILD READY
+
+        </div>
+
+
+        <div
+          class="aurora-update-info"
+        >
+
+          <div>
+
+            <span>
+              CLOUD DATA
+            </span>
+
+            <strong>
+              SAFE
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              INSTALLATION
+            </span>
+
+            <strong>
+              READY
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              ACTION
+            </span>
+
+            <strong>
+              RELOAD
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="aurora-update-actions"
+        >
+
+          <button
+            type="button"
+            id="auroraUpdateNow"
+            class="aurora-update-primary"
+          >
+            ↻ UPDATE NOW
+          </button>
+
+
+          <button
+            type="button"
+            id="auroraUpdateLater"
+            class="aurora-update-secondary"
+          >
+            LATER
+          </button>
+
+        </div>
+
+
+        <small
+          class="aurora-update-foot"
+        >
+          Your household data is stored
+          separately in Aurora Cloud.
+        </small>
+
+      </div>
+
+    `;
+
+
+    document.body
+      .appendChild(
+        portal
+      );
+
+
+    document
+      .getElementById(
+        "auroraUpdateNow"
+      )
+      ?.addEventListener(
+        "click",
+        applyUpdate
+      );
+
+
+    document
+      .getElementById(
+        "auroraUpdateLater"
+      )
+      ?.addEventListener(
+        "click",
+        closeModal
+      );
+
+
+    return portal;
+
+  }
+
+
+  function showModal() {
+
+    ensureModal()
+      .classList
+      .add(
+        "active"
+      );
+
+
+    document.body
+      .classList
+      .add(
+        "aurora-update-open"
+      );
+
+  }
+
+
+  function closeModal() {
+
+    document
+      .getElementById(
+        "auroraUpdatePortal"
+      )
+      ?.classList
+      .remove(
+        "active"
+      );
+
+
+    document.body
+      .classList
+      .remove(
+        "aurora-update-open"
+      );
+
+  }
+
+
+  /* ==========================================================
+     UPDATE DETECTION
+  ========================================================== */
+
+  async function checkForUpdate(
+    silent = true
+  ) {
+
+    if (
+      !navigator.onLine
+    ) {
+
+      return false;
+
+    }
+
+
+    try {
+
+      const fingerprint =
+        await createFingerprint();
+
+
+      if (
+        !fingerprint
+      ) {
+
+        return false;
+
+      }
+
+
+      latestFingerprint =
+        fingerprint;
+
+
+      const stored =
+        localStorage
+          .getItem(
+            STORAGE_KEY
+          );
+
+
+      /*
+        First run establishes baseline.
+      */
+
+      if (
+        !stored
+      ) {
+
+        localStorage
+          .setItem(
+            STORAGE_KEY,
+            fingerprint
+          );
+
+
+        return false;
+
+      }
+
+
+      if (
+        stored ===
+        fingerprint
+      ) {
+
+        if (
+          !silent &&
+          typeof toast ===
+          "function"
+        ) {
+
+          toast(
+            "Aurora is up to date."
+          );
+
+        }
+
+
+        return false;
+
+      }
+
+
+      updateDetected =
+        true;
+
+
+      showModal();
+
+
+      console.log(
+        "🚀 Aurora new build detected:",
+        fingerprint
+      );
+
+
+      return true;
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora update check failed:",
+        error
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     CLEAR AURORA CACHES
+  ========================================================== */
+
+  async function clearCaches() {
+
+    try {
+
+      if (
+        "caches" in window
+      ) {
+
+        const keys =
+          await caches.keys();
+
+
+        await Promise.all(
+
+          keys
+            .filter(
+              key =>
+                key.startsWith(
+                  "aurora-bachelor"
+                )
+            )
+            .map(
+              key =>
+                caches.delete(
+                  key
+                )
+            )
+
+        );
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora cache cleanup:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     APPLY UPDATE
+  ========================================================== */
+
+  async function applyUpdate() {
+
+    if (
+      reloading
+    ) {
+
+      return;
+
+    }
+
+
+    const button =
+      document.getElementById(
+        "auroraUpdateNow"
+      );
+
+
+    const status =
+      document.getElementById(
+        "auroraUpdateStatus"
+      );
+
+
+    try {
+
+      if (button) {
+
+        button.disabled =
+          true;
+
+
+        button.textContent =
+          "UPDATING...";
+
+      }
+
+
+      if (status) {
+
+        status.innerHTML = `
+          <span>◉</span>
+          DEPLOYING NEW SYSTEM BUILD...
+        `;
+
+      }
+
+
+      /*
+        Remember the server build we're
+        about to load so the modal does
+        not immediately appear again.
+      */
+
+      if (
+        latestFingerprint
+      ) {
+
+        localStorage
+          .setItem(
+            STORAGE_KEY,
+            latestFingerprint
+          );
+
+      }
+
+
+      /* ------------------------------------------------------
+         CLEAR OLD STATIC FILES
+      ------------------------------------------------------ */
+
+      await clearCaches();
+
+
+      /* ------------------------------------------------------
+         SERVICE WORKER UPDATE
+      ------------------------------------------------------ */
+
+      if (
+        registration
+      ) {
+
+        try {
+
+          await registration
+            .update();
+
+        }
+
+        catch (error) {
+
+          console.warn(
+            "Aurora SW update:",
+            error
+          );
+
+        }
+
+
+        if (
+          registration.waiting
+        ) {
+
+          registration.waiting
+            .postMessage({
+              type:
+                "AURORA_SKIP_WAITING"
+            });
+
+        }
+
+
+        else if (
+          registration.installing
+        ) {
+
+          registration.installing
+            .addEventListener(
+              "statechange",
+              event => {
+
+                const worker =
+                  event.target;
+
+
+                if (
+                  worker.state ===
+                  "installed" &&
+                  registration.waiting
+                ) {
+
+                  registration.waiting
+                    .postMessage({
+                      type:
+                        "AURORA_SKIP_WAITING"
+                    });
+
+                }
+
+              }
+            );
+
+        }
+
+      }
+
+
+      if (status) {
+
+        status.innerHTML = `
+          <span>✓</span>
+          UPDATE READY // RESTARTING AURORA...
+        `;
+
+      }
+
+
+      reloading =
+        true;
+
+
+      setTimeout(
+        () => {
+
+          window.location
+            .reload();
+
+        },
+        700
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Update Error:",
+        error
+      );
+
+
+      reloading =
+        false;
+
+
+      if (button) {
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "↻ RETRY UPDATE";
+
+      }
+
+
+      if (status) {
+
+        status.innerHTML = `
+          <span>!</span>
+          UPDATE FAILED // RETRY AVAILABLE
+        `;
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     SERVICE WORKER REGISTRATION WATCH
+  ========================================================== */
+
+  async function initializeServiceWorker() {
+
+    if (
+      !(
+        "serviceWorker" in
+        navigator
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      registration =
+        await navigator
+          .serviceWorker
+          .getRegistration();
+
+
+      if (
+        !registration
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+        A waiting worker means a real
+        service-worker update already exists.
+      */
+
+      if (
+        registration.waiting
+      ) {
+
+        updateDetected =
+          true;
+
+
+        showModal();
+
+      }
+
+
+      registration
+        .addEventListener(
+          "updatefound",
+          () => {
+
+            const worker =
+              registration
+                .installing;
+
+
+            if (!worker) {
+
+              return;
+
+            }
+
+
+            worker
+              .addEventListener(
+                "statechange",
+                () => {
+
+                  if (
+                    worker.state ===
+                    "installed" &&
+                    navigator
+                      .serviceWorker
+                      .controller
+                  ) {
+
+                    updateDetected =
+                      true;
+
+
+                    showModal();
+
+                  }
+
+                }
+              );
+
+          }
+        );
+
+
+      navigator
+        .serviceWorker
+        .addEventListener(
+          "controllerchange",
+          () => {
+
+            if (
+              reloading
+            ) {
+
+              return;
+
+            }
+
+
+            reloading =
+              true;
+
+
+            window.location
+              .reload();
+
+          }
+        );
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora SW watcher:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     INITIALIZE
+  ========================================================== */
+
+  async function init() {
+
+    await initializeServiceWorker();
+
+
+    /*
+      Let the current app fully boot first.
+    */
+
+    setTimeout(
+      () => {
+
+        checkForUpdate(
+          true
+        );
+
+      },
+      5000
+    );
+
+
+    /*
+      Background checks.
+    */
+
+    setInterval(
+      () => {
+
+        if (
+          !updateDetected
+        ) {
+
+          checkForUpdate(
+            true
+          );
+
+        }
+
+      },
+      CHECK_INTERVAL
+    );
+
+  }
+
+
+  /* ==========================================================
+     CHECK WHEN USER RETURNS TO APP
+  ========================================================== */
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document
+          .visibilityState ===
+        "visible" &&
+        !updateDetected
+      ) {
+
+        checkForUpdate(
+          true
+        );
+
+      }
+
+    }
+  );
+
+
+  window.addEventListener(
+    "online",
+    () => {
+
+      if (
+        !updateDetected
+      ) {
+
+        checkForUpdate(
+          true
+        );
+
+      }
+
+    }
+  );
+
+
+  window.addEventListener(
+    "focus",
+    () => {
+
+      if (
+        !updateDetected
+      ) {
+
+        checkForUpdate(
+          true
+        );
+
+      }
+
+    }
+  );
+
+
+  window.addEventListener(
+    "load",
+    init
+  );
+
+
+  return {
+
+    check:
+      () =>
+        checkForUpdate(
+          false
+        ),
+
+    apply:
+      applyUpdate,
+
+    close:
+      closeModal
+
+  };
+
+})();

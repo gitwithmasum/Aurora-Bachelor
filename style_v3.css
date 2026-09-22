@@ -20469,3 +20469,1547 @@ select optgroup {
   }
 
 }
+
+
+
+
+/* ============================================================
+   AURORA // INSTALL BUTTON
+============================================================ */
+
+.aurora-install-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 36px;
+
+  padding:
+    0 12px;
+
+  border:
+    1px solid rgba(82, 222, 255, .22);
+
+  border-radius:
+    10px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(33, 185, 234, .08),
+      rgba(112, 80, 255, .06));
+
+  color:
+    #86e9ff;
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+
+  cursor:
+    pointer;
+
+  transition:
+    .2s ease;
+}
+
+
+.aurora-install-btn:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(92, 226, 255, .50);
+
+  background:
+    rgba(55, 204, 255, .10);
+
+  box-shadow:
+    0 0 18px rgba(62, 207, 255, .08);
+}
+
+
+.aurora-install-btn:disabled {
+  opacity:
+    .5;
+
+  cursor:
+    wait;
+}
+
+
+.aurora-install-icon {
+  font-size:
+    12px;
+}
+
+
+/* IMPORTANT */
+
+.aurora-install-btn[hidden] {
+  display:
+    none !important;
+}
+
+
+@media (max-width: 720px) {
+
+  .aurora-install-btn span:last-child {
+    display:
+      none;
+  }
+
+
+  .aurora-install-btn {
+    width:
+      36px;
+
+    padding:
+      0;
+  }
+
+}
+
+
+/* ============================================================
+   AURORA // FUTURISTIC INSTALL PORTAL
+============================================================ */
+
+body.aurora-install-open {
+  overflow: hidden;
+}
+
+
+.aurora-install-portal {
+  position: fixed;
+  inset: 0;
+
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease,
+    visibility .25s ease;
+}
+
+
+.aurora-install-portal.active {
+  opacity: 1;
+  visibility: visible;
+
+  pointer-events: auto;
+}
+
+
+/* ============================================================
+   BACKDROP
+============================================================ */
+
+.aurora-install-backdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 50% 30%,
+      rgba(0, 207, 255, .09),
+      transparent 35%),
+    rgba(1, 5, 13, .84);
+
+  backdrop-filter:
+    blur(15px);
+
+  -webkit-backdrop-filter:
+    blur(15px);
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+.aurora-install-modal {
+  position: relative;
+
+  width: min(720px,
+      100%);
+
+  max-height:
+    calc(100vh - 40px);
+
+  overflow: auto;
+
+  padding:
+    25px;
+
+  border:
+    1px solid rgba(78, 220, 255, .34);
+
+  border-radius:
+    18px;
+
+  background:
+    radial-gradient(circle at 85% 10%,
+      rgba(120, 72, 255, .12),
+      transparent 27%),
+    radial-gradient(circle at 5% 90%,
+      rgba(31, 206, 255, .09),
+      transparent 30%),
+    linear-gradient(145deg,
+      rgba(5, 14, 29, .985),
+      rgba(7, 10, 25, .985));
+
+  box-shadow:
+    0 0 0 1px rgba(69, 212, 255, .04),
+
+    0 0 45px rgba(32, 183, 255, .11),
+
+    0 35px 100px rgba(0, 0, 0, .65);
+
+  transform:
+    scale(.94) translateY(12px);
+
+  transition:
+    transform .28s cubic-bezier(.22, .8, .25, 1);
+
+  scrollbar-width:
+    thin;
+}
+
+
+.aurora-install-portal.active .aurora-install-modal {
+  transform:
+    scale(1) translateY(0);
+}
+
+
+/* ============================================================
+   TOP GLOW
+============================================================ */
+
+.aurora-install-modal::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 8%;
+
+  width: 84%;
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #55e8ff,
+      #9a78ff,
+      #55e8ff,
+      transparent);
+
+  box-shadow:
+    0 0 14px rgba(70, 223, 255, .55);
+}
+
+
+/* ============================================================
+   SCAN LINE
+============================================================ */
+
+.aurora-install-scanline {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  height: 1px;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      rgba(94, 229, 255, .25),
+      transparent);
+
+  animation:
+    auroraInstallScan 5s linear infinite;
+}
+
+
+@keyframes auroraInstallScan {
+
+  0% {
+    top: 5%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: .6;
+  }
+
+  100% {
+    top: 95%;
+    opacity: 0;
+  }
+
+}
+
+
+/* ============================================================
+   CORNERS
+============================================================ */
+
+.aurora-install-corner {
+  position: absolute;
+
+  width: 17px;
+  height: 17px;
+
+  pointer-events: none;
+}
+
+
+.aurora-install-corner.top-left {
+  top: 8px;
+  left: 8px;
+
+  border-top:
+    2px solid #62e6ff;
+
+  border-left:
+    2px solid #62e6ff;
+}
+
+
+.aurora-install-corner.top-right {
+  top: 8px;
+  right: 8px;
+
+  border-top:
+    2px solid #a27cff;
+
+  border-right:
+    2px solid #a27cff;
+}
+
+
+.aurora-install-corner.bottom-left {
+  bottom: 8px;
+  left: 8px;
+
+  border-bottom:
+    2px solid #62e6ff;
+
+  border-left:
+    2px solid #62e6ff;
+}
+
+
+.aurora-install-corner.bottom-right {
+  bottom: 8px;
+  right: 8px;
+
+  border-bottom:
+    2px solid #a27cff;
+
+  border-right:
+    2px solid #a27cff;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.aurora-install-header {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  gap: 20px;
+}
+
+
+.aurora-install-code {
+  color:
+    #66e5ff;
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .16em;
+}
+
+
+.aurora-install-header h2 {
+  margin:
+    7px 0 6px;
+
+  color:
+    #f1f8ff;
+
+  font-size:
+    clamp(20px,
+      4vw,
+      30px);
+}
+
+
+.aurora-install-header h2 span {
+  background:
+    linear-gradient(90deg,
+      #67eaff,
+      #a889ff,
+      #ed9cff);
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color:
+    transparent;
+}
+
+
+.aurora-install-header p {
+  max-width:
+    500px;
+
+  margin: 0;
+
+  color:
+    rgba(169, 195, 214, .55);
+
+  font-size:
+    9px;
+
+  line-height:
+    1.7;
+}
+
+
+/* ============================================================
+   CLOSE
+============================================================ */
+
+.aurora-install-close {
+  flex:
+    0 0 36px;
+
+  width: 36px;
+  height: 36px;
+
+  border:
+    1px solid rgba(99, 219, 255, .20);
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(65, 188, 255, .035);
+
+  color:
+    #9cecff;
+
+  font-size:
+    20px;
+
+  cursor:
+    pointer;
+
+  transition:
+    .18s ease;
+}
+
+
+.aurora-install-close:hover {
+  border-color:
+    rgba(108, 229, 255, .55);
+
+  box-shadow:
+    0 0 15px rgba(67, 215, 255, .12);
+}
+
+
+/* ============================================================
+   CORE
+============================================================ */
+
+.aurora-install-core {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-top:
+    22px;
+
+  padding:
+    14px;
+
+  border:
+    1px solid rgba(85, 214, 255, .10);
+
+  border-radius:
+    13px;
+
+  background:
+    rgba(255, 255, 255, .018);
+}
+
+
+.aurora-install-orb {
+  position: relative;
+
+  flex:
+    0 0 50px;
+
+  width: 50px;
+  height: 50px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid rgba(78, 226, 255, .40);
+
+  border-radius:
+    50%;
+
+  box-shadow:
+    0 0 18px rgba(55, 211, 255, .10);
+}
+
+
+.aurora-install-orb::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 5px;
+
+  border:
+    1px dashed rgba(168, 122, 255, .45);
+
+  border-radius:
+    50%;
+
+  animation:
+    auroraInstallOrbit 8s linear infinite;
+}
+
+
+@keyframes auroraInstallOrbit {
+
+  to {
+    transform:
+      rotate(360deg);
+  }
+
+}
+
+
+.aurora-install-orb-inner {
+  color:
+    #78eaff;
+
+  font-size:
+    20px;
+
+  font-weight:
+    900;
+}
+
+
+.aurora-install-core-copy {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+
+.aurora-install-core-copy span {
+  color:
+    rgba(123, 227, 255, .55);
+
+  font-size:
+    6px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .12em;
+}
+
+
+.aurora-install-core-copy strong {
+  color:
+    #eef9ff;
+
+  font-size:
+    10px;
+}
+
+
+.aurora-install-core-copy small {
+  color:
+    rgba(152, 177, 198, .40);
+
+  font-size:
+    6px;
+}
+
+
+.aurora-install-status {
+  margin-left: auto;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  color:
+    #65efba;
+
+  font-size:
+    6px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+}
+
+
+.aurora-install-status i {
+  width: 5px;
+  height: 5px;
+
+  border-radius:
+    50%;
+
+  background:
+    #65efba;
+
+  box-shadow:
+    0 0 10px #65efba;
+}
+
+
+/* ============================================================
+   FEATURES
+============================================================ */
+
+.aurora-install-features {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2,
+      minmax(0, 1fr));
+
+  gap: 9px;
+
+  margin-top:
+    15px;
+}
+
+
+.aurora-install-feature {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    11px;
+
+  border:
+    1px solid rgba(255, 255, 255, .05);
+
+  border-radius:
+    11px;
+
+  background:
+    rgba(255, 255, 255, .015);
+}
+
+
+.aurora-install-feature-icon {
+  flex:
+    0 0 34px;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid rgba(75, 222, 255, .27);
+
+  border-radius:
+    9px;
+
+  color:
+    #68e7ff;
+
+  background:
+    rgba(51, 205, 255, .04);
+}
+
+
+.aurora-install-feature-icon.purple {
+  color:
+    #c08fff;
+
+  border-color:
+    rgba(181, 128, 255, .29);
+}
+
+
+.aurora-install-feature-icon.green {
+  color:
+    #6bf0bd;
+
+  border-color:
+    rgba(86, 238, 185, .27);
+}
+
+
+.aurora-install-feature-icon.amber {
+  color:
+    #ffc676;
+
+  border-color:
+    rgba(255, 192, 97, .27);
+}
+
+
+.aurora-install-feature strong {
+  display: block;
+
+  color:
+    #e8f5fc;
+
+  font-size:
+    9px;
+}
+
+
+.aurora-install-feature p {
+  margin:
+    3px 0 0;
+
+  color:
+    rgba(151, 181, 202, .43);
+
+  font-size:
+    7px;
+
+  line-height:
+    1.5;
+}
+
+
+/* ============================================================
+   TERMINAL
+============================================================ */
+
+.aurora-install-terminal {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  margin-top:
+    14px;
+
+  padding:
+    8px 10px;
+
+  border-left:
+    2px solid #61e5ff;
+
+  background:
+    linear-gradient(90deg,
+      rgba(55, 211, 255, .045),
+      transparent);
+}
+
+
+.aurora-install-terminal span {
+  color:
+    rgba(104, 224, 255, .54);
+
+  font-size:
+    6px;
+
+  font-weight:
+    900;
+}
+
+
+.aurora-install-terminal strong {
+  color:
+    #6be8ff;
+
+  font-size:
+    7px;
+
+  letter-spacing:
+    .05em;
+}
+
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+
+.aurora-install-actions {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 10px;
+
+  margin-top:
+    18px;
+}
+
+
+.aurora-install-primary,
+.aurora-install-secondary {
+  min-height:
+    46px;
+
+  border-radius:
+    11px;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+
+  cursor:
+    pointer;
+
+  transition:
+    .2s ease;
+}
+
+
+.aurora-install-primary {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  border:
+    1px solid rgba(69, 226, 255, .60);
+
+  background:
+    linear-gradient(135deg,
+      rgba(21, 134, 255, .50),
+      rgba(35, 208, 255, .20));
+
+  color:
+    #fff;
+
+  box-shadow:
+    inset 0 0 18px rgba(91, 231, 255, .08),
+
+    0 0 20px rgba(55, 210, 255, .08);
+}
+
+
+.aurora-install-primary:hover {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 0 25px rgba(57, 218, 255, .20);
+}
+
+
+.aurora-install-primary i {
+  color:
+    #76efff;
+
+  font-style:
+    normal;
+}
+
+
+.aurora-install-primary:disabled {
+  opacity:
+    .5;
+
+  cursor:
+    wait;
+}
+
+
+.aurora-install-secondary {
+  border:
+    1px solid rgba(169, 129, 255, .22);
+
+  background:
+    rgba(125, 81, 255, .035);
+
+  color:
+    rgba(220, 218, 255, .70);
+}
+
+
+.aurora-install-secondary:hover {
+  border-color:
+    rgba(170, 128, 255, .48);
+
+  background:
+    rgba(130, 87, 255, .07);
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.aurora-install-footer {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+
+  margin-top:
+    14px;
+
+  padding-top:
+    10px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, .045);
+
+  color:
+    rgba(105, 155, 183, .38);
+
+  font-size:
+    5px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .10em;
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 620px) {
+
+  .aurora-install-portal {
+    padding:
+      10px;
+  }
+
+
+  .aurora-install-modal {
+    padding:
+      18px;
+
+    border-radius:
+      15px;
+  }
+
+
+  .aurora-install-features {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .aurora-install-core {
+    flex-wrap:
+      wrap;
+  }
+
+
+  .aurora-install-status {
+    width:
+      100%;
+
+    margin-left:
+      63px;
+  }
+
+
+  .aurora-install-actions {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .aurora-install-footer {
+    flex-direction:
+      column;
+  }
+
+}
+
+
+
+
+/* ============================================================
+   AURORA // SYSTEM UPDATE PORTAL
+============================================================ */
+
+body.aurora-update-open {
+  overflow: hidden;
+}
+
+
+.aurora-update-portal {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000000;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease,
+    visibility .25s ease;
+}
+
+
+.aurora-update-portal.active {
+  opacity: 1;
+  visibility: visible;
+
+  pointer-events: auto;
+}
+
+
+.aurora-update-backdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 50% 25%,
+      rgba(65, 213, 255, .10),
+      transparent 36%),
+    rgba(2, 6, 14, .87);
+
+  backdrop-filter:
+    blur(16px);
+
+  -webkit-backdrop-filter:
+    blur(16px);
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+.aurora-update-modal {
+  position: relative;
+
+  width:
+    min(520px, 100%);
+
+  overflow: hidden;
+
+  padding: 28px;
+
+  border:
+    1px solid rgba(85, 223, 255, .30);
+
+  border-radius: 18px;
+
+  background:
+    radial-gradient(circle at 85% 0%,
+      rgba(144, 91, 255, .13),
+      transparent 31%),
+    linear-gradient(145deg,
+      rgba(6, 17, 32, .99),
+      rgba(6, 9, 23, .99));
+
+  box-shadow:
+    0 0 40px rgba(42, 203, 255, .10),
+
+    0 35px 90px rgba(0, 0, 0, .70);
+
+  transform:
+    translateY(15px) scale(.95);
+
+  transition:
+    transform .28s cubic-bezier(.22, .8, .25, 1);
+
+  text-align: center;
+}
+
+
+.aurora-update-portal.active .aurora-update-modal {
+  transform:
+    translateY(0) scale(1);
+}
+
+
+/* TOP NEON */
+
+.aurora-update-line {
+  position: absolute;
+
+  top: 0;
+  left: 10%;
+
+  width: 80%;
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #5ae6ff,
+      #aa79ff,
+      transparent);
+
+  box-shadow:
+    0 0 18px rgba(73, 218, 255, .55);
+}
+
+
+/* ============================================================
+   ORBIT
+============================================================ */
+
+.aurora-update-orbit {
+  position: relative;
+
+  width: 70px;
+  height: 70px;
+
+  display: grid;
+  place-items: center;
+
+  margin:
+    2px auto 18px;
+
+  border:
+    1px solid rgba(89, 226, 255, .29);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 22px rgba(61, 215, 255, .09);
+}
+
+
+.aurora-update-orbit::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 7px;
+
+  border:
+    1px dashed rgba(176, 125, 255, .48);
+
+  border-radius: 50%;
+
+  animation:
+    auroraUpdateOrbit 4s linear infinite;
+}
+
+
+.aurora-update-orbit::after {
+  content: "";
+
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  top: 5px;
+  left: 50%;
+
+  border-radius: 50%;
+
+  background:
+    #68eaff;
+
+  box-shadow:
+    0 0 12px #68eaff;
+}
+
+
+.aurora-update-orbit span {
+  color:
+    #70eaff;
+
+  font-size: 26px;
+
+  animation:
+    auroraUpdatePulse 1.7s ease-in-out infinite;
+}
+
+
+@keyframes auroraUpdateOrbit {
+
+  to {
+    transform:
+      rotate(360deg);
+  }
+
+}
+
+
+@keyframes auroraUpdatePulse {
+
+  50% {
+    opacity: .55;
+
+    transform:
+      rotate(180deg);
+  }
+
+}
+
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
+.aurora-update-code {
+  color:
+    rgba(101, 226, 255, .62);
+
+  font-size: 7px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .14em;
+}
+
+
+.aurora-update-modal h2 {
+  margin:
+    7px 0 8px;
+
+  color:
+    #eefaff;
+
+  font-size:
+    clamp(22px,
+      4vw,
+      30px);
+}
+
+
+.aurora-update-modal h2 span {
+  background:
+    linear-gradient(90deg,
+      #62e5ff,
+      #b08cff);
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color: transparent;
+}
+
+
+.aurora-update-modal>p {
+  max-width: 410px;
+
+  margin:
+    0 auto;
+
+  color:
+    rgba(165, 193, 212, .53);
+
+  font-size: 9px;
+
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+.aurora-update-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-top: 17px;
+
+  padding:
+    7px 11px;
+
+  border:
+    1px solid rgba(83, 239, 184, .14);
+
+  border-radius: 999px;
+
+  background:
+    rgba(70, 221, 169, .035);
+
+  color:
+    #67efbc;
+
+  font-size: 7px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .07em;
+}
+
+
+.aurora-update-status span {
+  text-shadow:
+    0 0 8px currentColor;
+}
+
+
+/* ============================================================
+   INFO
+============================================================ */
+
+.aurora-update-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 8px;
+
+  margin-top: 19px;
+}
+
+
+.aurora-update-info>div {
+  padding:
+    10px 6px;
+
+  border:
+    1px solid rgba(255, 255, 255, .05);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, .018);
+}
+
+
+.aurora-update-info span {
+  display: block;
+
+  color:
+    rgba(137, 169, 190, .40);
+
+  font-size: 5px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .10em;
+}
+
+
+.aurora-update-info strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color:
+    #dff7ff;
+
+  font-size: 8px;
+}
+
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+
+.aurora-update-actions {
+  display: grid;
+
+  grid-template-columns:
+    1.15fr .85fr;
+
+  gap: 9px;
+
+  margin-top: 19px;
+}
+
+
+.aurora-update-primary,
+.aurora-update-secondary {
+  min-height: 43px;
+
+  border-radius: 10px;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .07em;
+
+  cursor: pointer;
+
+  transition:
+    .18s ease;
+}
+
+
+.aurora-update-primary {
+  border:
+    1px solid rgba(74, 225, 255, .55);
+
+  background:
+    linear-gradient(135deg,
+      rgba(29, 151, 255, .50),
+      rgba(31, 211, 255, .17));
+
+  color: #fff;
+
+  box-shadow:
+    0 0 18px rgba(55, 214, 255, .08);
+}
+
+
+.aurora-update-primary:hover {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 0 25px rgba(52, 216, 255, .19);
+}
+
+
+.aurora-update-primary:disabled {
+  opacity: .55;
+
+  cursor: wait;
+}
+
+
+.aurora-update-secondary {
+  border:
+    1px solid rgba(169, 125, 255, .19);
+
+  background:
+    rgba(128, 82, 255, .025);
+
+  color:
+    rgba(217, 213, 247, .67);
+}
+
+
+.aurora-update-secondary:hover {
+  border-color:
+    rgba(174, 133, 255, .45);
+}
+
+
+/* FOOT */
+
+.aurora-update-foot {
+  display: block;
+
+  margin-top: 13px;
+
+  color:
+    rgba(130, 158, 178, .34);
+
+  font-size: 6px;
+}
+
+
+@media (max-width: 520px) {
+
+  .aurora-update-modal {
+    padding: 22px 17px;
+  }
+
+
+  .aurora-update-info {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .aurora-update-actions {
+    grid-template-columns:
+      1fr;
+  }
+
+}

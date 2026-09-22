@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" /> 
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />  
   <meta name="apple-mobile-web-app-title" content="Aurora" />
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
   <link rel="stylesheet" href="./style_v3.css">
@@ -176,6 +176,24 @@
           </div>
         
 
+
+        
+
+          <!-- =========================================================
+                                       AURORA // INSTALL APP
+          ========================================================= -->
+          
+          <button type="button" class="aurora-install-btn" id="auroraInstallBtn" hidden>
+            <span class="aurora-install-icon">
+              ⇩
+            </span>
+          
+            <span>
+              INSTALL AURORA
+            </span>
+          </button>
+
+
           <!-- =========================================================
                          AURORA // NOTIFICATION CENTER
           ========================================================== -->
@@ -193,7 +211,10 @@
               </span>
           
             </button>
-          
+
+
+
+             
           
             <div class="aurora-notification-panel" id="auroraNotificationPanel">
           
@@ -2078,6 +2099,14 @@
          The Supabase client is created ONLY inside script.js.
     ========================================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+  <!-- =========================================================
+       AURORA // PDF ENGINE
+  ========================================================= -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <script src="./script.js" defer></script>
 
