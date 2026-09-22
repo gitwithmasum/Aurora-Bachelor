@@ -475,6 +475,9 @@ const AuroraDataStore = (() => {
 
   let db = null;
 
+  let suppressCloudSave =
+    false;
+
 
   /* ==========================================================
      CREATE MONTH
@@ -760,6 +763,8 @@ const AuroraDataStore = (() => {
       db.members.map(
         member => ({
 
+          ...member,
+
           id:
             member.id ||
             uid("m"),
@@ -789,15 +794,13 @@ const AuroraDataStore = (() => {
             ),
 
           status:
-            member.status ===
-              "inactive"
+            member.status === "inactive"
               ? "inactive"
               : "active",
 
           createdAt:
             member.createdAt ||
-            new Date()
-              .toISOString()
+            new Date().toISOString()
 
         })
       );
@@ -881,16 +884,173 @@ const AuroraDataStore = (() => {
   function save() {
 
     if (!db) {
-      return;
+      return false;
     }
 
+
+    const cloudStatus =
+      window.AuroraCloudSync
+        ?.status?.();
+
+
+    const isReadOnlyMember =
+      cloudStatus?.ready === true &&
+      cloudStatus?.canWrite === false;
+
+
+    /* =========================================
+       MEMBER WRITE BLOCK
+    ========================================= */
+
+    if (
+      !suppressCloudSave &&
+      isReadOnlyMember
+    ) {
+
+      console.warn(
+        "🔒 Aurora: MEMBER write blocked."
+      );
+
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+
+      return false;
+
+    }
+
+
+    /* =========================================
+       LOCAL CACHE
+    ========================================= */
 
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(db)
     );
 
+
+    /* =========================================
+       CLOUD SAVE
+    ========================================= */
+
+    if (
+      !suppressCloudSave &&
+      window.AuroraCloudSync &&
+      typeof window.AuroraCloudSync
+        .queueSave === "function"
+    ) {
+
+      window.AuroraCloudSync
+        .queueSave(
+          db
+        );
+
+    }
+
+
+    return true;
+
   }
+
+  /* ==========================================================
+                  REPLACE DATABASE FROM CLOUD
+  ========================================================== */
+
+  function replaceFromCloud(
+    incoming
+    ) {
+
+    if (
+      !incoming ||
+      typeof incoming !== "object"
+    ) {
+
+      throw new Error(
+        "Invalid Aurora cloud database."
+      );
+
+    }
+
+
+    if (
+      !Array.isArray(
+        incoming.members
+      ) ||
+      !incoming.months
+    ) {
+
+      throw new Error(
+        "Aurora cloud database structure is invalid."
+      );
+
+    }
+
+
+    try {
+
+      suppressCloudSave =
+        true;
+
+
+      db =
+        structuredClone(
+          incoming
+        );
+
+
+      /*
+        Write cloud version into local cache.
+      */
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(db)
+      );
+
+
+      /*
+        Re-run Aurora normalizer.
+  
+        save() runs inside init(),
+        but suppressCloudSave prevents
+        cloud-save feedback loop.
+      */
+
+      init();
+
+
+      return db;
+
+    } finally {
+
+      suppressCloudSave =
+        false;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     DATABASE SNAPSHOT
+  ========================================================== */
+
+  function snapshot() {
+
+    if (!db) {
+      return null;
+    }
+
+
+    return structuredClone(
+      db
+    );
+
+  }
+
 
 
   /* ==========================================================
@@ -1238,11 +1398,2267 @@ const AuroraDataStore = (() => {
 
     exportBackup,
 
-    importBackup
+    importBackup,
+
+    replaceFromCloud,
+
+    snapshot
 
   };
 
 })();
+
+
+/* ============================================================
+   AURORA // SUPABASE CLOUD SYNC ENGINE
+============================================================ */
+
+const AuroraCloudSync = (() => {
+
+  const BACKUP_PREFIX =
+    "aurora_cloud_backup_";
+
+
+  let ready =
+    false;
+
+
+  let householdId =
+    null;
+
+
+  let currentRole =
+    "member";
+
+
+  let currentRevision =
+    0;
+
+
+  let realtimeChannel =
+    null;
+
+
+  let saveTimer =
+    null;
+
+
+  let pendingSnapshot =
+    null;
+
+
+  let saving =
+    false;
+
+
+  let remoteRefreshQueued =
+    false;
+
+
+  let initializedUserId =
+    null;
+
+
+  let applyingCloud =
+    false;
+
+  let initializingPromise =
+    null;
+
+  let pollTimer =
+    null;
+
+
+  /* ==========================================================
+     HELPERS
+  ========================================================== */
+
+  function canWrite() {
+
+    return (
+      currentRole === "owner" ||
+      currentRole === "admin"
+    );
+
+  }
+
+
+  function cloneData(
+    data
+  ) {
+
+    return structuredClone(
+      data
+    );
+
+  }
+
+
+  function databasesMatch(
+    a,
+    b
+  ) {
+
+    try {
+
+      return (
+        JSON.stringify(a) ===
+        JSON.stringify(b)
+      );
+
+    } catch (_) {
+
+      return false;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     LOCAL SAFETY BACKUP
+  ========================================================== */
+
+  function createLocalBackup(
+    reason = "cloud-sync"
+  ) {
+
+    try {
+
+      const snapshot =
+        AuroraDataStore.snapshot();
+
+
+      if (!snapshot) {
+        return null;
+      }
+
+
+      const stamp =
+        new Date()
+          .toISOString()
+          .replace(
+            /[:.]/g,
+            "-"
+          );
+
+
+      const key =
+        `${BACKUP_PREFIX}${reason}_${stamp}`;
+
+
+      localStorage.setItem(
+        key,
+        JSON.stringify(snapshot)
+      );
+
+
+      console.log(
+        "🛡️ Aurora local backup created:",
+        key
+      );
+
+
+      return key;
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Backup Error:",
+        error
+      );
+
+
+      return null;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     GET CURRENT MEMBERSHIP
+  ========================================================== */
+
+  async function getMembership(
+    client,
+    userId
+  ) {
+
+    const {
+      data,
+      error
+    } =
+      await client
+        .from("house_members")
+        .select(
+          "household_id, role"
+        )
+        .eq(
+          "user_id",
+          userId
+        )
+        .maybeSingle();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    return data ||
+      null;
+
+  }
+
+
+  /* ==========================================================
+     LOAD CLOUD ROW
+  ========================================================== */
+
+  async function fetchCloudData() {
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    if (
+      !client ||
+      !householdId
+    ) {
+
+      return null;
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await client.rpc(
+        "aurora_get_house_data",
+        {
+          p_household_id:
+            householdId
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const row =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+
+    return row ||
+      null;
+
+  }
+
+
+  /* ==========================================================
+     APPLY CLOUD DATABASE
+  ========================================================== */
+
+  function applyCloudDatabase(
+    cloudDatabase,
+    options = {}
+  ) {
+
+    const {
+      renderAfter = true
+    } =
+      options;
+
+
+    applyingCloud =
+      true;
+
+
+    try {
+
+      AuroraDataStore
+        .replaceFromCloud(
+          cloudDatabase
+        );
+
+
+      currentMonth =
+        AuroraDataStore
+          .get()
+          ?.settings
+          ?.currentMonth ||
+        currentMonth;
+
+
+      console.log(
+        "☁️ Aurora cloud database applied."
+      );
+
+
+    } finally {
+
+      applyingCloud =
+        false;
+
+    }
+
+
+    if (
+      renderAfter &&
+      typeof render ===
+      "function"
+    ) {
+
+      render();
+
+    }
+
+  }
+
+  /* ==========================================================
+     SINGLE CLOUD INITIALIZATION GUARD
+  ========================================================== */
+
+  async function initialize(
+    session = null
+  ) {
+
+    if (initializingPromise) {
+
+      console.log(
+        "☁️ Aurora Cloud initialization already running..."
+      );
+
+      return initializingPromise;
+
+    }
+
+
+    initializingPromise =
+      initializeInternal(
+        session
+      );
+
+
+    try {
+
+      return await initializingPromise;
+
+    } finally {
+
+      initializingPromise =
+        null;
+
+    }
+
+  }
+  /* ==========================================================
+     FIRST CLOUD INITIALIZATION
+  ========================================================== */
+
+  async function initializeInternal(
+    session = null
+  ) {
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    if (!client?.auth) {
+      return;
+    }
+
+
+    try {
+
+      let activeSession =
+        session;
+
+
+      if (!activeSession) {
+
+        const {
+          data,
+          error
+        } =
+          await client.auth
+            .getSession();
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        activeSession =
+          data?.session ||
+          null;
+
+      }
+
+
+      const user =
+        activeSession?.user;
+
+
+      if (!user) {
+
+        stop();
+
+        return;
+
+      }
+
+
+      /* =========================================
+         MEMBERSHIP
+      ========================================= */
+
+      const membership =
+        await getMembership(
+          client,
+          user.id
+        );
+
+
+      if (
+        !membership
+          ?.household_id
+      ) {
+
+        console.log(
+          "☁️ Aurora Cloud: User has no household."
+        );
+
+        stop();
+
+        return;
+
+      }
+
+
+      const newHouseholdId =
+        membership.household_id;
+
+
+      const newRole =
+        String(
+          membership.role ||
+          "member"
+        )
+          .toLowerCase()
+          .trim();
+
+
+      /*
+        Avoid duplicate initialization from
+        SIGNED_IN + INITIAL_SESSION.
+      */
+
+      if (
+        ready &&
+        initializedUserId === user.id &&
+        householdId ===
+        newHouseholdId
+      ) {
+
+        currentRole =
+          newRole;
+
+        return;
+
+      }
+
+
+      stopRealtime();
+
+
+      ready =
+        false;
+
+
+      initializedUserId =
+        user.id;
+
+
+      householdId =
+        newHouseholdId;
+
+
+      currentRole =
+        newRole;
+
+
+      currentRevision =
+        0;
+
+
+      console.log(
+        "☁️ Aurora Cloud Initializing:",
+        {
+          householdId,
+          currentRole
+        }
+      );
+
+
+      /* =========================================
+         CLOUD DATA
+      ========================================= */
+
+      const cloudRow =
+        await fetchCloudData();
+
+
+      const localDatabase =
+        AuroraDataStore.snapshot();
+
+
+      /* =========================================
+         CLOUD DOES NOT EXIST YET
+      ========================================= */
+
+      if (!cloudRow?.data) {
+
+        if (canWrite()) {
+
+          console.log(
+            "☁️ No cloud database found. Uploading current local database..."
+          );
+
+
+          createLocalBackup(
+            "before-first-cloud-upload"
+          );
+
+
+          currentRevision =
+            0;
+
+
+          ready =
+            true;
+
+
+          await saveNow(
+            localDatabase
+          );
+
+
+          toast(
+            "Aurora Cloud initialized ✓"
+          );
+
+        } else {
+
+          /*
+            Member cannot create cloud DB.
+            Wait for Owner/Admin.
+          */
+
+          ready =
+            true;
+
+
+          console.log(
+            "☁️ Cloud database is empty. Waiting for Owner/Admin initialization."
+          );
+
+        }
+
+
+        subscribeRealtime();
+
+        return;
+
+      }
+
+
+      /* =========================================
+         CLOUD ALREADY EXISTS
+      ========================================= */
+
+      currentRevision =
+        Number(
+          cloudRow.revision ||
+          0
+        );
+
+
+      const cloudDatabase =
+        cloudRow.data;
+
+
+      if (
+        !databasesMatch(
+          localDatabase,
+          cloudDatabase
+        )
+      ) {
+
+        /*
+          Never silently destroy local data.
+        */
+
+        const backupKey =
+          createLocalBackup(
+            "before-cloud-download"
+          );
+
+
+        console.log(
+          "🛡️ Existing local data backed up before cloud load:",
+          backupKey
+        );
+
+
+        toast(
+          "Cloud data loaded. Local backup preserved."
+        );
+
+      }
+
+
+      applyCloudDatabase(
+        cloudDatabase
+      );
+
+
+      ready =
+        true;
+
+
+      subscribeRealtime();
+
+
+      console.log(
+        "✅ Aurora Cloud Ready:",
+        {
+          revision:
+            currentRevision,
+
+          role:
+            currentRole,
+
+          household:
+            householdId
+        }
+      );
+
+
+    } catch (error) {
+
+      ready =
+        false;
+
+
+      console.error(
+        "❌ Aurora Cloud Initialization Error:",
+        error
+      );
+
+
+      toast(
+        "Cloud sync unavailable. Local mode active."
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     QUEUE SAVE
+
+     Called automatically by:
+     AuroraDataStore.save()
+  ========================================================== */
+
+  function queueSave(
+    database
+  ) {
+
+    if (
+      applyingCloud ||
+      !ready ||
+      !householdId ||
+      !canWrite()
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      pendingSnapshot =
+        cloneData(
+          database
+        );
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Cloud Snapshot Error:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    if (saveTimer) {
+
+      clearTimeout(
+        saveTimer
+      );
+
+    }
+
+
+    /*
+      Combine rapid edits into one cloud write.
+    */
+
+    saveTimer =
+      setTimeout(
+        () => {
+
+          saveTimer =
+            null;
+
+          flushSave();
+
+        },
+        700
+      );
+
+  }
+
+
+  /* ==========================================================
+     FLUSH QUEUED SAVE
+  ========================================================== */
+
+  async function flushSave() {
+
+    if (
+      !pendingSnapshot ||
+      !ready ||
+      !canWrite()
+    ) {
+
+      return;
+
+    }
+
+
+    if (saving) {
+      return;
+    }
+
+
+    const snapshot =
+      pendingSnapshot;
+
+
+    pendingSnapshot =
+      null;
+
+
+    await saveNow(
+      snapshot
+    );
+
+
+    /*
+      More changes may have happened while
+      previous request was in flight.
+    */
+
+    if (pendingSnapshot) {
+
+      queueSave(
+        pendingSnapshot
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     CLOUD SAVE
+  ========================================================== */
+
+  async function saveNow(
+    database
+  ) {
+
+    if (
+      !database ||
+      !householdId ||
+      !canWrite()
+    ) {
+
+      return null;
+
+    }
+
+
+    if (saving) {
+
+      pendingSnapshot =
+        cloneData(
+          database
+        );
+
+      return null;
+
+    }
+
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    if (!client) {
+      return null;
+    }
+
+
+    saving =
+      true;
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await client.rpc(
+          "aurora_save_house_data",
+          {
+
+            p_household_id:
+              householdId,
+
+            p_data:
+              database,
+
+            p_expected_revision:
+              currentRevision
+
+          }
+        );
+
+
+      if (error) {
+
+        /*
+          Conflict means another device/admin
+          saved before this device.
+        */
+
+        if (
+          String(
+            error.message ||
+            ""
+          )
+            .toLowerCase()
+            .includes(
+              "revision"
+            ) ||
+          String(
+            error.message ||
+            ""
+          )
+            .toLowerCase()
+            .includes(
+              "another device"
+            )
+        ) {
+
+          createLocalBackup(
+            "cloud-conflict"
+          );
+
+
+          console.warn(
+            "⚠️ Aurora cloud conflict detected."
+          );
+
+
+          await reloadFromCloud(
+            true
+          );
+
+
+          toast(
+            "Cloud changed on another device. Latest version loaded."
+          );
+
+
+          return null;
+
+        }
+
+
+        throw error;
+
+      }
+
+
+      const result =
+        Array.isArray(data)
+          ? data[0]
+          : data;
+
+
+      if (
+        result?.revision != null
+      ) {
+
+        currentRevision =
+          Number(
+            result.revision
+          );
+
+      }
+
+
+      console.log(
+        "☁️ Aurora Cloud Saved:",
+        {
+          revision:
+            currentRevision
+        }
+      );
+
+
+      return result;
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Cloud Save Error:",
+        error
+      );
+
+
+      toast(
+        "Cloud save failed. Local copy preserved."
+      );
+
+
+      return null;
+
+
+    } finally {
+
+      saving =
+        false;
+
+
+      if (
+        remoteRefreshQueued
+      ) {
+
+        remoteRefreshQueued =
+          false;
+
+
+        reloadFromCloud(
+          false
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     RELOAD FROM CLOUD
+  ========================================================== */
+
+  async function reloadFromCloud(
+    force = false
+  ) {
+
+    if (
+      !householdId ||
+      !ready
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      const cloudRow =
+        await fetchCloudData();
+
+
+      if (!cloudRow?.data) {
+        return;
+      }
+
+
+      const remoteRevision =
+        Number(
+          cloudRow.revision ||
+          0
+        );
+
+
+      if (
+        !force &&
+        remoteRevision <=
+        currentRevision
+      ) {
+
+        return;
+
+      }
+
+
+      if (saving) {
+
+        remoteRefreshQueued =
+          true;
+
+        return;
+
+      }
+
+
+      currentRevision =
+        remoteRevision;
+
+
+      applyCloudDatabase(
+        cloudRow.data
+      );
+
+
+      console.log(
+        "🔄 Aurora realtime cloud update:",
+        currentRevision
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Aurora Cloud Reload Error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     REALTIME
+  ========================================================== */
+
+  function subscribeRealtime() {
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    if (
+      !client ||
+      !householdId
+    ) {
+
+      return;
+
+    }
+
+
+    stopRealtime();
+
+
+    realtimeChannel =
+      client
+        .channel(
+          `aurora-cloud-${householdId}`
+        )
+        .on(
+          "postgres_changes",
+          {
+
+            event:
+              "*",
+
+            schema:
+              "public",
+
+            table:
+              "aurora_data",
+
+            filter:
+              `household_id=eq.${householdId}`
+
+          },
+
+          payload => {
+
+            const remoteRevision =
+              Number(
+                payload?.new
+                  ?.revision ||
+                0
+              );
+
+
+            /*
+              Ignore known revision / own echo.
+            */
+
+            if (
+              remoteRevision &&
+              remoteRevision <=
+              currentRevision
+            ) {
+
+              return;
+
+            }
+
+
+            if (saving) {
+
+              remoteRefreshQueued =
+                true;
+
+              return;
+
+            }
+
+
+            reloadFromCloud(
+              false
+            );
+
+          }
+        )
+        .subscribe(
+          status => {
+
+            console.log(
+              "📡 Aurora Realtime:",
+              status
+            );
+
+
+            if (
+              status ===
+              "SUBSCRIBED"
+            ) {
+
+              /*
+                Realtime is primary.
+                Polling is safety fallback.
+              */
+
+              startFallbackPolling();
+
+
+              /*
+                Immediately check whether
+                another device changed data
+                while channel was connecting.
+              */
+
+              reloadFromCloud(
+                false
+              );
+
+            }
+
+          }
+        );
+
+  }
+
+
+  /* ==========================================================
+   FALLBACK LIVE SYNC
+
+   Realtime miss করলেও refresh লাগবে না.
+  ========================================================== */
+
+  function startFallbackPolling() {
+
+    stopFallbackPolling();
+
+
+    pollTimer =
+      setInterval(
+        async () => {
+
+          if (
+            !ready ||
+            !householdId ||
+            saving ||
+            document.visibilityState !==
+            "visible"
+          ) {
+
+            return;
+
+          }
+
+
+          await reloadFromCloud(
+            false
+          );
+
+        },
+        2500
+      );
+
+
+    console.log(
+      "🔄 Aurora Auto Sync Fallback: ACTIVE"
+    );
+
+  }
+
+
+  function stopFallbackPolling() {
+
+    if (!pollTimer) {
+      return;
+    }
+
+
+    clearInterval(
+      pollTimer
+    );
+
+
+    pollTimer =
+      null;
+
+  }
+
+  function stopRealtime() {
+
+    stopFallbackPolling();
+    
+    if (!realtimeChannel) {
+      return;
+    }
+
+
+    const client =
+      getAuroraSupabaseClient();
+
+
+    try {
+
+      client
+        ?.removeChannel(
+          realtimeChannel
+        );
+
+    } catch (_) { }
+
+
+    realtimeChannel =
+      null;
+
+  }
+
+
+  /* ==========================================================
+     STOP CLOUD SESSION
+  ========================================================== */
+
+  function stop() {
+
+    ready =
+      false;
+
+
+    householdId =
+      null;
+
+
+    currentRole =
+      "member";
+
+
+    currentRevision =
+      0;
+
+
+    initializedUserId =
+      null;
+
+
+    pendingSnapshot =
+      null;
+
+
+    saving =
+      false;
+
+
+    remoteRefreshQueued =
+      false;
+
+
+    if (saveTimer) {
+
+      clearTimeout(
+        saveTimer
+      );
+
+      saveTimer =
+        null;
+
+    }
+
+
+    stopRealtime();
+
+  }
+
+
+  /* ==========================================================
+     DEBUG STATUS
+  ========================================================== */
+
+  function status() {
+
+    return {
+
+      ready,
+
+      householdId,
+
+      role:
+        currentRole,
+
+      canWrite:
+        canWrite(),
+
+      revision:
+        currentRevision,
+
+      saving
+
+    };
+
+  }
+
+
+  return {
+
+    initialize,
+
+    stop,
+
+    queueSave,
+
+    reloadFromCloud,
+
+    status
+
+  };
+
+})();
+
+
+window.AuroraCloudSync =
+  AuroraCloudSync;
+
+
+/* ============================================================
+   AURORA // GLOBAL PERMISSION ENGINE
+============================================================ */
+
+const AuroraPermissions = (() => {
+
+  function status() {
+
+    return (
+      window.AuroraCloudSync
+        ?.status?.() ||
+      {}
+    );
+
+  }
+
+
+  function role() {
+
+    return String(
+      status().role ||
+      "member"
+    )
+      .toLowerCase()
+      .trim();
+
+  }
+
+
+  function isOwner() {
+
+    return (
+      role() === "owner"
+    );
+
+  }
+
+
+  function isAdmin() {
+
+    return (
+      role() === "admin"
+    );
+
+  }
+
+
+  function isMember() {
+
+    return (
+      role() === "member"
+    );
+
+  }
+
+
+  function canManage() {
+
+    return (
+      isOwner() ||
+      isAdmin()
+    );
+
+  }
+
+
+  function canAccessControl() {
+
+    return canManage();
+
+  }
+
+
+  function canRemoveGoogleMember() {
+
+    return isOwner();
+
+  }
+
+
+  function canTransferOwnership() {
+
+    return isOwner();
+
+  }
+
+
+  function requireManage(
+    message =
+      "MEMBER // VIEW ONLY"
+  ) {
+
+    if (canManage()) {
+      return true;
+    }
+
+
+    toast(
+      message
+    );
+
+
+    console.warn(
+      "🔒 Aurora permission denied:",
+      role()
+    );
+
+
+    return false;
+
+  }
+
+
+  return {
+
+    status,
+
+    role,
+
+    isOwner,
+
+    isAdmin,
+
+    isMember,
+
+    canManage,
+
+    canAccessControl,
+
+    canRemoveGoogleMember,
+
+    canTransferOwnership,
+
+    requireManage
+
+  };
+
+})();
+
+
+window.AuroraPermissions =
+  AuroraPermissions;
+
+
+/* ============================================================
+   AURORA // AUTOMATIC MEMBER VIEW-ONLY GUARD
+   No manual button tagging required
+============================================================ */
+
+const AuroraMemberGuard = (() => {
+
+  let noticeLocked = false;
+
+
+  /* ==========================================================
+     MEMBER CHECK
+  ========================================================== */
+
+  function isMember() {
+
+    const status =
+      window.AuroraCloudSync
+        ?.status?.();
+
+
+    return (
+      status?.ready === true &&
+      String(
+        status?.role || ""
+      ).toLowerCase() === "member"
+    );
+
+  }
+
+
+  /* ==========================================================
+     NOTICE
+  ========================================================== */
+
+  function showNotice() {
+
+    if (noticeLocked) {
+      return;
+    }
+
+
+    noticeLocked = true;
+
+
+    toast(
+      "MEMBER // VIEW ONLY — Only Owner/Admin can modify data."
+    );
+
+
+    setTimeout(
+      () => {
+
+        noticeLocked = false;
+
+      },
+      900
+    );
+
+  }
+
+
+  /* ==========================================================
+     ELEMENT INFORMATION
+  ========================================================== */
+
+  function getElementInfo(
+    element
+  ) {
+
+    const target =
+      element?.closest?.(
+        "button, a, input, select, textarea, [role='button']"
+      );
+
+
+    if (!target) {
+
+      return {
+        target: null,
+        text: "",
+        id: "",
+        classes: "",
+        onclick: ""
+      };
+
+    }
+
+
+    return {
+
+      target,
+
+      text:
+        String(
+          target.textContent ||
+          target.value ||
+          target.title ||
+          target.getAttribute(
+            "aria-label"
+          ) ||
+          ""
+        )
+          .toLowerCase()
+          .trim(),
+
+      id:
+        String(
+          target.id ||
+          ""
+        ).toLowerCase(),
+
+      classes:
+        String(
+          target.className ||
+          ""
+        ).toLowerCase(),
+
+      onclick:
+        String(
+          target.getAttribute(
+            "onclick"
+          ) ||
+          ""
+        ).toLowerCase()
+
+    };
+
+  }
+
+
+  /* ==========================================================
+     SAFE / VIEW-ONLY CONTROLS
+
+     Member may use these.
+  ========================================================== */
+
+  function isAllowedControl(
+    element
+  ) {
+
+    const info =
+      getElementInfo(
+        element
+      );
+
+
+    const target =
+      info.target;
+
+
+    if (!target) {
+      return true;
+    }
+
+
+    /* -----------------------------------------
+       CLOSE / CANCEL
+    ----------------------------------------- */
+
+    if (
+      info.classes.includes(
+        "modal-close"
+      ) ||
+
+      info.id.includes(
+        "close"
+      ) ||
+
+      info.text === "×" ||
+
+      info.text === "close" ||
+
+      info.text === "cancel"
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       NAVIGATION
+    ----------------------------------------- */
+
+    if (
+      target.closest(
+        "nav, .sidebar, .nav, .bottom-nav"
+      ) ||
+
+      target.hasAttribute(
+        "data-page"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       PROFILE / SIGN OUT
+    ----------------------------------------- */
+
+    if (
+      info.id.includes(
+        "profile"
+      ) ||
+
+      info.id.includes(
+        "signout"
+      ) ||
+
+      info.text.includes(
+        "sign out"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       MONTH VIEW / FILTER / SEARCH
+
+       These change only what member is viewing,
+       not accounting data.
+    ----------------------------------------- */
+
+    if (
+      info.id.includes(
+        "month"
+      ) ||
+
+      info.id.includes(
+        "search"
+      ) ||
+
+      info.id.includes(
+        "filter"
+      ) ||
+
+      info.classes.includes(
+        "search"
+      ) ||
+
+      info.classes.includes(
+        "filter"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       EXPORT / DOWNLOAD REPORT
+    ----------------------------------------- */
+
+    if (
+      info.text.includes(
+        "export"
+      ) ||
+
+      info.text.includes(
+        "download"
+      ) ||
+
+      info.onclick.includes(
+        "export"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    return false;
+
+  }
+
+
+  /* ==========================================================
+     DETECT WRITE ACTION AUTOMATICALLY
+  ========================================================== */
+
+  function isWriteAction(
+    element
+  ) {
+
+    if (
+      isAllowedControl(
+        element
+      )
+    ) {
+
+      return false;
+
+    }
+
+
+    const info =
+      getElementInfo(
+        element
+      );
+
+
+    if (!info.target) {
+      return false;
+    }
+
+
+    const combined =
+      [
+        info.text,
+        info.id,
+        info.classes,
+        info.onclick
+      ]
+        .join(" ")
+        .toLowerCase();
+
+
+    /*
+      Aurora write/action keywords.
+    */
+
+    const WRITE_WORDS = [
+
+      "add",
+      "save",
+      "edit",
+      "delete",
+      "remove",
+      "create",
+      "update",
+
+      "submit",
+      "record",
+      "log",
+
+      "invite",
+      "revoke",
+
+      "admin",
+      "ownership",
+      "transfer",
+
+      "reset",
+      "restore",
+      "import",
+
+      "activate",
+      "deactivate",
+
+      "approve",
+      "reject",
+
+      "payment",
+      "expense",
+      "bill",
+
+      "makeadmin",
+      "make-admin",
+      "removeadmin",
+      "remove-admin"
+
+    ];
+
+
+    if (
+      WRITE_WORDS.some(
+        word =>
+          combined.includes(
+            word
+          )
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       MEAL MATRIX INPUT
+    ----------------------------------------- */
+
+    if (
+      info.target.matches(
+        ".meal-input"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /* -----------------------------------------
+       FORM SUBMIT BUTTON
+    ----------------------------------------- */
+
+    if (
+      info.target.matches(
+        "button[type='submit'], input[type='submit']"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    return false;
+
+  }
+
+
+  /* ==========================================================
+     CLICK BLOCKER
+     Capture phase = runs before existing Aurora listeners.
+  ========================================================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      if (!isMember()) {
+        return;
+      }
+
+
+      if (
+        !isWriteAction(
+          event.target
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      event.stopImmediatePropagation();
+
+
+      showNotice();
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     FORM SUBMIT BLOCKER
+  ========================================================== */
+
+  document.addEventListener(
+    "submit",
+    event => {
+
+      if (!isMember()) {
+        return;
+      }
+
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      event.stopImmediatePropagation();
+
+
+      showNotice();
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     INPUT EDIT BLOCKER
+
+     Mainly protects Meal Matrix and any accounting input
+     already visible on screen.
+  ========================================================== */
+
+  document.addEventListener(
+    "beforeinput",
+    event => {
+
+      if (!isMember()) {
+        return;
+      }
+
+
+      const target =
+        event.target;
+
+
+      if (
+        !(target instanceof HTMLElement)
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        isAllowedControl(
+          target
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        target.matches(
+          "input, textarea, .meal-input"
+        )
+      ) {
+
+        event.preventDefault();
+
+        showNotice();
+
+      }
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     SELECT / CHECKBOX / RADIO BLOCKER
+  ========================================================== */
+
+  document.addEventListener(
+    "change",
+    event => {
+
+      if (!isMember()) {
+        return;
+      }
+
+
+      const target =
+        event.target;
+
+
+      if (
+        !(target instanceof HTMLElement)
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        isAllowedControl(
+          target
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        target.matches(
+          "select, input[type='checkbox'], input[type='radio'], .meal-input"
+        )
+      ) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        event.stopImmediatePropagation();
+
+
+        showNotice();
+
+
+        /*
+          Restore authoritative cloud state.
+        */
+
+        setTimeout(
+          () => {
+
+            window.AuroraCloudSync
+              ?.reloadFromCloud?.(
+                true
+              );
+
+          },
+          0
+        );
+
+      }
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     KEYBOARD PROTECTION
+  ========================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (!isMember()) {
+        return;
+      }
+
+
+      const target =
+        event.target;
+
+
+      if (
+        !(target instanceof HTMLElement)
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        isAllowedControl(
+          target
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        target.matches(
+          "input, textarea, select, .meal-input"
+        )
+      ) {
+
+        const allowedKeys = [
+          "Tab",
+          "Escape",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown"
+        ];
+
+
+        if (
+          allowedKeys.includes(
+            event.key
+          )
+        ) {
+
+          return;
+
+        }
+
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        showNotice();
+
+      }
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     PUBLIC API
+  ========================================================== */
+
+  return {
+
+    isMember,
+
+    showNotice,
+
+    isWriteAction
+
+  };
+
+})();
+
+
+window.AuroraMemberGuard =
+  AuroraMemberGuard;
+
+
 
 
 /* ============================================================
@@ -1260,6 +3676,8 @@ const AuroraApp = (() => {
     bills: "House Bills",
     reports: "Monthly Report",
     settlement: "Settlement",
+    activity: "Activity Log",
+    versions: "Version History",
     settings: "Settings",
     profile: "Profile"
   };
@@ -1394,6 +3812,8 @@ const pageTitles = {
   bills: "House Bills",
   reports: "Monthly Report",
   settlement: "Settlement",
+  activity: "Activity Log",
+  versions: "Version History",
   settings: "Settings",
   profile: "Profile"
 };
@@ -1771,6 +4191,1072 @@ function renderShell() {
 }
 
 
+
+/* ============================================================
+   AURORA // MONTH LOCK CONTROLLER
+============================================================ */
+
+const AuroraMonthLock = (() => {
+
+  const ACCOUNTING_PAGES =
+    new Set([
+      "dashboard",
+      "meals",
+      "expenses",
+      "payments",
+      "bills",
+      "reports",
+      "settlement"
+    ]);
+
+
+  function cloud() {
+
+    return (
+      window.AuroraCloudSync
+        ?.status?.() || {}
+    );
+
+  }
+
+
+  function monthKey() {
+
+    const value =
+      String(
+        AuroraApp.getCurrentMonth() || ""
+      ).trim();
+
+
+    if (
+      /^\d{4}-(0[1-9]|1[0-2])$/
+        .test(value)
+    ) {
+
+      return value;
+
+    }
+
+
+    console.error(
+      "❌ Aurora Month Lock: invalid current month",
+      value
+    );
+
+
+    return "";
+
+  }
+
+
+  function monthData() {
+
+    const database =
+      AuroraDataStore.get();
+
+    const month =
+      monthKey();
+
+
+    if (
+      !database ||
+      !month
+    ) {
+
+      return null;
+
+    }
+
+
+    return (
+      database.months?.[
+      month
+      ] || null
+    );
+
+  }
+
+
+  function isLocked() {
+
+    return (
+      monthData()?.closed === true
+    );
+
+  }
+
+
+  function canManage() {
+
+    const role =
+      String(
+        cloud().role || ""
+      ).toLowerCase();
+
+    return (
+      role === "owner" ||
+      role === "admin"
+    );
+
+  }
+
+
+  function monthName() {
+
+    const key =
+      monthKey();
+
+
+    if (!key) {
+
+      return "CURRENT MONTH";
+
+    }
+
+
+    return monthLabel(
+      key
+    ).toUpperCase();
+
+  }
+
+
+  /* ==========================================================
+     LOCK / UNLOCK
+  ========================================================== */
+
+  async function setLock(
+    locked
+  ) {
+
+    const status =
+      cloud();
+
+    const month =
+      monthKey();
+
+
+    if (
+      !/^\d{4}-(0[1-9]|1[0-2])$/
+        .test(month)
+    ) {
+
+      console.error(
+        "❌ Aurora Month Lock: invalid month",
+        {
+          month,
+          currentMonth:
+            window.AuroraApp
+              ?.getCurrentMonth?.()
+        }
+      );
+
+      toast(
+        "Invalid month cycle. Please select the month again."
+      );
+
+      return;
+
+    }
+
+    if (
+      !status.ready ||
+      !status.householdId
+    ) {
+
+      toast(
+        "Cloud session is not ready."
+      );
+
+      return;
+
+    }
+
+
+    if (
+      !canManage()
+    ) {
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+      return;
+
+    }
+
+
+    const action =
+      locked
+        ? "LOCK"
+        : "UNLOCK";
+
+
+    const confirmed =
+      await auroraConfirm({
+
+        eyebrow:
+          "AURORA // MONTH CONTROL",
+
+        title:
+          `${action} ${monthName()}?`,
+
+        message:
+          locked
+
+            ? `MONTH // ${month}\n\n` +
+            `Meals, expenses, payments, bills and rent will become read-only.\n` +
+            `Owner or Admin can unlock this month later.`
+
+            : `MONTH // ${month}\n\n` +
+            `Accounting modifications will be enabled again for this month.`,
+
+        confirmText:
+          locked
+            ? "🔒 LOCK MONTH"
+            : "🔓 UNLOCK MONTH",
+
+        cancelText:
+          "CANCEL",
+
+        danger:
+          false
+
+      });
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    const client =
+      window
+        .getAuroraSupabaseClient
+        ?.();
+
+
+    if (!client) {
+      return;
+    }
+
+
+    try {
+
+      toast(
+        locked
+          ? "Locking month..."
+          : "Unlocking month..."
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await client.rpc(
+          "aurora_set_month_lock",
+          {
+
+            p_household_id:
+              status.householdId,
+
+            p_month:
+              month,
+
+            p_locked:
+              Boolean(
+                locked
+              ),
+
+            p_expected_revision:
+              Number(
+                status.revision
+              )
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      console.log(
+        "🔐 Aurora Month Lock:",
+        data
+      );
+
+
+      await window
+        .AuroraCloudSync
+        ?.reloadFromCloud?.(
+          true
+        );
+
+
+      toast(
+        locked
+          ? `${monthName()} LOCKED`
+          : `${monthName()} UNLOCKED`
+      );
+
+
+      render();
+
+
+      if (
+        typeof AuroraActivity !==
+        "undefined"
+      ) {
+
+        AuroraActivity
+          .load?.(
+            false
+          );
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Month Lock Error:",
+        error
+      );
+
+
+      const message =
+        String(
+          error?.message || ""
+        );
+
+
+      if (
+        message.includes(
+          "VERSION_CONFLICT"
+        )
+      ) {
+
+        toast(
+          "Cloud data changed. Refreshing..."
+        );
+
+
+        await window
+          .AuroraCloudSync
+          ?.reloadFromCloud?.(
+            true
+          );
+
+
+        render();
+
+        return;
+
+      }
+
+
+      if (
+        message.includes(
+          "MONTH_NOT_FOUND"
+        )
+      ) {
+
+        toast(
+          "This month has no accounting data yet."
+        );
+
+        return;
+
+      }
+
+
+      toast(
+        error?.message ||
+        "Month lock operation failed."
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     MONTH LOCK UI
+  ========================================================== */
+
+  function renderControl() {
+
+    const monthSelector =
+      document.getElementById(
+        "monthSelect"
+      );
+
+
+    if (!monthSelector) {
+      return;
+    }
+
+
+    let control =
+      document.getElementById(
+        "auroraMonthLockControl"
+      );
+
+
+    if (!control) {
+
+      control =
+        document.createElement(
+          "div"
+        );
+
+      control.id =
+        "auroraMonthLockControl";
+
+      control.className =
+        "aurora-month-lock-control";
+
+
+      monthSelector.insertAdjacentElement(
+        "afterend",
+        control
+      );
+
+    }
+
+
+    const locked =
+      isLocked();
+
+
+    const manager =
+      canManage();
+
+
+    control.classList.toggle(
+      "is-locked",
+      locked
+    );
+
+
+    control.innerHTML = `
+
+    <div
+      class="aurora-month-lock-stack"
+    >
+
+      ${manager
+
+        ? `
+            <button
+              type="button"
+              class="aurora-month-lock-action"
+              id="auroraMonthLockButton"
+            >
+              ${locked
+          ? "🔓 UNLOCK MONTH"
+          : "🔒 LOCK MONTH"
+        }
+            </button>
+          `
+
+        : `
+            <span
+              class="aurora-month-lock-view"
+            >
+              VIEW ONLY
+            </span>
+          `
+      }
+
+
+      <span
+        class="
+          aurora-month-lock-state
+          ${locked
+        ? "locked"
+        : "open"
+      }
+        "
+      >
+        ${locked
+        ? "● LOCKED"
+        : "● OPEN"
+      }
+      </span>
+
+    </div>
+
+  `;
+
+
+    const button =
+      document.getElementById(
+        "auroraMonthLockButton"
+      );
+
+
+    if (button) {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          setLock(
+            !locked
+          );
+
+        }
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     BLOCK MESSAGE
+  ========================================================== */
+
+  let noticeLock =
+    false;
+
+
+  function showLockedNotice() {
+
+    if (noticeLock) {
+      return;
+    }
+
+
+    noticeLock =
+      true;
+
+
+    toast(
+      `🔒 ${monthName()} // MONTH LOCKED`
+    );
+
+
+    setTimeout(
+      () => {
+
+        noticeLock =
+          false;
+
+      },
+      900
+    );
+
+  }
+
+
+
+  /* ==========================================================
+   VISUAL LOCK STATE
+========================================================== */
+
+  function applyVisualState() {
+
+    /*
+      First clear previous visual state.
+      Important when switching from locked
+      month to open month.
+    */
+
+    document
+      .querySelectorAll(
+        ".aurora-lock-disabled"
+      )
+      .forEach(
+        element => {
+
+          element.classList.remove(
+            "aurora-lock-disabled"
+          );
+
+          element.removeAttribute(
+            "data-aurora-lock-label"
+          );
+
+        }
+      );
+
+
+    if (!isLocked()) {
+      return;
+    }
+
+
+    const activePage =
+      document.querySelector(
+        ".page.active"
+      );
+
+
+    if (!activePage) {
+      return;
+    }
+
+
+    /*
+      Find possible write controls
+    */
+
+    const controls =
+      activePage.querySelectorAll(
+
+        `
+        button,
+        input,
+        textarea,
+        select,
+        [role="button"]
+      `
+
+      );
+
+
+    controls.forEach(
+      element => {
+
+        /*
+          Do not dim controls that are
+          still safe to use.
+        */
+
+        if (
+          isAllowed(
+            element
+          )
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          isWriteAction(
+            element
+          ) ||
+          element.classList.contains(
+            "meal-input"
+          )
+        ) {
+
+          element.classList.add(
+            "aurora-lock-disabled"
+          );
+
+
+          element.setAttribute(
+            "data-aurora-lock-label",
+            "MONTH LOCKED"
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* ==========================================================
+     CHECK WHETHER CURRENT PAGE IS ACCOUNTING
+  ========================================================== */
+
+  function accountingPage() {
+
+    const active =
+      document
+        .querySelector(
+          ".page.active"
+        )
+        ?.id
+        ?.replace(
+          "page-",
+          ""
+        );
+
+
+    return ACCOUNTING_PAGES
+      .has(
+        active
+      );
+
+  }
+
+
+  /* ==========================================================
+     ALLOWED CONTROLS
+  ========================================================== */
+
+  function isAllowed(
+    element
+  ) {
+
+    if (!element) {
+      return true;
+    }
+
+
+    if (
+      element.id ===
+      "monthSelect" ||
+
+      element.id ===
+      "auroraMonthLockBtn"
+    ) {
+
+      return true;
+
+    }
+
+
+    if (
+      element.closest(
+        "#nav"
+      ) ||
+
+      element.closest(
+        ".nav-item"
+      ) ||
+
+      element.matches?.(
+        "[data-page]"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    /*
+      Reports / preview / filtering remain usable.
+    */
+
+    const text =
+      String(
+        (
+          element.textContent ||
+          element.value ||
+          element.id ||
+          ""
+        )
+      ).toLowerCase();
+
+
+    if (
+      text.includes(
+        "preview"
+      ) ||
+
+      text.includes(
+        "refresh"
+      ) ||
+
+      text.includes(
+        "print"
+      ) ||
+
+      text.includes(
+        "export"
+      ) ||
+
+      text.includes(
+        "download"
+      ) ||
+
+      text.includes(
+        "close"
+      ) ||
+
+      text.includes(
+        "cancel"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    return false;
+
+  }
+
+
+  /* ==========================================================
+     WRITE ACTION DETECTOR
+  ========================================================== */
+
+  function isWriteAction(
+    element
+  ) {
+
+    if (!element) {
+      return false;
+    }
+
+
+    const info = [
+
+      element.id,
+      element.name,
+      element.className,
+      element.textContent,
+      element.value,
+      element.getAttribute?.(
+        "onclick"
+      )
+
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+
+    const keywords = [
+
+      "add day",
+      "add first day",
+      "save meal",
+      "edit meal",
+      "delete meal",
+
+      "add expense",
+      "save expense",
+      "delete expense",
+
+      "record payment",
+      "save payment",
+      "delete payment",
+
+      "add bill",
+      "save bill",
+      "delete bill",
+
+      "add rent",
+      "save rent",
+      "delete rent",
+
+      "reset month",
+
+      "meal-input"
+
+    ];
+
+
+    return keywords.some(
+      keyword =>
+        info.includes(
+          keyword
+        )
+    );
+
+  }
+
+
+  /* ==========================================================
+     GLOBAL CLICK GUARD
+  ========================================================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      if (
+        !isLocked() ||
+        !accountingPage()
+      ) {
+
+        return;
+
+      }
+
+
+      const element =
+        event.target.closest(
+          "button, a, [role='button'], input, select, textarea"
+        );
+
+
+      if (
+        !element ||
+        isAllowed(
+          element
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        !isWriteAction(
+          element
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+
+      showLockedNotice();
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     FORM SUBMIT GUARD
+  ========================================================== */
+
+  document.addEventListener(
+    "submit",
+    event => {
+
+      if (
+        !isLocked() ||
+        !accountingPage()
+      ) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+
+      showLockedNotice();
+
+    },
+    true
+  );
+
+
+  /* ==========================================================
+     MEAL INPUT GUARD
+  ========================================================== */
+
+  document.addEventListener(
+    "beforeinput",
+    event => {
+
+      if (
+        !isLocked()
+      ) {
+
+        return;
+
+      }
+
+
+      const input =
+        event.target.closest?.(
+          ".meal-input"
+        );
+
+
+      if (!input) {
+        return;
+      }
+
+
+      event.preventDefault();
+
+
+      showLockedNotice();
+
+    },
+    true
+  );
+
+
+  document.addEventListener(
+    "change",
+    event => {
+
+      if (
+        !isLocked()
+      ) {
+
+        return;
+
+      }
+
+
+      const input =
+        event.target.closest?.(
+          ".meal-input"
+        );
+
+
+      if (!input) {
+        return;
+      }
+
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+
+      showLockedNotice();
+
+
+      window
+        .AuroraCloudSync
+        ?.reloadFromCloud?.(
+          true
+        );
+
+    },
+    true
+  );
+
+
+  return {
+
+    render:
+      renderControl,
+
+    applyVisualState,
+
+    setLock,
+
+    isLocked,
+
+    canManage,
+
+    monthKey
+
+  };
+
+})();
+
+
+window.AuroraMonthLock =
+  AuroraMonthLock;
+
+
 /* ============================================================
    MAIN RENDER ENGINE
 ============================================================ */
@@ -1794,12 +5280,24 @@ function render() {
 
 
     /* --------------------------------------------------------
+       Monthly Lock Status UI
+    -------------------------------------------------------- */
+
+    if (
+      typeof AuroraMonthLock !==
+      "undefined"
+    ) {
+
+      AuroraMonthLock.render();
+
+    }
+
+
+    /* --------------------------------------------------------
        Current page renderer
     -------------------------------------------------------- */
 
-    switch (
-    currentPage
-    ) {
+    switch (currentPage) {
 
       case "dashboard":
 
@@ -1807,9 +5305,7 @@ function render() {
           typeof renderDashboard ===
           "function"
         ) {
-
           renderDashboard();
-
         }
 
         break;
@@ -1821,9 +5317,7 @@ function render() {
           typeof renderMeals ===
           "function"
         ) {
-
           renderMeals();
-
         }
 
         break;
@@ -1835,9 +5329,7 @@ function render() {
           typeof renderMembers ===
           "function"
         ) {
-
           renderMembers();
-
         }
 
         break;
@@ -1849,9 +5341,7 @@ function render() {
           typeof renderExpenses ===
           "function"
         ) {
-
           renderExpenses();
-
         }
 
         break;
@@ -1863,9 +5353,7 @@ function render() {
           typeof renderPayments ===
           "function"
         ) {
-
           renderPayments();
-
         }
 
         break;
@@ -1877,9 +5365,7 @@ function render() {
           typeof renderBills ===
           "function"
         ) {
-
           renderBills();
-
         }
 
         break;
@@ -1891,9 +5377,7 @@ function render() {
           typeof renderReports ===
           "function"
         ) {
-
           renderReports();
-
         }
 
         break;
@@ -1905,9 +5389,31 @@ function render() {
           typeof renderSettlement ===
           "function"
         ) {
-
           renderSettlement();
+        }
 
+        break;
+
+
+      case "activity":
+
+        if (
+          typeof renderActivity ===
+          "function"
+        ) {
+          renderActivity();
+        }
+
+        break;
+
+
+      case "versions":
+
+        if (
+          typeof renderVersions ===
+          "function"
+        ) {
+          renderVersions();
         }
 
         break;
@@ -1919,9 +5425,7 @@ function render() {
           typeof renderSettings ===
           "function"
         ) {
-
           renderSettings();
-
         }
 
         break;
@@ -1933,9 +5437,7 @@ function render() {
           typeof renderProfile ===
           "function"
         ) {
-
           renderProfile();
-
         }
 
         break;
@@ -1946,19 +5448,33 @@ function render() {
         currentPage =
           "dashboard";
 
-
         if (
           typeof renderDashboard ===
           "function"
         ) {
-
           renderDashboard();
-
         }
 
     }
 
-  } catch (error) {
+
+    /* --------------------------------------------------------
+       Apply locked visual state AFTER page rendering
+    -------------------------------------------------------- */
+
+    if (
+      typeof AuroraMonthLock !==
+      "undefined"
+    ) {
+
+      AuroraMonthLock
+        .applyVisualState();
+
+    }
+
+  }
+
+  catch (error) {
 
     console.error(
       "AURORA RENDER ERROR:",
@@ -1981,7 +5497,6 @@ function render() {
           <h2>
             ⚠️ Module Error
           </h2>
-
 
           <p class="muted">
             ${esc(
@@ -2682,10 +6197,7 @@ function go(page) {
    MODAL SYSTEM
 ============================================================ */
 
-function modal(
-  title,
-  body
-) {
+function modal( title, body) {
 
   const root =
     document.getElementById(
@@ -2761,6 +6273,259 @@ function closeModal() {
 
 }
 
+
+
+/* ============================================================
+   AURORA // FUTURISTIC CONFIRMATION
+============================================================ */
+
+function auroraConfirm({
+  eyebrow = "AURORA // SECURITY PROTOCOL",
+  title = "Confirm Action",
+  message = "",
+  confirmText = "CONFIRM",
+  cancelText = "CANCEL",
+  danger = false
+} = {}) {
+
+  return new Promise(resolve => {
+
+    const root =
+      document.getElementById(
+        "modalRoot"
+      );
+
+    if (!root) {
+      resolve(false);
+      return;
+    }
+
+
+    root.innerHTML = `
+
+      <div
+        class="modal-backdrop aurora-confirm-backdrop"
+        id="auroraConfirmBackdrop"
+      >
+
+        <div
+          class="aurora-confirm-modal"
+          role="dialog"
+          aria-modal="true"
+        >
+
+          <div
+            class="aurora-confirm-scanline"
+          ></div>
+
+
+          <div
+            class="aurora-confirm-header"
+          >
+
+            <div>
+
+              <span
+                class="aurora-confirm-eyebrow"
+              >
+                ${esc(eyebrow)}
+              </span>
+
+              <h2>
+                ${esc(title)}
+              </h2>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="aurora-confirm-close"
+              id="auroraConfirmClose"
+            >
+              ×
+            </button>
+
+          </div>
+
+
+          <div
+            class="aurora-confirm-icon
+            ${danger ? "danger" : ""}"
+          >
+
+            ${danger
+        ? "!"
+        : "◇"
+      }
+
+          </div>
+
+
+          <div
+            class="aurora-confirm-message"
+          >
+            ${String(message)
+        .split("\n")
+        .map(
+          line =>
+            `<p>${esc(line)}</p>`
+        )
+        .join("")
+      }
+          </div>
+
+
+          <div
+            class="aurora-confirm-warning"
+          >
+
+            <span>
+              SYSTEM CHECK
+            </span>
+
+            <strong>
+              ${danger
+        ? "HIGH IMPACT ACTION"
+        : "VERIFICATION REQUIRED"
+      }
+            </strong>
+
+          </div>
+
+
+          <div
+            class="aurora-confirm-actions"
+          >
+
+            <button
+              type="button"
+              class="btn aurora-confirm-cancel"
+              id="auroraConfirmCancel"
+            >
+              ${esc(cancelText)}
+            </button>
+
+
+            <button
+              type="button"
+              class="
+                btn
+                aurora-confirm-accept
+                ${danger
+        ? "danger"
+        : ""
+      }
+              "
+              id="auroraConfirmAccept"
+            >
+              ${esc(confirmText)}
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    let finished = false;
+
+
+    function finish(value) {
+
+      if (finished) {
+        return;
+      }
+
+      finished = true;
+
+      root.innerHTML = "";
+
+      resolve(value);
+
+    }
+
+
+    document
+      .getElementById(
+        "auroraConfirmAccept"
+      )
+      ?.addEventListener(
+        "click",
+        () => finish(true)
+      );
+
+
+    document
+      .getElementById(
+        "auroraConfirmCancel"
+      )
+      ?.addEventListener(
+        "click",
+        () => finish(false)
+      );
+
+
+    document
+      .getElementById(
+        "auroraConfirmClose"
+      )
+      ?.addEventListener(
+        "click",
+        () => finish(false)
+      );
+
+
+    document
+      .getElementById(
+        "auroraConfirmBackdrop"
+      )
+      ?.addEventListener(
+        "click",
+        event => {
+
+          if (
+            event.target.id ===
+            "auroraConfirmBackdrop"
+          ) {
+
+            finish(false);
+
+          }
+
+        }
+      );
+
+
+    function escapeHandler(event) {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        document.removeEventListener(
+          "keydown",
+          escapeHandler
+        );
+
+        finish(false);
+
+      }
+
+    }
+
+
+    document.addEventListener(
+      "keydown",
+      escapeHandler
+    );
+
+  });
+
+}
 
 /* ============================================================
    TOAST
@@ -4292,427 +8057,2167 @@ const AuroraHouseAccount = (() => {
 
 
 /* ============================================================
-   AURORA BACHELOR — DASHBOARD V3
+   AURORA BACHELOR — DASHBOARD V4
+   Separate Meal Account + House Account
 ============================================================ */
 
 /* ============================================================
-   AURORA BACHELOR — DASHBOARD V4
-   Separate Meal Account + House Account
+   AURORA // SMART COMMAND DASHBOARD
 ============================================================ */
 
 function renderDashboard() {
 
   const page =
-    document.getElementById("page-dashboard");
+    document.getElementById(
+      "page-dashboard"
+    );
+
 
   if (!page) {
     return;
   }
 
+
+  /* ==========================================================
+     CORE DATA
+  ========================================================== */
+
+  const activeMonth =
+    AuroraApp.getCurrentMonth();
+
+
+  const database =
+    AuroraDataStore.get();
+
+
   const month =
     AuroraDataStore.getMonth(
-      AuroraApp.getCurrentMonth()
+      activeMonth
     );
+
 
   const members =
     AuroraDataStore.getMembers();
 
+
   /* ==========================================================
-     MEAL ACCOUNT — COMPLETELY SEPARATE
+     MEAL INTELLIGENCE
   ========================================================== */
 
   const totalMeals =
-    AuroraMealAccount.totalMeals();
+    AuroraMealAccount
+      .totalMeals();
+
 
   const mealExpense =
-    AuroraMealAccount.totalExpense();
+    AuroraMealAccount
+      .totalExpense();
+
 
   const mealRate =
-    AuroraMealAccount.mealRate();
+    AuroraMealAccount
+      .mealRate();
 
-  const mealPaid =
-    AuroraPaymentAccount.totalByAccount("meal");
 
-  const mealOutstanding =
-    Math.max(
-      0,
-      mealExpense - mealPaid
-    );
+  const mealDays =
+    (
+      month
+        ?.mealAccount
+        ?.meals ||
+      []
+    )
+      .filter(
+        day => {
+
+          const values =
+            Object.values(
+              day?.values || {}
+            );
+
+
+          return values.some(
+            value =>
+              Number(
+                value || 0
+              ) > 0
+          );
+
+        }
+      )
+      .length;
+
 
   /* ==========================================================
-     HOUSE ACCOUNT — COMPLETELY SEPARATE
+     TOP MEAL MEMBER
+  ========================================================== */
+
+  const mealRanking =
+    members
+      .map(
+        member => ({
+
+          ...member,
+
+          meals:
+            AuroraMealAccount
+              .memberMeals(
+                member.id
+              )
+
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.meals -
+          a.meals
+      );
+
+
+  const topMealMember =
+    mealRanking[0];
+
+
+  const topMealText =
+    topMealMember &&
+      topMealMember.meals > 0
+
+      ? topMealMember.name
+
+      : "No data";
+
+
+  const topMealSub =
+    topMealMember &&
+      topMealMember.meals > 0
+
+      ? `${topMealMember.meals} meals`
+
+      : "No meals recorded";
+
+
+  /* ==========================================================
+     FINANCIAL INTELLIGENCE
   ========================================================== */
 
   const houseCost =
-    AuroraHouseAccount.totalCost();
+    AuroraHouseAccount
+      .totalCost();
 
-  const rent =
-    AuroraHouseAccount.totalRent();
 
-  const bills =
-    AuroraHouseAccount.totalBills();
+  const totalPaid =
+    AuroraPaymentAccount
+      .total();
 
-  const housePaid =
-    AuroraPaymentAccount.totalByAccount("house");
 
-  const houseOutstanding =
+  /*
+    Keep this aligned with Aurora's current
+    meal + house accounting formula.
+  */
+
+  const totalExpense =
+    mealExpense +
+    houseCost;
+
+
+  const outstanding =
     Math.max(
       0,
-      houseCost - housePaid
+      totalExpense -
+      totalPaid
     );
 
+
+  const paymentCoverage =
+    totalExpense > 0
+
+      ? Math.min(
+        100,
+        (
+          totalPaid /
+          totalExpense
+        ) * 100
+      )
+
+      : 0;
+
+
   /* ==========================================================
-     OVERVIEW — COMBINED ONLY FOR SUMMARY
+     SETTLEMENT INTELLIGENCE
   ========================================================== */
 
-  const combinedExpense =
-    mealExpense + houseCost;
+  const memberBalances =
+    members
+      .map(
+        member => {
 
-  const combinedPaid =
-    mealPaid + housePaid;
+          const mealBalance =
+            AuroraMealAccount
+              .memberBalance(
+                member.id
+              );
 
-  const combinedOutstanding =
-    mealOutstanding + houseOutstanding;
+
+          const houseBalance =
+            AuroraHouseAccount
+              .memberBalance(
+                member.id
+              );
+
+
+          return {
+
+            id:
+              member.id,
+
+            name:
+              member.name,
+
+            amount:
+              mealBalance +
+              houseBalance
+
+          };
+
+        }
+      );
+
+
+  const attentionMembers =
+    memberBalances
+      .filter(
+        item =>
+          Math.abs(
+            item.amount
+          ) > 0.01
+      )
+      .sort(
+        (a, b) =>
+          Math.abs(
+            b.amount
+          ) -
+          Math.abs(
+            a.amount
+          )
+      )
+      .slice(
+        0,
+        5
+      );
+
+
+  /* ==========================================================
+     MONTH STATUS
+  ========================================================== */
+
+  const monthLocked =
+    month?.closed ===
+    true;
+
+
+  let cloudStatus = {};
+
+
+  try {
+
+    cloudStatus =
+      window
+        .AuroraCloudSync
+        ?.status?.() ||
+      {};
+
+  }
+
+  catch (error) {
+
+    cloudStatus = {};
+
+  }
+
+
+  const revision =
+    Number(
+      cloudStatus
+        ?.revision ||
+      0
+    );
+
+
+  const cloudReady =
+    cloudStatus
+      ?.ready ===
+    true;
+
+
+  const role =
+    String(
+      cloudStatus
+        ?.role ||
+      "member"
+    )
+      .toUpperCase();
+
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
 
   page.innerHTML = `
 
-    <div class="card hero">
+    <!-- =====================================================
+         COMMAND HERO
+    ====================================================== -->
 
-      <div class="eyebrow">
-        AURORA //
-        ${monthLabel(
-    AuroraApp.getCurrentMonth()
-  ).toUpperCase()}
+    <section
+      class="aurora-intel-hero"
+    >
+
+      <div>
+
+        <span
+          class="aurora-intel-eyebrow"
+        >
+          AURORA //
+          ${esc(
+    monthLabel(
+      activeMonth
+    ).toUpperCase()
+  )}
+        </span>
+
+
+        <h2>
+          House Command Center
+        </h2>
+
+
+        <p>
+          Live household intelligence,
+          accounting health and settlement
+          signals in one orbit.
+        </p>
+
       </div>
 
-      <div class="kpi-row">
 
-        <div>
-          <h2>House Command Center</h2>
+      <div
+        class="aurora-intel-rate"
+      >
 
-          <div class="muted">
-            Meal and house accounts are tracked independently.
-          </div>
+        <span>
+          LIVE MEAL RATE
+        </span>
+
+        <strong>
+          ${money(
+    mealRate
+  )}
+        </strong>
+
+        <small>
+          PER MEAL
+        </small>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FINANCIAL SNAPSHOT
+    ====================================================== -->
+
+    <div
+      class="aurora-intel-section-head"
+    >
+
+      <div>
+
+        <span>
+          FINANCIAL CORE
+        </span>
+
+        <h3>
+          Monthly Snapshot
+        </h3>
+
+      </div>
+
+      <button
+        type="button"
+        onclick="go('payments')"
+      >
+        OPEN LEDGER →
+      </button>
+
+    </div>
+
+
+    <div
+      class="aurora-intel-grid"
+    >
+
+      <article
+        class="
+          aurora-intel-card
+          cyan
+        "
+      >
+
+        <span>
+          TOTAL EXPENSE
+        </span>
+
+        <strong>
+          ${money(
+    totalExpense
+  )}
+        </strong>
+
+        <small>
+          Meal + house account
+        </small>
+
+      </article>
+
+
+      <article
+        class="
+          aurora-intel-card
+          green
+        "
+      >
+
+        <span>
+          TOTAL PAID
+        </span>
+
+        <strong>
+          ${money(
+    totalPaid
+  )}
+        </strong>
+
+        <small>
+          Recorded contributions
+        </small>
+
+      </article>
+
+
+      <article
+        class="
+          aurora-intel-card
+          amber
+        "
+      >
+
+        <span>
+          OUTSTANDING
+        </span>
+
+        <strong>
+          ${money(
+    outstanding
+  )}
+        </strong>
+
+        <small>
+          Remaining account gap
+        </small>
+
+      </article>
+
+
+      <article
+        class="
+          aurora-intel-card
+          purple
+        "
+      >
+
+        <span>
+          PAYMENT COVERAGE
+        </span>
+
+        <strong>
+          ${paymentCoverage
+      .toFixed(
+        1
+      )}%
+        </strong>
+
+        <div
+          class="aurora-intel-progress"
+        >
+
+          <i
+            style="
+              width:
+              ${paymentCoverage}%;
+            "
+          ></i>
+
         </div>
 
-        <div class="big">
-          ${money(mealRate)}
-        </div>
+      </article>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MEAL INTELLIGENCE
+    ====================================================== -->
+
+    <div
+      class="aurora-intel-section-head"
+    >
+
+      <div>
+
+        <span>
+          CONSUMPTION NETWORK
+        </span>
+
+        <h3>
+          Meal Intelligence
+        </h3>
 
       </div>
 
-      <div class="muted">
-        Current meal rate · meal expenses divided by recorded meals.
-      </div>
+      <button
+        type="button"
+        onclick="go('meals')"
+      >
+        VIEW MATRIX →
+      </button>
 
     </div>
 
 
-    <!-- ======================================================
-         MEAL ACCOUNT
-    ======================================================= -->
+    <div
+      class="aurora-intel-grid"
+    >
 
-    <div class="grid stats" style="margin-top:14px">
+      <article
+        class="aurora-intel-card blue"
+      >
 
-      ${card(
-    "Meal Count",
-    totalMeals,
-    "Current month"
-  )}
+        <span>
+          TOTAL MEALS
+        </span>
 
-      ${card(
-    "Meal Rate",
-    money(mealRate),
-    "Per meal"
-  )}
+        <strong>
+          ${totalMeals}
+        </strong>
 
-      ${card(
-    "Meal Expense",
-    money(mealExpense),
-    "Food account"
-  )}
+        <small>
+          Current cycle
+        </small>
 
-      ${card(
-    "Meal Outstanding",
-    money(mealOutstanding),
-    `Paid ${money(mealPaid)}`
-  )}
-
-    </div>
+      </article>
 
 
-    <!-- ======================================================
-         HOUSE ACCOUNT
-    ======================================================= -->
+      <article
+        class="aurora-intel-card cyan"
+      >
 
-    <div class="grid stats" style="margin-top:14px">
+        <span>
+          MEAL RATE
+        </span>
 
-      ${card(
-    "House Cost",
-    money(houseCost),
-    "Rent + bills"
-  )}
+        <strong>
+          ${money(
+        mealRate
+      )}
+        </strong>
 
-      ${card(
-    "House Rent",
-    money(rent),
-    "Rent account"
-  )}
+        <small>
+          Per meal
+        </small>
 
-      ${card(
-    "House Bills",
-    money(bills),
-    "Utilities"
-  )}
-
-      ${card(
-    "House Outstanding",
-    money(houseOutstanding),
-    `Paid ${money(housePaid)}`
-  )}
-
-    </div>
+      </article>
 
 
-    <!-- ======================================================
-         ACCOUNT OVERVIEW
-    ======================================================= -->
+      <article
+        class="aurora-intel-card green"
+      >
 
-    <div class="grid stats" style="margin-top:14px">
+        <span>
+          ACTIVE MEAL DAYS
+        </span>
 
-      ${card(
-    "Active Members",
-    members.length,
-    "Current house members"
-  )}
+        <strong>
+          ${mealDays}
+        </strong>
 
-      ${card(
-    "Combined Expense",
-    money(combinedExpense),
-    "Meal + house overview"
-  )}
+        <small>
+          Days with recorded meals
+        </small>
 
-      ${card(
-    "Combined Paid",
-    money(combinedPaid),
-    "Meal + house payments"
-  )}
+      </article>
 
-      ${card(
-    "Combined Outstanding",
-    money(combinedOutstanding),
-    "Summary only"
-  )}
+
+      <article
+        class="aurora-intel-card purple"
+      >
+
+        <span>
+          HIGHEST CONSUMPTION
+        </span>
+
+        <strong
+          class="aurora-intel-name"
+        >
+          ${esc(
+        topMealText
+      )}
+        </strong>
+
+        <small>
+          ${esc(
+        topMealSub
+      )}
+        </small>
+
+      </article>
 
     </div>
 
 
-    <!-- ======================================================
-         MEMBER MATRIX
-    ======================================================= -->
 
-    <div class="grid two-col">
+    <!-- =====================================================
+         LOWER INTELLIGENCE GRID
+    ====================================================== -->
 
-      <div class="card">
+    <div
+      class="aurora-intel-lower"
+    >
 
-        <div class="section-head">
+      <!-- ===================================================
+           SETTLEMENT ALERT
+      ==================================================== -->
+
+      <section
+        class="aurora-intel-panel"
+      >
+
+        <div
+          class="aurora-intel-panel-head"
+        >
 
           <div>
-            <h2>Member Balance Matrix</h2>
 
-            <div class="muted">
-              Meal account balance by active member.
-            </div>
+            <span>
+              SETTLEMENT SIGNALS
+            </span>
+
+            <h3>
+              Attention Required
+            </h3>
+
           </div>
 
+
           <button
-            class="btn small"
-            onclick="go('members')"
+            type="button"
+            onclick="go('settlement')"
           >
-            Manage
+            OPEN →
           </button>
 
         </div>
 
-        ${members.length ? `
 
-          <div class="table-wrap">
+        ${attentionMembers.length
 
-            <table>
+      ? `
 
-              <thead>
-                <tr>
-                  <th>Member</th>
-                  <th>Meals</th>
-                  <th>Meal Due</th>
-                  <th>Meal Paid</th>
-                  <th>Balance</th>
-                </tr>
-              </thead>
+              <div
+                class="aurora-intel-balance-list"
+              >
 
-              <tbody>
+                ${attentionMembers
+        .map(
+          member => {
 
-                ${members.map(member => {
+            const receive =
+              member.amount >
+              0;
 
-    const meals =
-      AuroraMealAccount.memberMeals(
-        member.id
-      );
 
-    const due =
-      AuroraMealAccount.memberDue(
-        member.id
-      );
+            return `
 
-    const paid =
-      AuroraPaymentAccount
-        .data()
-        .filter(
-          payment =>
-            payment.account === "meal" &&
-            payment.memberId === member.id
+                        <div
+                          class="
+                            aurora-intel-balance-row
+                            ${receive
+                ? "receive"
+                : "pay"
+              }
+                          "
+                        >
+
+                          <div>
+
+                            <strong>
+                              ${esc(
+                member.name
+              )}
+                            </strong>
+
+                            <span>
+                              ${receive
+                ? "RECEIVE"
+                : "PAY"
+              }
+                            </span>
+
+                          </div>
+
+
+                          <strong>
+                            ${money(
+                Math.abs(
+                  member.amount
+                )
+              )}
+                          </strong>
+
+                        </div>
+
+                      `;
+
+          }
         )
-        .reduce(
-          (sum, payment) =>
-            sum + Number(payment.amount || 0),
-          0
-        );
+        .join("")}
 
-    const balance =
-      paid - due;
+              </div>
 
-    return `
-                    <tr>
-                      <td>
-                        <strong>${esc(member.name)}</strong>
-                      </td>
+            `
 
-                      <td>${meals}</td>
-                      <td>${money(due)}</td>
-                      <td>${money(paid)}</td>
+      : `
 
-                      <td class="${balance >= 0 ? "positive" : "negative"
-      }">
-                        ${balance >= 0 ? "+" : ""}${money(balance)}
-                      </td>
-                    </tr>
-                  `;
+              <div
+                class="
+                  aurora-intel-clear
+                "
+              >
 
-  }).join("")}
+                <span>
+                  ✓
+                </span>
 
-              </tbody>
+                <div>
 
-            </table>
+                  <strong>
+                    Accounts Balanced
+                  </strong>
 
-          </div>
+                  <p>
+                    No settlement action
+                    is currently required.
+                  </p>
 
-        ` : `
+                </div>
 
-          <div class="empty">
-            <div class="emoji">👥</div>
-            <h3>No active members</h3>
-            <p class="muted">
-              Add members to start house accounting.
-            </p>
-          </div>
+              </div>
 
-        `}
+            `
+    }
 
-      </div>
+      </section>
 
 
-      <!-- ====================================================
-           HOUSE FINANCE
-      ===================================================== -->
 
-      <div class="card">
+      <!-- ===================================================
+           SYSTEM HEALTH
+      ==================================================== -->
 
-        <div class="section-head">
+      <section
+        class="aurora-intel-panel"
+      >
+
+        <div
+          class="aurora-intel-panel-head"
+        >
 
           <div>
-            <h2>House Finance Core</h2>
 
-            <div class="muted">
-              House account only — rent, bills and house payments.
-            </div>
+            <span>
+              SYSTEM CORE
+            </span>
+
+            <h3>
+              Month Status
+            </h3>
+
           </div>
 
-          <button
-            class="btn small"
-            onclick="go('bills')"
+        </div>
+
+
+        <div
+          class="aurora-intel-system"
+        >
+
+          <div
+            class="aurora-intel-system-row"
           >
-            Open
-          </button>
 
-        </div>
-
-        <div class="bar-list">
-
-          <div class="bar-row">
-            <span>Rent</span>
-            <span class="progress">
-              <i style="width:${houseCost > 0
-      ? (rent / houseCost) * 100
-      : 0
-    }%"></i>
+            <span>
+              ACCOUNTING CYCLE
             </span>
-            <strong>${money(rent)}</strong>
+
+            <strong
+              class="
+                ${monthLocked
+      ? "locked"
+      : "open"
+    }
+              "
+            >
+              ${monthLocked
+      ? "● LOCKED"
+      : "● OPEN"
+    }
+            </strong>
+
           </div>
 
-          <div class="bar-row">
-            <span>Bills</span>
-            <span class="progress">
-              <i style="width:${houseCost > 0
-      ? (bills / houseCost) * 100
-      : 0
-    }%"></i>
+
+          <div
+            class="aurora-intel-system-row"
+          >
+
+            <span>
+              CLOUD CORE
             </span>
-            <strong>${money(bills)}</strong>
+
+            <strong
+              class="
+                ${cloudReady
+      ? "online"
+      : "waiting"
+    }
+              "
+            >
+              ${cloudReady
+      ? "● SYNCED"
+      : "◇ CONNECTING"
+    }
+            </strong>
+
+          </div>
+
+
+          <div
+            class="aurora-intel-system-row"
+          >
+
+            <span>
+              CLOUD REVISION
+            </span>
+
+            <strong>
+              ${revision > 0
+      ? `REV ${revision}`
+      : "REV —"
+    }
+            </strong>
+
+          </div>
+
+
+          <div
+            class="aurora-intel-system-row"
+          >
+
+            <span>
+              ACCESS LEVEL
+            </span>
+
+            <strong>
+              ${esc(
+      role
+    )}
+            </strong>
+
+          </div>
+
+
+          <div
+            class="aurora-intel-system-row"
+          >
+
+            <span>
+              ACTIVE MEMBERS
+            </span>
+
+            <strong>
+              ${members.length}
+            </strong>
+
           </div>
 
         </div>
 
-        <div class="muted" style="margin-top:18px">
-          🏠 Rent: ${money(rent)}
-          <br>
-          📄 Bills: ${money(bills)}
-          <br>
-          💳 House Paid: ${money(housePaid)}
-          <br>
-          ⚠ Outstanding: ${money(houseOutstanding)}
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ======================================================
-         QUICK ACTIONS
-    ======================================================= -->
-
-    <div class="grid quick-grid">
-
-      <button class="card quick" onclick="go('meals')">
-        <b>🍚 Daily Meals</b>
-        <span class="muted">Record daily meal usage.</span>
-      </button>
-
-      <button class="card quick" onclick="go('expenses')">
-        <b>◈ Meal Expenses</b>
-        <span class="muted">Track food and grocery spending.</span>
-      </button>
-
-      <button class="card quick" onclick="go('payments')">
-        <b>৳ Payments</b>
-        <span class="muted">Track meal and house contributions.</span>
-      </button>
+      </section>
 
     </div>
 
   `;
+  AuroraDashboardSignals.mount();
 
 }
+
+
+/* ============================================================
+   AURORA // DASHBOARD SIGNAL INTELLIGENCE
+============================================================ */
+
+const AuroraDashboardSignals = (() => {
+
+  let requestToken = 0;
+
+
+  /* ==========================================================
+     HOUSEHOLD ID
+  ========================================================== */
+
+  async function getHouseholdId() {
+
+    try {
+
+      const cloud =
+        window.AuroraCloudSync
+          ?.status?.() || {};
+
+
+      const cloudHouseId =
+        cloud.householdId ||
+        cloud.household_id ||
+        cloud.houseId ||
+        null;
+
+
+      if (cloudHouseId) {
+
+        return cloudHouseId;
+
+      }
+
+
+      const supabase =
+        getAuroraSupabaseClient();
+
+
+      if (!supabase) {
+
+        return null;
+
+      }
+
+
+      const {
+        data: {
+          user
+        }
+      } =
+        await supabase.auth
+          .getUser();
+
+
+      if (!user) {
+
+        return null;
+
+      }
+
+
+      /* ------------------------------------------------------
+         MEMBER LOOKUP
+      ------------------------------------------------------ */
+
+      const {
+        data:
+        membership
+      } =
+        await supabase
+
+          .from(
+            "house_members"
+          )
+
+          .select(
+            "household_id"
+          )
+
+          .eq(
+            "user_id",
+            user.id
+          )
+
+          .limit(
+            1
+          )
+
+          .maybeSingle();
+
+
+      if (
+        membership
+          ?.household_id
+      ) {
+
+        return (
+          membership
+            .household_id
+        );
+
+      }
+
+
+      /* ------------------------------------------------------
+         OWNER FALLBACK
+      ------------------------------------------------------ */
+
+      const {
+        data:
+        household
+      } =
+        await supabase
+
+          .from(
+            "households"
+          )
+
+          .select(
+            "id"
+          )
+
+          .eq(
+            "owner_id",
+            user.id
+          )
+
+          .limit(
+            1
+          )
+
+          .maybeSingle();
+
+
+      return (
+        household?.id ||
+        null
+      );
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora dashboard household lookup:",
+        error
+      );
+
+
+      return null;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     TIME AGO
+  ========================================================== */
+
+  function timeAgo(
+    value
+  ) {
+
+    if (!value) {
+
+      return "—";
+
+    }
+
+
+    const timestamp =
+      new Date(
+        value
+      ).getTime();
+
+
+    if (
+      Number.isNaN(
+        timestamp
+      )
+    ) {
+
+      return "—";
+
+    }
+
+
+    const seconds =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            Date.now() -
+            timestamp
+          ) / 1000
+        )
+      );
+
+
+    if (
+      seconds < 10
+    ) {
+
+      return "JUST NOW";
+
+    }
+
+
+    if (
+      seconds < 60
+    ) {
+
+      return (
+        `${seconds}S AGO`
+      );
+
+    }
+
+
+    const minutes =
+      Math.floor(
+        seconds / 60
+      );
+
+
+    if (
+      minutes < 60
+    ) {
+
+      return (
+        `${minutes}M AGO`
+      );
+
+    }
+
+
+    const hours =
+      Math.floor(
+        minutes / 60
+      );
+
+
+    if (
+      hours < 24
+    ) {
+
+      return (
+        `${hours}H AGO`
+      );
+
+    }
+
+
+    const days =
+      Math.floor(
+        hours / 24
+      );
+
+
+    return (
+      `${days}D AGO`
+    );
+
+  }
+
+
+  /* ==========================================================
+     ACTIVITY ICON
+  ========================================================== */
+
+  function activityIcon(
+    type
+  ) {
+
+    const value =
+      String(
+        type || ""
+      ).toUpperCase();
+
+
+    if (
+      value.includes(
+        "PAYMENT"
+      )
+    ) {
+
+      return "৳";
+
+    }
+
+
+    if (
+      value.includes(
+        "EXPENSE"
+      )
+    ) {
+
+      return "＋";
+
+    }
+
+
+    if (
+      value.includes(
+        "MEAL"
+      )
+    ) {
+
+      return "◉";
+
+    }
+
+
+    if (
+      value.includes(
+        "BILL"
+      )
+    ) {
+
+      return "▣";
+
+    }
+
+
+    if (
+      value.includes(
+        "RENT"
+      )
+    ) {
+
+      return "⌂";
+
+    }
+
+
+    if (
+      value.includes(
+        "LOCKED"
+      )
+    ) {
+
+      return "🔒";
+
+    }
+
+
+    if (
+      value.includes(
+        "UNLOCKED"
+      )
+    ) {
+
+      return "🔓";
+
+    }
+
+
+    if (
+      value.includes(
+        "VERSION"
+      )
+    ) {
+
+      return "↶";
+
+    }
+
+
+    if (
+      value.includes(
+        "ROLE"
+      ) ||
+      value.includes(
+        "OWNER"
+      )
+    ) {
+
+      return "♢";
+
+    }
+
+
+    if (
+      value.includes(
+        "INVITATION"
+      )
+    ) {
+
+      return "✉";
+
+    }
+
+
+    if (
+      value.includes(
+        "MEMBER"
+      )
+    ) {
+
+      return "◇";
+
+    }
+
+
+    return "·";
+
+  }
+
+
+  /* ==========================================================
+     ACTIVITY CLASS
+  ========================================================== */
+
+  function activityClass(
+    type
+  ) {
+
+    const value =
+      String(
+        type || ""
+      ).toUpperCase();
+
+
+    if (
+      value.includes(
+        "DELETED"
+      ) ||
+      value.includes(
+        "REMOVED"
+      ) ||
+      value.includes(
+        "REVOKED"
+      )
+    ) {
+
+      return "danger";
+
+    }
+
+
+    if (
+      value.includes(
+        "PAYMENT"
+      ) ||
+      value.includes(
+        "CONNECTED"
+      ) ||
+      value.includes(
+        "ACCEPTED"
+      )
+    ) {
+
+      return "green";
+
+    }
+
+
+    if (
+      value.includes(
+        "LOCK"
+      ) ||
+      value.includes(
+        "ROLE"
+      ) ||
+      value.includes(
+        "VERSION"
+      ) ||
+      value.includes(
+        "OWNER"
+      )
+    ) {
+
+      return "purple";
+
+    }
+
+
+    if (
+      value.includes(
+        "BILL"
+      ) ||
+      value.includes(
+        "RENT"
+      )
+    ) {
+
+      return "amber";
+
+    }
+
+
+    return "cyan";
+
+  }
+
+
+  /* ==========================================================
+     SMART ALERTS
+  ========================================================== */
+
+  function alerts() {
+
+    const month =
+      AuroraDataStore
+        .getMonth(
+          AuroraApp
+            .getCurrentMonth()
+        );
+
+
+    const members =
+      AuroraDataStore
+        .getMembers();
+
+
+    const mealExpense =
+      AuroraMealAccount
+        .totalExpense();
+
+
+    const houseCost =
+      AuroraHouseAccount
+        .totalCost();
+
+
+    const totalExpense =
+      mealExpense +
+      houseCost;
+
+
+    const totalPaid =
+      AuroraPaymentAccount
+        .total();
+
+
+    const totalMeals =
+      AuroraMealAccount
+        .totalMeals();
+
+
+    const outstanding =
+      Math.max(
+        0,
+        totalExpense -
+        totalPaid
+      );
+
+
+    const result = [];
+
+
+    /* --------------------------------------------------------
+       MONTH LOCK
+    -------------------------------------------------------- */
+
+    if (
+      month?.closed ===
+      true
+    ) {
+
+      result.push({
+
+        type:
+          "locked",
+
+        icon:
+          "🔒",
+
+        title:
+          "Accounting cycle locked",
+
+        text:
+          `${monthLabel(
+            AuroraApp
+              .getCurrentMonth()
+          )} is currently read only.`
+
+      });
+
+    }
+
+
+    /* --------------------------------------------------------
+       OUTSTANDING
+    -------------------------------------------------------- */
+
+    if (
+      outstanding >
+      0.01
+    ) {
+
+      result.push({
+
+        type:
+          "warning",
+
+        icon:
+          "!",
+
+        title:
+          "Outstanding balance",
+
+        text:
+          `${money(
+            outstanding
+          )} remains uncovered this cycle.`
+
+      });
+
+    }
+
+
+    /* --------------------------------------------------------
+       NO MEALS
+    -------------------------------------------------------- */
+
+    if (
+      totalMeals <= 0
+    ) {
+
+      result.push({
+
+        type:
+          "info",
+
+        icon:
+          "◉",
+
+        title:
+          "No meal activity",
+
+        text:
+          "No meals have been recorded for this cycle."
+
+      });
+
+    }
+
+
+    /* --------------------------------------------------------
+       MEMBER SETTLEMENT
+    -------------------------------------------------------- */
+
+    const unsettled =
+      members.filter(
+        member => {
+
+          const balance =
+            AuroraMealAccount
+              .memberBalance(
+                member.id
+              ) +
+
+            AuroraHouseAccount
+              .memberBalance(
+                member.id
+              );
+
+
+          return (
+            Math.abs(
+              balance
+            ) >
+            0.01
+          );
+
+        }
+      );
+
+
+    if (
+      unsettled.length >
+      0
+    ) {
+
+      result.push({
+
+        type:
+          "signal",
+
+        icon:
+          "◇",
+
+        title:
+          "Settlement pending",
+
+        text:
+          `${unsettled.length} member${unsettled.length === 1
+            ? ""
+            : "s"
+          } currently have unsettled balances.`
+
+      });
+
+    }
+
+
+    /* --------------------------------------------------------
+       ALL CLEAR
+    -------------------------------------------------------- */
+
+    if (
+      result.length ===
+      0
+    ) {
+
+      result.push({
+
+        type:
+          "clear",
+
+        icon:
+          "✓",
+
+        title:
+          "System clear",
+
+        text:
+          "No immediate accounting alerts detected."
+
+      });
+
+    }
+
+
+    return result
+      .slice(
+        0,
+        4
+      );
+
+  }
+
+
+  /* ==========================================================
+     ALERT HTML
+  ========================================================== */
+
+  function renderAlerts() {
+
+    const list =
+      document.getElementById(
+        "auroraDashboardAlerts"
+      );
+
+
+    if (!list) {
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      alerts()
+        .map(
+          alert => `
+
+            <div
+              class="
+                aurora-dash-alert
+                ${alert.type}
+              "
+            >
+
+              <span
+                class="
+                  aurora-dash-alert-icon
+                "
+              >
+                ${alert.icon}
+              </span>
+
+
+              <div>
+
+                <strong>
+                  ${esc(
+            alert.title
+          )}
+                </strong>
+
+                <p>
+                  ${esc(
+            alert.text
+          )}
+                </p>
+
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("");
+
+  }
+
+
+  /* ==========================================================
+     RECENT ACTIVITY
+  ========================================================== */
+
+  async function loadActivity(
+    token
+  ) {
+
+    const container =
+      document.getElementById(
+        "auroraDashboardActivity"
+      );
+
+
+    if (!container) {
+
+      return;
+
+    }
+
+
+    try {
+
+      const householdId =
+        await getHouseholdId();
+
+
+      if (
+        token !==
+        requestToken
+      ) {
+
+        return;
+
+      }
+
+
+      if (!householdId) {
+
+        container.innerHTML = `
+
+          <div
+            class="aurora-dash-empty"
+          >
+            CLOUD SIGNAL UNAVAILABLE
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      const supabase =
+        getAuroraSupabaseClient();
+
+
+      if (!supabase) {
+
+        return;
+
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_get_activity",
+          {
+
+            p_household_id:
+              householdId,
+
+            p_limit:
+              5
+
+          }
+        );
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      if (
+        token !==
+        requestToken
+      ) {
+
+        return;
+
+      }
+
+
+      const rows =
+        Array.isArray(
+          data
+        )
+          ? data
+          : [];
+
+
+      if (
+        rows.length ===
+        0
+      ) {
+
+        container.innerHTML = `
+
+          <div
+            class="aurora-dash-empty"
+          >
+
+            <span>◇</span>
+
+            <strong>
+              No activity yet
+            </strong>
+
+            <p>
+              New Aurora events will
+              appear here.
+            </p>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      container.innerHTML =
+        rows
+          .map(
+            item => {
+
+              const type =
+                item.event_type ||
+                "";
+
+
+              const actor =
+                item.actor_name ||
+                item.actor_email ||
+                "AURORA SYSTEM";
+
+
+              return `
+
+                <div
+                  class="
+                    aurora-dash-activity-row
+                    ${activityClass(
+                type
+              )}
+                  "
+                >
+
+                  <span
+                    class="
+                      aurora-dash-activity-icon
+                    "
+                  >
+                    ${activityIcon(
+                type
+              )}
+                  </span>
+
+
+                  <div
+                    class="
+                      aurora-dash-activity-copy
+                    "
+                  >
+
+                    <strong>
+                      ${esc(
+                item.title ||
+                "Aurora Activity"
+              )}
+                    </strong>
+
+
+                    <div>
+
+                      <span>
+                        ${esc(
+                actor
+              )}
+                      </span>
+
+
+                      ${item.actor_role
+
+                  ? `
+                            <span>
+                              ${esc(
+                    String(
+                      item.actor_role
+                    )
+                      .toUpperCase()
+                  )}
+                            </span>
+                          `
+
+                  : ""
+                }
+
+
+                      <span>
+                        ${timeAgo(
+                  item.created_at
+                )}
+                      </span>
+
+
+                      ${item.revision
+
+                  ? `
+                            <span>
+                              REV ${Number(
+                    item.revision
+                  )}
+                            </span>
+                          `
+
+                  : ""
+                }
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              `;
+
+            }
+          )
+          .join("");
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora Dashboard Activity:",
+        error
+      );
+
+
+      container.innerHTML = `
+
+        <div
+          class="aurora-dash-empty error"
+        >
+          EVENT NETWORK TEMPORARILY UNAVAILABLE
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     MOUNT
+  ========================================================== */
+
+  function mount() {
+
+    const page =
+      document.getElementById(
+        "page-dashboard"
+      );
+
+
+    if (!page) {
+
+      return;
+
+    }
+
+
+    requestToken += 1;
+
+
+    const token =
+      requestToken;
+
+
+    page.insertAdjacentHTML(
+      "beforeend",
+      `
+
+        <div
+          class="
+            aurora-dash-signals-grid
+          "
+        >
+
+          <!-- ================================================
+               SMART ALERTS
+          ================================================= -->
+
+          <section
+            class="
+              aurora-intel-panel
+              aurora-dash-signal-panel
+            "
+          >
+
+            <div
+              class="
+                aurora-intel-panel-head
+              "
+            >
+
+              <div>
+
+                <span>
+                  AURORA INTELLIGENCE
+                </span>
+
+                <h3>
+                  Smart Alerts
+                </h3>
+
+              </div>
+
+
+              <span
+                class="
+                  aurora-dash-live-tag
+                "
+              >
+                LIVE
+              </span>
+
+            </div>
+
+
+            <div
+              id="auroraDashboardAlerts"
+              class="aurora-dash-alert-list"
+            ></div>
+
+          </section>
+
+
+
+          <!-- ================================================
+               RECENT ACTIVITY
+          ================================================= -->
+
+          <section
+            class="
+              aurora-intel-panel
+              aurora-dash-signal-panel
+            "
+          >
+
+            <div
+              class="
+                aurora-intel-panel-head
+              "
+            >
+
+              <div>
+
+                <span>
+                  EVENT NETWORK
+                </span>
+
+                <h3>
+                  Recent Signals
+                </h3>
+
+              </div>
+
+
+              <button
+                type="button"
+                onclick="go('activity')"
+              >
+                VIEW ALL →
+              </button>
+
+            </div>
+
+
+            <div
+              id="auroraDashboardActivity"
+              class="
+                aurora-dash-activity-list
+              "
+            >
+
+              <div
+                class="aurora-dash-loading"
+              >
+                SCANNING EVENT NETWORK...
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      `
+    );
+
+
+    renderAlerts();
+
+
+    loadActivity(
+      token
+    );
+
+  }
+
+
+  return {
+
+    mount,
+
+    refresh:
+      mount
+
+  };
+
+})();
 
 
 
@@ -12878,6 +18383,2180 @@ function closeMemberLedger() {
 
 
 /* ============================================================
+   AURORA BACHELOR // ACTIVITY NETWORK
+============================================================ */
+
+const AuroraActivity = (() => {
+
+  let loading =
+    false;
+
+  let logs =
+    [];
+
+  let filter =
+    "ALL";
+
+  let autoRefreshTimer =
+    null;
+
+
+  /* ==========================================================
+     CLOUD STATUS
+  ========================================================== */
+
+  function getStatus() {
+
+    return (
+      window.AuroraCloudSync
+        ?.status?.() ||
+      {}
+    );
+
+  }
+
+
+  /* ==========================================================
+     ESCAPE
+  ========================================================== */
+
+  function escapeValue(
+    value
+  ) {
+
+    return String(
+      value ?? ""
+    )
+
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
+
+  }
+
+
+  /* ==========================================================
+     DATE / TIME
+  ========================================================== */
+
+  function formatTime(
+    value
+  ) {
+
+    if (!value) {
+      return "—";
+    }
+
+
+    const date =
+      new Date(
+        value
+      );
+
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+
+      return "—";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+      "en-BD",
+      {
+
+        day:
+          "2-digit",
+
+        month:
+          "short",
+
+        year:
+          "numeric",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        second:
+          "2-digit"
+
+      }
+    ).format(
+      date
+    );
+
+  }
+
+
+  /* ==========================================================
+     EVENT ICON
+  ========================================================== */
+
+  function eventIcon(type) {
+
+    const map = {
+
+      DATA_CREATED: "◉",
+      DATA_UPDATED: "↻",
+
+      EXPENSE_ADDED: "＋",
+      EXPENSE_UPDATED: "✎",
+      EXPENSE_DELETED: "−",
+
+      PAYMENT_ADDED: "৳",
+      PAYMENT_UPDATED: "↻",
+      PAYMENT_DELETED: "×",
+
+      MEAL_ADDED: "🍚",
+      MEAL_UPDATED: "✎",
+      MEAL_DELETED: "×",
+
+      BILL_ADDED: "▣",
+      BILL_UPDATED: "✎",
+      BILL_DELETED: "×",
+
+      RENT_ADDED: "⌂",
+      RENT_UPDATED: "✎",
+      RENT_DELETED: "×",
+
+      ACCOUNTING_MEMBER_ADDED: "＋",
+      ACCOUNTING_MEMBER_UPDATED: "◉",
+      ACCOUNTING_MEMBER_DELETED: "−",
+
+      MEMBER_CONNECTED: "＋",
+      MEMBER_REMOVED: "−",
+
+      ROLE_CHANGED: "♢",
+      OWNERSHIP_TRANSFERRED: "♛",
+
+      INVITATION_CREATED: "✉",
+      INVITATION_RESENT: "↗",
+      INVITATION_ACCEPTED: "✓",
+      INVITATION_REVOKED: "×",
+      INVITATION_EXPIRED: "⌛",
+
+      SETTINGS_UPDATED: "⚙",
+      HOUSE_UPDATED: "⌂",
+
+      MONTH_LOCKED: "🔒",
+      MONTH_UNLOCKED: "🔓"
+
+    };
+
+
+    return (
+      map[type] ||
+      "◇"
+    );
+
+  }
+
+
+  /* ==========================================================
+     EVENT CLASS
+  ========================================================== */
+
+  function eventClass(type) {
+
+    type =
+      String(type || "")
+        .toUpperCase();
+
+
+    /* DELETE / REVOKE */
+
+    if (
+      type.includes("DELETED") ||
+      type.includes("REMOVED") ||
+      type.includes("REVOKED")
+    ) {
+
+      return "danger";
+
+    }
+
+
+    /* SECURITY */
+
+    if (
+      type.includes("ROLE") ||
+      type.includes("OWNERSHIP") ||
+      type.includes("SETTINGS")
+    ) {
+
+      return "purple";
+
+    }
+
+
+    /* PAYMENTS / SUCCESS */
+
+    if (
+      type.includes("PAYMENT") ||
+      type.includes("ACCEPTED") ||
+      type.includes("CONNECTED")
+    ) {
+
+      return "success";
+
+    }
+
+
+    /* HOUSE BILL / RENT */
+
+    if (
+      type.includes("BILL") ||
+      type.includes("RENT")
+    ) {
+
+      return "amber";
+
+    }
+
+
+    /* MEALS */
+
+    if (
+      type.includes("MEAL")
+    ) {
+
+      return "blue";
+
+    }
+
+
+    /* MONTH */
+
+    if (
+      type.includes("MONTH")
+    ) {
+
+      return "purple";
+
+    }
+
+
+    return "cyan";
+
+  }
+
+
+  /* ==========================================================
+     DETAILS
+  ========================================================== */
+
+  function renderDetails(
+    item
+  ) {
+
+    const details =
+      item.details &&
+        typeof item.details === "object"
+        ? item.details
+        : {};
+
+
+    const entries =
+      Object.entries(
+        details
+      );
+
+
+    if (!entries.length) {
+
+      return "";
+
+    }
+
+
+    return `
+      <div
+        class="aurora-activity-details"
+      >
+
+        ${entries
+        .map(
+          ([key, value]) => {
+
+            return `
+                  <span>
+
+                    <b>
+                      ${escapeValue(
+              key
+                .replaceAll(
+                  "_",
+                  " "
+                )
+                .toUpperCase()
+            )}
+                    </b>
+
+                    ${escapeValue(
+              typeof value ===
+                "object"
+                ? JSON.stringify(
+                  value
+                )
+                : value
+            )}
+
+                  </span>
+                `;
+
+          }
+        )
+        .join("")
+      }
+
+      </div>
+    `;
+
+  }
+
+
+  /* ==========================================================
+     FILTERED LOGS
+  ========================================================== */
+
+  function filteredLogs() {
+
+    if (
+      filter === "ALL"
+    ) {
+
+      return logs;
+
+    }
+
+
+    return logs.filter(
+      item => {
+
+        const type =
+          String(
+            item.event_type || ""
+          ).toUpperCase();
+
+
+        switch (filter) {
+
+
+          case "ACCOUNTING":
+
+            return (
+              type.includes("DATA") ||
+              type.includes("EXPENSE") ||
+              type.includes("PAYMENT") ||
+              type.includes("MEAL") ||
+              type.includes("BILL") ||
+              type.includes("RENT") ||
+              type.includes("MONTH")
+            );
+
+
+          case "MEMBERS":
+
+            return (
+              type.includes("MEMBER") ||
+              type === "ROLE_CHANGED"
+            );
+
+
+          case "INVITATIONS":
+
+            return (
+              type.includes(
+                "INVITATION"
+              )
+            );
+
+
+          case "SECURITY":
+
+            return (
+              type === "ROLE_CHANGED" ||
+              type ===
+              "OWNERSHIP_TRANSFERRED" ||
+              type ===
+              "SETTINGS_UPDATED" ||
+              type ===
+              "HOUSE_UPDATED" ||
+              type ===
+              "MONTH_LOCKED" ||
+              type ===
+              "MONTH_UNLOCKED"
+            );
+
+
+          default:
+
+            return true;
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* ==========================================================
+     TIMELINE
+  ========================================================== */
+
+  function renderTimeline() {
+
+    const root =
+      document.getElementById(
+        "auroraActivityRoot"
+      );
+
+
+    if (!root) {
+      return;
+    }
+
+
+    const items =
+      filteredLogs();
+
+
+    root.innerHTML = `
+
+      <div
+        class="aurora-activity-toolbar"
+      >
+
+        <div>
+
+          <strong>
+            ◇ AUDIT STREAM
+          </strong>
+
+          <span>
+            ${logs.length
+      } EVENTS
+          </span>
+
+        </div>
+
+
+        <div
+          class="aurora-activity-actions"
+        >
+
+          <select
+            id="activityFilter"
+          >
+
+            <option
+              value="ALL"
+              ${filter === "ALL"
+              ? "selected"
+              : ""
+            }>
+              ALL EVENTS
+            </option>
+
+            <option
+              value="ACCOUNTING"
+              ${filter ===
+        "ACCOUNTING"
+        ? "selected"
+        : ""
+      }
+            >
+              ACCOUNTING
+            </option>
+
+            <option
+              value="MEMBERS"
+              ${filter ===
+        "MEMBERS"
+        ? "selected"
+        : ""
+      }
+            >
+              MEMBERS
+            </option>
+
+            <option
+              value="INVITATIONS"
+              ${filter ===
+        "INVITATIONS"
+        ? "selected"
+        : ""
+      }
+            >
+              INVITATIONS
+            </option>
+
+            <option
+              value="SECURITY"
+              ${filter ===
+        "SECURITY"
+        ? "selected"
+        : ""
+      }
+            >
+              SECURITY
+            </option>
+
+          </select>
+
+
+          <button
+            class="btn"
+            id="activityRefreshBtn"
+            type="button"
+          >
+            ↻ REFRESH
+          </button>
+
+        </div>
+
+      </div>
+
+
+      ${items.length
+
+        ?
+
+        `
+            <div
+              class="aurora-activity-timeline"
+            >
+
+              ${items
+          .map(
+            item => {
+
+              const role =
+                String(
+                  item.actor_role ||
+                  "SYSTEM"
+                ).toUpperCase();
+
+
+              const actor =
+                item.actor_name ||
+                item.actor_email ||
+                "Aurora System";
+
+
+              return `
+
+                        <article
+                          class="
+                            aurora-activity-event
+                            ${eventClass(
+                item.event_type
+              )}
+                          "
+                        >
+
+                          <div
+                            class="aurora-activity-icon"
+                          >
+                            ${eventIcon(
+                item.event_type
+              )}
+                          </div>
+
+
+                          <div
+                            class="aurora-activity-content"
+                          >
+
+                            <div
+                              class="aurora-activity-top"
+                            >
+
+                              <div>
+
+                                <strong>
+                                  ${escapeValue(
+                item.title
+              )}
+                                </strong>
+
+                                <small>
+                                  ${escapeValue(
+                item.event_type
+              )}
+                                </small>
+
+                              </div>
+
+
+                              <time>
+
+                                ${escapeValue(
+                formatTime(
+                  item.created_at
+                )
+              )}
+
+                              </time>
+
+                            </div>
+
+
+                            <div
+                              class="aurora-activity-actor"
+                            >
+
+                              <span>
+                                ${escapeValue(
+                actor
+              )}
+                              </span>
+
+                              <b>
+                                ${escapeValue(
+                role
+              )}
+                              </b>
+
+                              ${item.revision
+                  ? `
+                                      <em>
+                                        REV ${Number(
+                    item.revision
+                  )
+                  }
+                                      </em>
+                                    `
+                  : ""
+                }
+
+                            </div>
+
+
+                            ${renderDetails(
+                  item
+                )
+                }
+
+                          </div>
+
+                        </article>
+
+                      `;
+
+            }
+          )
+          .join("")
+        }
+
+            </div>
+          `
+
+        :
+
+        `
+            <div
+              class="card empty"
+            >
+
+              <div
+                class="emoji"
+              >
+                ◇
+              </div>
+
+              No activity records found.
+
+            </div>
+          `
+      }
+    `;
+
+
+    document
+      .getElementById(
+        "activityFilter"
+      )
+      ?.addEventListener(
+        "change",
+        event => {
+
+          filter =
+            event.target.value;
+
+          renderTimeline();
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "activityRefreshBtn"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+
+          load(
+            true
+          );
+
+        }
+      );
+
+  }
+
+
+  /* ==========================================================
+     LOADING
+  ========================================================== */
+
+  function renderLoading() {
+
+    const root =
+      document.getElementById(
+        "auroraActivityRoot"
+      );
+
+
+    if (!root) {
+      return;
+    }
+
+
+    root.innerHTML = `
+
+      <div class="card">
+
+        <div class="muted">
+
+          ◌ Connecting to
+          Aurora Audit Network...
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* ==========================================================
+     LOAD
+  ========================================================== */
+
+  async function load(
+    showLoading = false
+  ) {
+
+    if (loading) {
+      return;
+    }
+
+
+    const status =
+      getStatus();
+
+
+    if (
+      !status.ready ||
+      !status.householdId
+    ) {
+
+      const root =
+        document.getElementById(
+          "auroraActivityRoot"
+        );
+
+
+      if (root) {
+
+        root.innerHTML = `
+
+          <div class="card">
+
+            <div class="muted">
+
+              Cloud session is not ready yet.
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+
+
+      return;
+
+    }
+
+
+    const client =
+      window
+        .getAuroraSupabaseClient
+        ?.();
+
+
+    if (!client) {
+
+      console.error(
+        "Aurora Activity: Supabase client unavailable."
+      );
+
+      return;
+
+    }
+
+
+    loading =
+      true;
+
+
+    if (showLoading) {
+
+      renderLoading();
+
+    }
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await client.rpc(
+          "aurora_get_activity",
+          {
+
+            p_household_id:
+              status.householdId,
+
+            p_limit:
+              150
+
+          }
+        );
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      logs =
+        Array.isArray(
+          data
+        )
+          ? data
+          : [];
+
+
+      renderTimeline();
+
+    }
+
+    catch (
+    error
+    ) {
+
+      console.error(
+        "Aurora Activity Error:",
+        error
+      );
+
+
+      const root =
+        document.getElementById(
+          "auroraActivityRoot"
+        );
+
+
+      if (root) {
+
+        root.innerHTML = `
+
+          <div class="card">
+
+            <h3>
+              ⚠ Activity Network Error
+            </h3>
+
+            <div class="muted">
+              ${escapeValue(
+          error.message ||
+          "Unable to load activity."
+        )}
+            </div>
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+    finally {
+
+      loading =
+        false;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     PAGE RENDER
+  ========================================================== */
+
+  function render() {
+
+    renderLoading();
+
+    load(
+      false
+    );
+
+  }
+
+
+  /* ==========================================================
+     AUTO REFRESH
+  ========================================================== */
+
+  function startAutoRefresh() {
+
+    stopAutoRefresh();
+
+
+    autoRefreshTimer =
+      setInterval(
+        () => {
+
+          const page =
+            document.getElementById(
+              "page-activity"
+            );
+
+
+          if (
+            !page ||
+            !page.classList.contains(
+              "active"
+            ) ||
+            document.visibilityState !==
+            "visible"
+          ) {
+
+            return;
+
+          }
+
+
+          load(
+            false
+          );
+
+        },
+        10000
+      );
+
+  }
+
+
+  function stopAutoRefresh() {
+
+    if (
+      !autoRefreshTimer
+    ) {
+
+      return;
+
+    }
+
+
+    clearInterval(
+      autoRefreshTimer
+    );
+
+
+    autoRefreshTimer =
+      null;
+
+  }
+
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    startAutoRefresh
+  );
+
+
+  return {
+
+    render,
+
+    load,
+
+    refresh:
+      () =>
+        load(
+          true
+        )
+
+  };
+
+})();
+
+
+
+function renderActivity() {
+
+  AuroraActivity.render();
+
+}
+
+
+
+/* ============================================================
+   AURORA // VERSION HISTORY
+============================================================ */
+
+const AuroraVersionHistory = (() => {
+
+  let versions = [];
+  let loading = false;
+
+
+  function status() {
+
+    return (
+      window.AuroraCloudSync
+        ?.status?.() || {}
+    );
+
+  }
+
+
+  function client() {
+
+    return window
+      .getAuroraSupabaseClient
+      ?.();
+
+  }
+
+
+  function canRestore() {
+
+    return (
+      status().canWrite === true
+    );
+
+  }
+
+
+  function formatDate(value) {
+
+    if (!value) {
+      return "—";
+    }
+
+    const date =
+      new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return "—";
+    }
+
+    return new Intl.DateTimeFormat(
+      "en-BD",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    ).format(date);
+
+  }
+
+
+  function reasonLabel(reason) {
+
+    const map = {
+
+      INITIAL_SNAPSHOT:
+        "Initial Snapshot",
+
+      SYSTEM_BACKFILL:
+        "Initial Cloud Backup",
+
+      AUTO_SNAPSHOT:
+        "Automatic Snapshot"
+
+    };
+
+    return (
+      map[reason] ||
+      reason ||
+      "Snapshot"
+    );
+
+  }
+
+
+  function renderLoading() {
+
+    const root =
+      document.getElementById(
+        "auroraVersionRoot"
+      );
+
+    if (!root) {
+      return;
+    }
+
+    root.innerHTML = `
+      <div class="card">
+        <div class="muted">
+          ◌ Loading temporal archive...
+        </div>
+      </div>
+    `;
+
+  }
+
+
+  function renderList() {
+
+    const root =
+      document.getElementById(
+        "auroraVersionRoot"
+      );
+
+    if (!root) {
+      return;
+    }
+
+
+    const cloud =
+      status();
+
+    const currentRevision =
+      Number(
+        cloud.revision || 0
+      );
+
+
+    root.innerHTML = `
+
+      <div class="version-toolbar">
+
+        <div>
+
+          <strong>
+            ⟳ TEMPORAL ARCHIVE
+          </strong>
+
+          <span>
+            ${versions.length}
+            SNAPSHOTS
+          </span>
+
+        </div>
+
+
+        <div class="version-toolbar-actions">
+
+          <span class="version-current-badge">
+            CURRENT REV ${currentRevision}
+          </span>
+
+          <button
+            class="btn"
+            id="versionRefreshBtn"
+            type="button"
+          >
+            ↻ REFRESH
+          </button>
+
+        </div>
+
+      </div>
+
+
+      ${versions.length
+
+        ? `
+
+            <div class="version-list">
+
+              ${versions.map(item => {
+
+          const revision =
+            Number(
+              item.revision
+            );
+
+          const isCurrent =
+            revision ===
+            currentRevision;
+
+          return `
+
+                  <article
+                    class="
+                      version-card
+                      ${isCurrent
+              ? "current"
+              : ""
+            }
+                    "
+                  >
+
+                    <div
+                      class="version-revision"
+                    >
+
+                      <span>
+                        REVISION
+                      </span>
+
+                      <strong>
+                        ${revision}
+                      </strong>
+
+                    </div>
+
+
+                    <div
+                      class="version-main"
+                    >
+
+                      <div
+                        class="version-title-row"
+                      >
+
+                        <strong>
+                          ${reasonLabel(
+              item.reason
+            )
+            }
+                        </strong>
+
+                        ${isCurrent
+              ? `
+                              <span
+                                class="version-status current"
+                              >
+                                CURRENT
+                              </span>
+                            `
+              : `
+                              <span
+                                class="version-status archived"
+                              >
+                                ARCHIVED
+                              </span>
+                            `
+            }
+
+                      </div>
+
+
+                      <div
+                        class="version-meta"
+                      >
+
+                        <span>
+                          ◷
+                          ${formatDate(
+              item.saved_at
+            )
+            }
+                        </span>
+
+                        <span>
+                          ◉
+                          ${esc(
+              item.saved_by_name ||
+              item.saved_by_email ||
+              "Aurora System"
+            )
+            }
+                        </span>
+
+                      </div>
+
+                    </div>
+
+
+                    <div
+                      class="version-actions"
+                    >
+
+                      <button
+                        class="btn small"
+                        type="button"
+                        onclick="
+                          previewAuroraVersion(
+                            ${revision}
+                          )
+                        "
+                      >
+                        ◉ PREVIEW
+                      </button>
+
+
+                      <button
+                        class="
+                          btn
+                          small
+                          ${isCurrent
+              ? ""
+              : "primary"
+            }
+                        "
+                        type="button"
+
+                        ${isCurrent
+              ? "disabled"
+              : ""
+            }
+
+                        onclick="
+                          restoreAuroraVersion(
+                            ${revision}
+                          )
+                        "
+                      >
+                        ${isCurrent
+              ? "CURRENT"
+              : "↶ RESTORE"
+            }
+                      </button>
+
+                    </div>
+
+                  </article>
+
+                `;
+
+        }).join("")}
+
+            </div>
+
+          `
+
+        : `
+
+            <div class="card empty">
+
+              <div class="emoji">
+                ⟳
+              </div>
+
+              <h3>
+                No version history yet
+              </h3>
+
+              <p class="muted">
+                New snapshots will appear
+                after accounting changes.
+              </p>
+
+            </div>
+
+          `
+      }
+
+    `;
+
+
+    document
+      .getElementById(
+        "versionRefreshBtn"
+      )
+      ?.addEventListener(
+        "click",
+        () => load(true)
+      );
+
+  }
+
+
+  async function load(
+    showLoading = false
+  ) {
+
+    if (loading) {
+      return;
+    }
+
+
+    const cloud =
+      status();
+
+
+    if (
+      !cloud.ready ||
+      !cloud.householdId
+    ) {
+
+      const root =
+        document.getElementById(
+          "auroraVersionRoot"
+        );
+
+      if (root) {
+
+        root.innerHTML = `
+          <div class="card">
+            <div class="muted">
+              Cloud session is not ready.
+            </div>
+          </div>
+        `;
+
+      }
+
+      return;
+
+    }
+
+
+    const supabase =
+      client();
+
+    if (!supabase) {
+      return;
+    }
+
+
+    loading = true;
+
+
+    if (showLoading) {
+      renderLoading();
+    }
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_get_versions",
+          {
+            p_household_id:
+              cloud.householdId,
+
+            p_limit:
+              100
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      versions =
+        Array.isArray(data)
+          ? data
+          : [];
+
+
+      renderList();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Version History Error:",
+        error
+      );
+
+
+      const root =
+        document.getElementById(
+          "auroraVersionRoot"
+        );
+
+
+      if (root) {
+
+        root.innerHTML = `
+
+          <div class="card">
+
+            <h3>
+              ⚠ Temporal Archive Error
+            </h3>
+
+            <p class="muted">
+              ${esc(
+          error.message ||
+          "Unable to load versions."
+        )
+          }
+            </p>
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+    finally {
+
+      loading = false;
+
+    }
+
+  }
+
+
+  async function preview(
+    revision
+  ) {
+
+    const cloud =
+      status();
+
+    const supabase =
+      client();
+
+
+    if (
+      !supabase ||
+      !cloud.householdId
+    ) {
+      return;
+    }
+
+
+    try {
+
+      toast(
+        `Loading revision ${revision}...`
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_get_version_data",
+          {
+
+            p_household_id:
+              cloud.householdId,
+
+            p_revision:
+              Number(revision)
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      const snapshot =
+        data || {};
+
+
+      const members =
+        Array.isArray(
+          snapshot.members
+        )
+          ? snapshot.members
+          : [];
+
+
+      const months =
+        snapshot.months &&
+          typeof snapshot.months ===
+          "object"
+
+          ? Object.keys(
+            snapshot.months
+          )
+
+          : [];
+
+
+      let mealRecords = 0;
+      let expenses = 0;
+      let payments = 0;
+      let bills = 0;
+      let rents = 0;
+
+
+      months.forEach(
+        monthKey => {
+
+          const month =
+            snapshot.months[
+            monthKey
+            ] || {};
+
+          mealRecords +=
+            month
+              ?.mealAccount
+              ?.meals
+              ?.length || 0;
+
+          expenses +=
+            month
+              ?.mealAccount
+              ?.expenses
+              ?.length || 0;
+
+          payments +=
+            (
+              month
+                ?.mealAccount
+                ?.payments
+                ?.length || 0
+            ) +
+            (
+              month
+                ?.houseAccount
+                ?.payments
+                ?.length || 0
+            );
+
+          bills +=
+            month
+              ?.houseAccount
+              ?.bills
+              ?.length || 0;
+
+          rents +=
+            month
+              ?.houseAccount
+              ?.rent
+              ?.length || 0;
+
+        }
+      );
+
+
+      modal(
+        `Revision ${revision}`,
+        `
+
+          <div class="version-preview">
+
+            <div
+              class="version-preview-hero"
+            >
+
+              <span>
+                TEMPORAL SNAPSHOT
+              </span>
+
+              <strong>
+                REV ${revision}
+              </strong>
+
+            </div>
+
+
+            <div
+              class="version-preview-grid"
+            >
+
+              <div>
+                <small>
+                  MEMBERS
+                </small>
+
+                <strong>
+                  ${members.length}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  MONTHS
+                </small>
+
+                <strong>
+                  ${months.length}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  MEAL DAYS
+                </small>
+
+                <strong>
+                  ${mealRecords}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  EXPENSES
+                </small>
+
+                <strong>
+                  ${expenses}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  PAYMENTS
+                </small>
+
+                <strong>
+                  ${payments}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  HOUSE BILLS
+                </small>
+
+                <strong>
+                  ${bills}
+                </strong>
+              </div>
+
+
+              <div>
+                <small>
+                  RENT RECORDS
+                </small>
+
+                <strong>
+                  ${rents}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div
+              class="version-preview-months"
+            >
+
+              <small>
+                AVAILABLE MONTHS
+              </small>
+
+              <div>
+
+                ${months.length
+
+          ? months
+            .sort()
+            .reverse()
+            .map(
+              month => `
+                            <span>
+                              ${esc(month)}
+                            </span>
+                          `
+            )
+            .join("")
+
+          : `
+                      <span>
+                        No month data
+                      </span>
+                    `
+        }
+
+              </div>
+
+            </div>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="btn"
+                onclick="closeModal()"
+              >
+                CLOSE
+              </button>
+
+
+              ${Number(revision) !==
+          Number(
+            cloud.revision
+          )
+
+          ? `
+
+                    <button
+                      type="button"
+                      class="btn primary"
+                      onclick="
+                        closeModal();
+                        restoreAuroraVersion(
+                          ${Number(revision)}
+                        );
+                      "
+                    >
+                      ↶ RESTORE THIS REVISION
+                    </button>
+
+                  `
+
+          : ""
+        }
+
+            </div>
+
+          </div>
+
+        `
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Version Preview Error:",
+        error
+      );
+
+      toast(
+        error.message ||
+        "Unable to preview revision."
+      );
+
+    }
+
+  }
+
+
+  async function restore(
+    revision
+  ) {
+
+    const cloud =
+      status();
+
+
+    if (!canRestore()) {
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      Number(revision) ===
+      Number(cloud.revision)
+    ) {
+
+      toast(
+        "This revision is already current."
+      );
+
+      return;
+
+    }
+
+
+    const confirmed =
+      await auroraConfirm({
+
+        eyebrow:
+          "AURORA // TEMPORAL RESTORE",
+
+        title:
+          `Restore Revision ${revision}?`,
+
+        message:
+          `CURRENT REVISION // ${cloud.revision}\n` +
+          `TARGET SNAPSHOT // REV ${revision}\n\n` +
+          `Aurora will create a NEW revision using this snapshot.\n` +
+          `Existing version history will remain protected.`,
+
+        confirmText:
+          `↶ RESTORE REV ${revision}`,
+
+        cancelText:
+          "CANCEL",
+
+        danger:
+          true
+
+      });
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    const supabase =
+      client();
+
+    if (!supabase) {
+      return;
+    }
+
+
+    try {
+
+      toast(
+        `Restoring revision ${revision}...`
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_restore_house_data",
+          {
+
+            p_household_id:
+              cloud.householdId,
+
+            p_source_revision:
+              Number(revision),
+
+            p_expected_revision:
+              Number(
+                cloud.revision
+              )
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      console.log(
+        "⟳ Aurora Restore Complete:",
+        data
+      );
+
+
+      toast(
+        `Revision ${revision} restored successfully.`
+      );
+
+
+      await window
+        .AuroraCloudSync
+        ?.reloadFromCloud?.(
+          true
+        );
+
+
+      await load(false);
+
+
+      if (
+        typeof AuroraActivity !==
+        "undefined"
+      ) {
+
+        AuroraActivity
+          .load?.(
+            false
+          );
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Restore Error:",
+        error
+      );
+
+
+      const message =
+        String(
+          error.message || ""
+        );
+
+
+      if (
+        message.includes(
+          "VERSION_CONFLICT"
+        )
+      ) {
+
+        toast(
+          "Cloud changed. Refresh Version History and try again."
+        );
+
+        await load(false);
+
+        return;
+
+      }
+
+
+      if (
+        message.includes(
+          "VERSION_ALREADY_CURRENT"
+        )
+      ) {
+
+        toast(
+          "That snapshot is already current."
+        );
+
+        return;
+
+      }
+
+
+      toast(
+        error.message ||
+        "Restore failed."
+      );
+
+    }
+
+  }
+
+
+  function render() {
+
+    renderLoading();
+
+    load(false);
+
+  }
+
+
+  return {
+
+    render,
+    load,
+    preview,
+    restore
+
+  };
+
+})();
+
+
+
+function renderVersions() {
+
+  AuroraVersionHistory
+    .render();
+
+}
+
+
+function previewAuroraVersion(
+  revision
+) {
+
+  AuroraVersionHistory
+    .preview(
+      revision
+    );
+
+}
+
+
+function restoreAuroraVersion(
+  revision
+) {
+
+  AuroraVersionHistory
+    .restore(
+      revision
+    );
+
+}
+
+
+
+
+
+
+
+/* ============================================================
    AURORA BACHELOR — SETTINGS V4
    Isolated settings module
 ============================================================ */
@@ -16138,7 +23817,7 @@ if ("serviceWorker" in navigator) {
       true;
 
     client.auth.onAuthStateChange(
-      function (event, session) {
+      async function (event, session) {
 
         console.log(
           "🔐 AURORA AUTH EVENT:",
@@ -16157,10 +23836,10 @@ if ("serviceWorker" in navigator) {
             session.user.email
           );
 
-          loadAuroraProfile(session);
+          await loadAuroraProfile(session);
 
           /*
-           * OAuth সফল হওয়ার পরেই URL clean করবে।
+           * OAuth সফল হওয়ার পরেই URL clean করবে।
            * Login-এর আগে ?code= মুছবে না।
            */
 
@@ -16182,26 +23861,27 @@ if ("serviceWorker" in navigator) {
 
 
         if (
-          event === "INITIAL_SESSION"
+          event ===
+          "INITIAL_SESSION"
         ) {
+
+          await loadAuroraProfile(
+            session
+          );
+
 
           if (session?.user) {
 
-            console.log(
-              "✅ Aurora Initial Session:",
-              session.user.email
-            );
+            await AuroraCloudSync
+              .initialize(
+                session
+              );
 
-            loadAuroraProfile(session);
-
-          } else {
-
-            console.log(
-              "🔐 Aurora: No initial session."
-            );
           }
 
+
           return;
+
         }
 
 
@@ -16213,32 +23893,34 @@ if ("serviceWorker" in navigator) {
           session?.user
         ) {
 
-          loadAuroraProfile(session);
+          await loadAuroraProfile(
+            session
+          );
+
+          await AuroraCloudSync
+            .initialize(
+              session
+            );
 
           return;
         }
 
 
         if (
-          event === "SIGNED_OUT"
+          event ===
+          "SIGNED_OUT"
         ) {
 
           console.log(
-            "🚪 Aurora: User signed out."
+            "🚪 Aurora Session Destroyed"
           );
 
-          const el =
-            getElements();
 
-          if (el.loginView) {
-            el.loginView.hidden =
-              false;
-          }
+          AuroraCloudSync.stop();
 
-          if (el.profileView) {
-            el.profileView.hidden =
-              true;
-          }
+
+          return;
+
         }
       }
     );
@@ -16283,11 +23965,12 @@ if ("serviceWorker" in navigator) {
         session.user.email
       );
 
-    } else {
 
-      console.log(
-        "🔐 Aurora: No active session."
-      );
+      await AuroraCloudSync
+        .initialize(
+          session
+        );
+
     }
   }
 
@@ -16296,11 +23979,11 @@ if ("serviceWorker" in navigator) {
      INITIALIZE
   ============================================================ */
 
-  function initialize() {
+  async function initialize() {
 
     initAuthListener();
 
-    initializeAuroraAuth();
+    await initializeAuroraAuth();
 
     console.log(
       "🚀 Aurora Profile + Auth System Ready"
@@ -17264,5 +24947,3869 @@ if (
 } else {
 
   initializeAuroraInvitationFlow();
+
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // GLOBAL FUTURISTIC CONFIRMATION BRIDGE
+   Converts old native confirm() actions automatically.
+============================================================ */
+
+const AuroraConfirmSystem = (() => {
+
+  const wrappedFunctions =
+    new Set();
+
+
+  /* ==========================================================
+     RUN OLD FUNCTION WITHOUT ITS NATIVE CONFIRM
+  ========================================================== */
+
+  function executeApprovedAction(
+    originalFunction,
+    thisArg,
+    args
+  ) {
+
+    const nativeConfirm =
+      window.confirm;
+
+
+    /*
+      Existing functions already contain:
+
+      confirm(...)
+
+      After Aurora confirmation succeeds,
+      temporarily return TRUE for that old
+      confirm call.
+
+      Then restore browser confirm immediately.
+    */
+
+    window.confirm =
+      () => true;
+
+
+    try {
+
+      return originalFunction
+        .apply(
+          thisArg,
+          args
+        );
+
+    }
+
+    finally {
+
+      window.confirm =
+        nativeConfirm;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     MEMBER WRITE CHECK
+  ========================================================== */
+
+  function managerAllowed() {
+
+    const permissions =
+      window.AuroraPermissions;
+
+
+    if (
+      permissions &&
+      typeof permissions.canManage ===
+      "function" &&
+      !permissions.canManage()
+    ) {
+
+      toast(
+        "MEMBER // VIEW ONLY"
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  }
+
+
+  /* ==========================================================
+     OWNER CHECK
+  ========================================================== */
+
+  function ownerAllowed() {
+
+    const permissions =
+      window.AuroraPermissions;
+
+
+    if (
+      permissions &&
+      typeof permissions.isOwner ===
+      "function" &&
+      !permissions.isOwner()
+    ) {
+
+      toast(
+        "OWNER ACCESS REQUIRED"
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  }
+
+
+  /* ==========================================================
+     WRAP GLOBAL FUNCTION
+  ========================================================== */
+
+  function wrapGlobal(
+    functionName,
+    configBuilder,
+    options = {}
+  ) {
+
+    const original =
+      window[
+      functionName
+      ];
+
+
+    if (
+      typeof original !==
+      "function"
+    ) {
+
+      return false;
+
+    }
+
+
+    if (
+      original
+        .__auroraConfirmWrapped
+    ) {
+
+      return true;
+
+    }
+
+
+    const wrapped =
+      async function (
+        ...args
+      ) {
+
+        /*
+          Permission check
+        */
+
+        if (
+          options.ownerOnly &&
+          !ownerAllowed()
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          options.managerOnly &&
+          !managerAllowed()
+        ) {
+
+          return;
+
+        }
+
+
+        let config;
+
+
+        try {
+
+          config =
+            typeof configBuilder ===
+              "function"
+
+              ? configBuilder(
+                ...args
+              )
+
+              : configBuilder;
+
+        }
+
+        catch (error) {
+
+          console.warn(
+            `Aurora confirmation config error: ${functionName}`,
+            error
+          );
+
+
+          config = {
+            title:
+              "Confirm Action",
+
+            message:
+              "Continue with this action?"
+          };
+
+        }
+
+
+        /*
+          config === false means:
+          run normally, no Aurora popup.
+        */
+
+        if (
+          config === false
+        ) {
+
+          return original.apply(
+            this,
+            args
+          );
+
+        }
+
+
+        const confirmed =
+          await auroraConfirm({
+
+            eyebrow:
+              config?.eyebrow ||
+              "AURORA // SECURITY PROTOCOL",
+
+            title:
+              config?.title ||
+              "Confirm Action",
+
+            message:
+              config?.message ||
+              "Continue with this action?",
+
+            confirmText:
+              config?.confirmText ||
+              "CONFIRM",
+
+            cancelText:
+              config?.cancelText ||
+              "CANCEL",
+
+            danger:
+              config?.danger !==
+              false
+
+          });
+
+
+        if (
+          !confirmed
+        ) {
+
+          return;
+
+        }
+
+
+        return executeApprovedAction(
+
+          original,
+
+          this,
+
+          args
+
+        );
+
+      };
+
+
+    wrapped
+      .__auroraConfirmWrapped =
+      true;
+
+
+    wrapped
+      .__auroraOriginal =
+      original;
+
+
+    window[
+      functionName
+    ] =
+      wrapped;
+
+
+    wrappedFunctions.add(
+      functionName
+    );
+
+
+    console.log(
+      `◇ Aurora Confirm: ${functionName} protected`
+    );
+
+
+    return true;
+
+  }
+
+
+  /* ==========================================================
+     WRAP OBJECT METHOD
+  ========================================================== */
+
+  function wrapMethod(
+    object,
+    methodName,
+    configBuilder,
+    options = {}
+  ) {
+
+    if (
+      !object ||
+      typeof object[
+      methodName
+      ] !==
+      "function"
+    ) {
+
+      return false;
+
+    }
+
+
+    const original =
+      object[
+      methodName
+      ];
+
+
+    if (
+      original
+        .__auroraConfirmWrapped
+    ) {
+
+      return true;
+
+    }
+
+
+    const wrapped =
+      async function (
+        ...args
+      ) {
+
+        if (
+          options.ownerOnly &&
+          !ownerAllowed()
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          options.managerOnly &&
+          !managerAllowed()
+        ) {
+
+          return;
+
+        }
+
+
+        const config =
+          typeof configBuilder ===
+            "function"
+
+            ? configBuilder(
+              ...args
+            )
+
+            : configBuilder;
+
+
+        const confirmed =
+          await auroraConfirm({
+
+            eyebrow:
+              config?.eyebrow ||
+              "AURORA // SECURITY PROTOCOL",
+
+            title:
+              config?.title ||
+              "Confirm Action",
+
+            message:
+              config?.message ||
+              "Continue with this action?",
+
+            confirmText:
+              config?.confirmText ||
+              "CONFIRM",
+
+            cancelText:
+              config?.cancelText ||
+              "CANCEL",
+
+            danger:
+              config?.danger !==
+              false
+
+          });
+
+
+        if (
+          !confirmed
+        ) {
+
+          return;
+
+        }
+
+
+        return executeApprovedAction(
+
+          original,
+
+          this,
+
+          args
+
+        );
+
+      };
+
+
+    wrapped
+      .__auroraConfirmWrapped =
+      true;
+
+
+    wrapped
+      .__auroraOriginal =
+      original;
+
+
+    object[
+      methodName
+    ] =
+      wrapped;
+
+
+    console.log(
+      `◇ Aurora Confirm: ${methodName} protected`
+    );
+
+
+    return true;
+
+  }
+
+
+  /* ==========================================================
+     DELETE EXPENSE
+  ========================================================== */
+
+  function protectExpense() {
+
+    wrapGlobal(
+
+      "deleteExpense",
+
+      id => {
+
+        const expense =
+          window
+            .AuroraExpenseAccount
+            ?.get?.(
+              id
+            );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // EXPENSE CONTROL",
+
+          title:
+            "Delete Expense?",
+
+          message:
+            `${expense?.description || "Selected expense"}\n` +
+            `${money(
+              expense?.amount || 0
+            )}\n\n` +
+            `This accounting record will be removed.`,
+
+          confirmText:
+            "× DELETE EXPENSE",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DELETE PAYMENT
+  ========================================================== */
+
+  function protectPayment() {
+
+    wrapGlobal(
+
+      "deletePayment",
+
+      id => {
+
+        const payment =
+          window
+            .AuroraPaymentAccount
+            ?.get?.(
+              id
+            );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // PAYMENT LEDGER",
+
+          title:
+            "Delete Payment?",
+
+          message:
+            `TRANSACTION // ${money(
+              payment?.amount || 0
+            )}\n` +
+
+            `ACCOUNT // ${String(
+              payment?.account ||
+              "unknown"
+            ).toUpperCase()
+            }\n\n` +
+
+            `This payment will be removed from the ledger.`,
+
+          confirmText:
+            "× DELETE PAYMENT",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DELETE MEAL
+  ========================================================== */
+
+  function protectMeal() {
+
+    wrapGlobal(
+
+      "deleteMealDay",
+
+      id => {
+
+        const meals =
+          window
+            .AuroraMealAccount
+            ?.data?.()
+            ?.meals || [];
+
+
+        const meal =
+          meals.find(
+            item =>
+              item.id === id
+          );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // MEAL MATRIX",
+
+          title:
+            "Delete Meal Record?",
+
+          message:
+            `DATE // ${meal?.date ||
+            "Unknown"
+            }\n\n` +
+            `Meal values for this day will be removed.`,
+
+          confirmText:
+            "× DELETE MEAL",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DELETE BILL
+  ========================================================== */
+
+  function protectBill() {
+
+    wrapGlobal(
+
+      "deleteBill",
+
+      id => {
+
+        const bill =
+          window
+            .AuroraBillAccount
+            ?.get?.(
+              id
+            );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // HOUSE FINANCE",
+
+          title:
+            "Delete House Bill?",
+
+          message:
+            `${bill?.description || "Selected bill"}\n` +
+
+            `CATEGORY // ${bill?.category ||
+            "Other"
+            }\n` +
+
+            `AMOUNT // ${money(
+              bill?.amount || 0
+            )}`,
+
+          confirmText:
+            "× DELETE BILL",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DELETE RENT
+  ========================================================== */
+
+  function protectRent() {
+
+    wrapGlobal(
+
+      "deleteRent",
+
+      id => {
+
+        const rents =
+          window
+            .AuroraHouseAccount
+            ?.data?.()
+            ?.rent || [];
+
+
+        const rent =
+          rents.find(
+            item =>
+              item.id === id
+          );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // HOUSE FINANCE",
+
+          title:
+            "Delete Rent Record?",
+
+          message:
+            `${rent?.description ||
+            "House Rent"
+            }\n` +
+
+            `AMOUNT // ${money(
+              rent?.amount || 0
+            )}`,
+
+          confirmText:
+            "× DELETE RENT",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DELETE ACCOUNTING MEMBER
+  ========================================================== */
+
+  function protectMember() {
+
+    wrapGlobal(
+
+      "deleteMember",
+
+      id => {
+
+        const member =
+          window
+            .AuroraDataStore
+            ?.get?.()
+            ?.members
+            ?.find(
+              item =>
+                item.id === id
+            );
+
+
+        return {
+
+          eyebrow:
+            "AURORA // MEMBER DIRECTORY",
+
+          title:
+            `Remove ${member?.name ||
+            "Member"
+            }?`,
+
+          message:
+            `The member will be removed from the accounting directory.\n\n` +
+            `Historical meal and payment records will remain protected.`,
+
+          confirmText:
+            "× REMOVE MEMBER",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     RESTORE SETTINGS DEFAULTS
+  ========================================================== */
+
+  function protectSettingsRestore() {
+
+    wrapGlobal(
+
+      "restoreSettingsDefaults",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // CONFIGURATION",
+
+        title:
+          "Restore Default Settings?",
+
+        message:
+          `Aurora system settings will return to their default values.\n\n` +
+          `Members, meals, expenses and payments will remain intact.`,
+
+        confirmText:
+          "↻ RESTORE DEFAULTS",
+
+        danger:
+          true
+
+      }),
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     SIGN OUT
+  ========================================================== */
+
+  function protectSignOut() {
+
+    wrapGlobal(
+
+      "signOutAurora",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // SESSION CONTROL",
+
+        title:
+          "End Aurora Session?",
+
+        message:
+          `You are about to sign out of Aurora Bachelor.\n` +
+          `Cloud data will remain safely stored.`,
+
+        confirmText:
+          "↗ SIGN OUT",
+
+        danger:
+          false
+
+      })
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     DATASTORE RESET
+  ========================================================== */
+
+  function protectDatabaseReset() {
+
+    wrapMethod(
+
+      window.AuroraDataStore,
+
+      "reset",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // CRITICAL RESET",
+
+        title:
+          "Reset Aurora Database?",
+
+        message:
+          `WARNING // HIGH IMPACT ACTION\n\n` +
+          `Local Aurora accounting data will be reset.`,
+
+        confirmText:
+          "⚠ RESET DATABASE",
+
+        danger:
+          true
+
+      }),
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     CURRENT MONTH RESET
+  ========================================================== */
+
+  function protectMonthReset() {
+
+    wrapMethod(
+
+      window.AuroraAccounting,
+
+      "resetCurrentMonth",
+
+      () => {
+
+        const month =
+          window
+            .AuroraApp
+            ?.getCurrentMonth?.() ||
+          "Current Month";
+
+
+        return {
+
+          eyebrow:
+            "AURORA // MONTH RESET",
+
+          title:
+            "Reset Current Month?",
+
+          message:
+            `TARGET // ${month}\n\n` +
+            `Meals, expenses, bills, rent and payments ` +
+            `for this month will be removed.`,
+
+          confirmText:
+            "⚠ RESET MONTH",
+
+          danger:
+            true
+
+        };
+
+      },
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     CONNECTED GOOGLE MEMBER REMOVAL
+     OWNER ONLY
+  ========================================================== */
+
+  function protectConnectedMember() {
+
+    wrapGlobal(
+
+      "removeAuroraConnectedMember",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // ACCESS CONTROL",
+
+        title:
+          "Remove Connected Member?",
+
+        message:
+          `This user's Google account will lose access to the household.\n\n` +
+          `Their historical accounting records will remain.`,
+
+        confirmText:
+          "× REMOVE ACCESS",
+
+        danger:
+          true
+
+      }),
+
+      {
+        ownerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     OWNERSHIP TRANSFER
+     OWNER ONLY
+  ========================================================== */
+
+  function protectOwnershipTransfer() {
+
+    wrapGlobal(
+
+      "transferAuroraOwnership",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // OWNERSHIP PROTOCOL",
+
+        title:
+          "Transfer Ownership?",
+
+        message:
+          `This action changes the primary owner of Aurora Bachelor.\n\n` +
+          `Your account will no longer remain the household owner.`,
+
+        confirmText:
+          "♛ TRANSFER OWNERSHIP",
+
+        danger:
+          true
+
+      }),
+
+      {
+        ownerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     INVITATION REVOKE
+  ========================================================== */
+
+  function protectInvitationRevoke() {
+
+    wrapGlobal(
+
+      "revokeAuroraInvitation",
+
+      () => ({
+
+        eyebrow:
+          "AURORA // INVITATION CONTROL",
+
+        title:
+          "Revoke Invitation?",
+
+        message:
+          `The pending invitation will become invalid and can no longer be accepted.`,
+
+        confirmText:
+          "× REVOKE INVITE",
+
+        danger:
+          true
+
+      }),
+
+      {
+        managerOnly:
+          true
+      }
+
+    );
+
+  }
+
+
+  /* ==========================================================
+     INSTALL
+  ========================================================== */
+
+  function install() {
+
+    protectExpense();
+
+    protectPayment();
+
+    protectMeal();
+
+    protectBill();
+
+    protectRent();
+
+    protectMember();
+
+    protectSettingsRestore();
+
+    protectSignOut();
+
+    protectDatabaseReset();
+
+    protectMonthReset();
+
+    protectConnectedMember();
+
+    protectOwnershipTransfer();
+
+    protectInvitationRevoke();
+
+
+    console.log(
+      "🛡 Aurora Futuristic Confirmation System: ACTIVE"
+    );
+
+  }
+
+
+  return {
+
+    install,
+
+    wrapGlobal,
+
+    wrapMethod
+
+  };
+
+})();
+
+
+
+/* ============================================================
+   INSTALL AFTER AURORA IS READY
+============================================================ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    setTimeout(
+      () => {
+
+        AuroraConfirmSystem
+          .install();
+
+      },
+      300
+    );
+
+  }
+);
+
+
+window.AuroraConfirmSystem =
+  AuroraConfirmSystem;
+
+
+
+
+
+/* ============================================================
+   AURORA // CLOUD SYNC HUD
+============================================================ */
+
+const AuroraSyncHUD = (() => {
+
+  let state =
+    "connecting";
+
+  let lastRevision =
+    null;
+
+  let lastSyncedAt =
+    null;
+
+  let syncingSince =
+    null;
+
+  let lastError =
+    "";
+
+  let queueWrapped =
+    false;
+
+  let reloadWrapped =
+    false;
+
+  let intervalId =
+    null;
+
+
+  /* ==========================================================
+     CLOUD STATUS
+  ========================================================== */
+
+  function cloudStatus() {
+
+    try {
+
+      return (
+        window
+          .AuroraCloudSync
+          ?.status?.() || {}
+      );
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora Sync HUD status error:",
+        error
+      );
+
+      return {};
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     ELEMENTS
+  ========================================================== */
+
+  function elements() {
+
+    return {
+
+      root:
+        document.getElementById(
+          "auroraSyncHud"
+        ),
+
+      orb:
+        document.getElementById(
+          "auroraSyncOrb"
+        ),
+
+      state:
+        document.getElementById(
+          "auroraSyncState"
+        ),
+
+      revision:
+        document.getElementById(
+          "auroraSyncRevision"
+        ),
+
+      meta:
+        document.getElementById(
+          "auroraSyncMeta"
+        )
+
+    };
+
+  }
+
+
+  /* ==========================================================
+     TIME LABEL
+  ========================================================== */
+
+  function timeAgo(
+    value
+  ) {
+
+    if (!value) {
+      return "Waiting for cloud";
+    }
+
+
+    const seconds =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            Date.now() -
+            value
+          ) / 1000
+        )
+      );
+
+
+    if (seconds < 5) {
+
+      return "Synced just now";
+
+    }
+
+
+    if (seconds < 60) {
+
+      return `Synced ${seconds}s ago`;
+
+    }
+
+
+    const minutes =
+      Math.floor(
+        seconds / 60
+      );
+
+
+    if (minutes < 60) {
+
+      return (
+        `Synced ${minutes}m ago`
+      );
+
+    }
+
+
+    const hours =
+      Math.floor(
+        minutes / 60
+      );
+
+
+    return (
+      `Synced ${hours}h ago`
+    );
+
+  }
+
+
+  /* ==========================================================
+     ROLE
+  ========================================================== */
+
+  function roleLabel(
+    status
+  ) {
+
+    const role =
+      String(
+        status?.role || ""
+      ).toUpperCase();
+
+
+    if (
+      role === "OWNER" ||
+      role === "ADMIN" ||
+      role === "MEMBER"
+    ) {
+
+      return role;
+
+    }
+
+
+    return "";
+
+  }
+
+
+  /* ==========================================================
+     SET STATE
+  ========================================================== */
+
+  function setState(
+    nextState,
+    errorMessage = ""
+  ) {
+
+    state =
+      nextState;
+
+
+    if (errorMessage) {
+
+      lastError =
+        errorMessage;
+
+    }
+
+
+    render();
+
+  }
+
+
+  function markSyncing() {
+
+    syncingSince =
+      Date.now();
+
+
+    setState(
+      "syncing"
+    );
+
+  }
+
+
+  function markSynced() {
+
+    syncingSince =
+      null;
+
+    lastError =
+      "";
+
+    lastSyncedAt =
+      Date.now();
+
+
+    setState(
+      "synced"
+    );
+
+  }
+
+
+  function markConflict(
+    message = "Revision conflict"
+  ) {
+
+    syncingSince =
+      null;
+
+
+    setState(
+      "conflict",
+      message
+    );
+
+  }
+
+
+  function markError(
+    message = "Cloud sync error"
+  ) {
+
+    syncingSince =
+      null;
+
+
+    setState(
+      "error",
+      message
+    );
+
+  }
+
+
+  /* ==========================================================
+     DETERMINE CURRENT STATE
+  ========================================================== */
+
+  function refreshState() {
+
+    const status =
+      cloudStatus();
+
+
+    /* --------------------------------------------------------
+       OFFLINE
+    -------------------------------------------------------- */
+
+    if (
+      navigator.onLine ===
+      false
+    ) {
+
+      state =
+        "offline";
+
+      render();
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       CLOUD NOT READY
+    -------------------------------------------------------- */
+
+    if (
+      !status.ready
+    ) {
+
+      if (
+        state !== "error" &&
+        state !== "conflict"
+      ) {
+
+        state =
+          "connecting";
+
+      }
+
+
+      render();
+
+      return;
+
+    }
+
+
+    const revision =
+      Number(
+        status.revision || 0
+      );
+
+
+    /* --------------------------------------------------------
+       FIRST READY STATE
+    -------------------------------------------------------- */
+
+    if (
+      lastRevision === null
+    ) {
+
+      lastRevision =
+        revision;
+
+      lastSyncedAt =
+        Date.now();
+
+
+      if (
+        state !== "syncing"
+      ) {
+
+        state =
+          "synced";
+
+      }
+
+    }
+
+
+    /* --------------------------------------------------------
+       REVISION INCREASED
+       means cloud accepted newer state
+    -------------------------------------------------------- */
+
+    else if (
+      revision >
+      lastRevision
+    ) {
+
+      lastRevision =
+        revision;
+
+      lastSyncedAt =
+        Date.now();
+
+      syncingSince =
+        null;
+
+      lastError =
+        "";
+
+      state =
+        "synced";
+
+    }
+
+
+    /* --------------------------------------------------------
+       RECOVER FROM OFFLINE
+    -------------------------------------------------------- */
+
+    if (
+      state === "offline"
+    ) {
+
+      state =
+        "synced";
+
+      lastSyncedAt =
+        Date.now();
+
+    }
+
+
+    render();
+
+  }
+
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
+
+  function render() {
+
+    const el =
+      elements();
+
+
+    if (
+      !el.root
+    ) {
+
+      return;
+
+    }
+
+
+    const status =
+      cloudStatus();
+
+
+    const revision =
+      Number(
+        status.revision || 0
+      );
+
+
+    const role =
+      roleLabel(
+        status
+      );
+
+
+    el.root.classList.remove(
+      "sync-synced",
+      "sync-syncing",
+      "sync-offline",
+      "sync-connecting",
+      "sync-conflict",
+      "sync-error"
+    );
+
+
+    let title =
+      "CONNECTING";
+
+    let meta =
+      "Initializing cloud link...";
+
+
+    switch (state) {
+
+      /* ------------------------------------------------------
+         SYNCED
+      ------------------------------------------------------ */
+
+      case "synced":
+
+        title =
+          status.canWrite === false
+
+            ? "CLOUD SYNCED"
+
+            : "CLOUD SYNCED";
+
+
+        meta =
+          [
+            role,
+
+            timeAgo(
+              lastSyncedAt
+            )
+          ]
+            .filter(Boolean)
+            .join(" // ");
+
+
+        el.root.classList.add(
+          "sync-synced"
+        );
+
+        break;
+
+
+      /* ------------------------------------------------------
+         SYNCING
+      ------------------------------------------------------ */
+
+      case "syncing":
+
+        title =
+          "SYNCING";
+
+        meta =
+          role
+
+            ? `${role} // Uploading changes...`
+
+            : "Uploading changes...";
+
+
+        el.root.classList.add(
+          "sync-syncing"
+        );
+
+        break;
+
+
+      /* ------------------------------------------------------
+         OFFLINE
+      ------------------------------------------------------ */
+
+      case "offline":
+
+        title =
+          "OFFLINE";
+
+        meta =
+          "Local cache active";
+
+
+        el.root.classList.add(
+          "sync-offline"
+        );
+
+        break;
+
+
+      /* ------------------------------------------------------
+         CONFLICT
+      ------------------------------------------------------ */
+
+      case "conflict":
+
+        title =
+          "SYNC CONFLICT";
+
+        meta =
+          lastError ||
+          "Cloud revision changed";
+
+
+        el.root.classList.add(
+          "sync-conflict"
+        );
+
+        break;
+
+
+      /* ------------------------------------------------------
+         ERROR
+      ------------------------------------------------------ */
+
+      case "error":
+
+        title =
+          "SYNC ERROR";
+
+        meta =
+          lastError ||
+          "Cloud connection failed";
+
+
+        el.root.classList.add(
+          "sync-error"
+        );
+
+        break;
+
+
+      /* ------------------------------------------------------
+         CONNECTING
+      ------------------------------------------------------ */
+
+      default:
+
+        title =
+          "CONNECTING";
+
+        meta =
+          "Establishing secure cloud link...";
+
+
+        el.root.classList.add(
+          "sync-connecting"
+        );
+
+    }
+
+
+    if (el.state) {
+
+      el.state.textContent =
+        title;
+
+    }
+
+
+    if (el.revision) {
+
+      el.revision.textContent =
+        revision > 0
+          ? `REV ${revision}`
+          : "REV —";
+
+    }
+
+
+    if (el.meta) {
+
+      el.meta.textContent =
+        meta;
+
+    }
+
+
+    el.root.title =
+      [
+        title,
+
+        revision > 0
+          ? `Revision ${revision}`
+          : "",
+
+        role
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
+  }
+
+
+  /* ==========================================================
+     WRAP CLOUD QUEUE SAVE
+     Shows SYNCING when Aurora queues a write.
+  ========================================================== */
+
+  function wrapQueueSave() {
+
+    if (
+      queueWrapped
+    ) {
+
+      return;
+
+    }
+
+
+    const cloud =
+      window.AuroraCloudSync;
+
+
+    if (
+      !cloud ||
+      typeof cloud.queueSave !==
+      "function"
+    ) {
+
+      return;
+
+    }
+
+
+    const original =
+      cloud.queueSave
+        .bind(
+          cloud
+        );
+
+
+    cloud.queueSave =
+      function (
+        ...args
+      ) {
+
+        markSyncing();
+
+
+        try {
+
+          const result =
+            original(
+              ...args
+            );
+
+
+          if (
+            result &&
+            typeof result.then ===
+            "function"
+          ) {
+
+            result.catch(
+              error => {
+
+                const message =
+                  String(
+                    error?.message ||
+                    error ||
+                    ""
+                  );
+
+
+                if (
+                  message.includes(
+                    "VERSION_CONFLICT"
+                  )
+                ) {
+
+                  markConflict(
+                    "Cloud revision conflict"
+                  );
+
+                }
+
+                else {
+
+                  markError(
+                    message ||
+                    "Cloud save failed"
+                  );
+
+                }
+
+              }
+            );
+
+          }
+
+
+          return result;
+
+        }
+
+        catch (error) {
+
+          const message =
+            String(
+              error?.message ||
+              error ||
+              ""
+            );
+
+
+          if (
+            message.includes(
+              "VERSION_CONFLICT"
+            )
+          ) {
+
+            markConflict(
+              "Cloud revision conflict"
+            );
+
+          }
+
+          else {
+
+            markError(
+              message ||
+              "Cloud save failed"
+            );
+
+          }
+
+
+          throw error;
+
+        }
+
+      };
+
+
+    queueWrapped =
+      true;
+
+
+    console.log(
+      "☁ Aurora Sync HUD: queueSave connected"
+    );
+
+  }
+
+
+  /* ==========================================================
+     WRAP CLOUD RELOAD
+  ========================================================== */
+
+  function wrapReload() {
+
+    if (
+      reloadWrapped
+    ) {
+
+      return;
+
+    }
+
+
+    const cloud =
+      window.AuroraCloudSync;
+
+
+    if (
+      !cloud ||
+      typeof cloud.reloadFromCloud !==
+      "function"
+    ) {
+
+      return;
+
+    }
+
+
+    const original =
+      cloud.reloadFromCloud
+        .bind(
+          cloud
+        );
+
+
+    cloud.reloadFromCloud =
+      async function (
+        ...args
+      ) {
+
+        if (
+          navigator.onLine
+        ) {
+
+          setState(
+            "syncing"
+          );
+
+        }
+
+
+        try {
+
+          const result =
+            await original(
+              ...args
+            );
+
+
+          markSynced();
+
+
+          return result;
+
+        }
+
+        catch (error) {
+
+          const message =
+            String(
+              error?.message ||
+              error ||
+              ""
+            );
+
+
+          if (
+            message.includes(
+              "VERSION_CONFLICT"
+            )
+          ) {
+
+            markConflict(
+              "Revision conflict detected"
+            );
+
+          }
+
+          else {
+
+            markError(
+              message ||
+              "Cloud reload failed"
+            );
+
+          }
+
+
+          throw error;
+
+        }
+
+      };
+
+
+    reloadWrapped =
+      true;
+
+
+    console.log(
+      "☁ Aurora Sync HUD: reload connected"
+    );
+
+  }
+
+
+  /* ==========================================================
+     MANUAL REFRESH
+  ========================================================== */
+
+  async function refreshCloud() {
+
+    if (
+      navigator.onLine ===
+      false
+    ) {
+
+      toast(
+        "Aurora is offline."
+      );
+
+      return;
+
+    }
+
+
+    const cloud =
+      window.AuroraCloudSync;
+
+
+    if (
+      typeof cloud
+        ?.reloadFromCloud !==
+      "function"
+    ) {
+
+      toast(
+        "Cloud sync is not ready."
+      );
+
+      return;
+
+    }
+
+
+    try {
+
+      setState(
+        "syncing"
+      );
+
+
+      await cloud
+        .reloadFromCloud(
+          true
+        );
+
+
+      markSynced();
+
+
+      toast(
+        "Cloud sync refreshed."
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora manual sync error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     EVENTS
+  ========================================================== */
+
+  function installEvents() {
+
+    window.addEventListener(
+      "offline",
+      () => {
+
+        state =
+          "offline";
+
+        render();
+
+      }
+    );
+
+
+    window.addEventListener(
+      "online",
+      () => {
+
+        state =
+          "connecting";
+
+        render();
+
+
+        setTimeout(
+          refreshState,
+          500
+        );
+
+      }
+    );
+
+
+    window.addEventListener(
+      "aurora:dataUpdated",
+      () => {
+
+        const status =
+          cloudStatus();
+
+
+        const revision =
+          Number(
+            status.revision || 0
+          );
+
+
+        if (
+          revision > 0
+        ) {
+
+          lastRevision =
+            revision;
+
+        }
+
+
+        markSynced();
+
+      }
+    );
+
+
+    /*
+      Optional custom event.
+      Can be dispatched by CloudSync later.
+    */
+
+    window.addEventListener(
+      "aurora:syncConflict",
+      event => {
+
+        markConflict(
+          event?.detail?.message ||
+          "Revision conflict detected"
+        );
+
+      }
+    );
+
+
+    /*
+      Detect uncaught version conflicts.
+    */
+
+    window.addEventListener(
+      "unhandledrejection",
+      event => {
+
+        const message =
+          String(
+            event?.reason?.message ||
+            event?.reason ||
+            ""
+          );
+
+
+        if (
+          message.includes(
+            "VERSION_CONFLICT"
+          )
+        ) {
+
+          markConflict(
+            "Revision conflict detected"
+          );
+
+        }
+
+      }
+    );
+
+
+    document
+      .getElementById(
+        "auroraSyncHud"
+      )
+      ?.addEventListener(
+        "click",
+        refreshCloud
+      );
+
+  }
+
+
+  /* ==========================================================
+     INIT
+  ========================================================== */
+
+  function init() {
+
+    render();
+
+
+    installEvents();
+
+
+    /*
+      CloudSync may initialize slightly later.
+      Polling also keeps revision display current.
+    */
+
+    intervalId =
+      setInterval(
+        () => {
+
+          wrapQueueSave();
+
+          wrapReload();
+
+          refreshState();
+
+        },
+        1000
+      );
+
+
+    setTimeout(
+      () => {
+
+        wrapQueueSave();
+
+        wrapReload();
+
+        refreshState();
+
+      },
+      300
+    );
+
+  }
+
+
+  return {
+
+    init,
+
+    render,
+
+    refresh:
+      refreshCloud,
+
+    syncing:
+      markSyncing,
+
+    synced:
+      markSynced,
+
+    conflict:
+      markConflict,
+
+    error:
+      markError
+
+  };
+
+})();
+
+
+window.AuroraSyncHUD =
+  AuroraSyncHUD;
+
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    AuroraSyncHUD
+      .init();
+
+  }
+);
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // NOTIFICATION CENTER
+============================================================ */
+
+const AuroraNotifications = (() => {
+
+  let notifications = [];
+
+  let unreadCount = 0;
+
+  let loading = false;
+
+  let opened = false;
+
+  let pollingId = null;
+
+
+  /* ==========================================================
+     CLOUD
+  ========================================================== */
+
+  function cloud() {
+
+    return (
+      window.AuroraCloudSync
+        ?.status?.() || {}
+    );
+
+  }
+
+
+  function client() {
+
+    return (
+      getAuroraSupabaseClient?.() ||
+      null
+    );
+
+  }
+
+
+  /* ==========================================================
+     ELEMENTS
+  ========================================================== */
+
+  function elements() {
+
+    return {
+
+      root:
+        document.getElementById(
+          "auroraNotification"
+        ),
+
+      button:
+        document.getElementById(
+          "auroraNotificationBtn"
+        ),
+
+      badge:
+        document.getElementById(
+          "auroraNotificationBadge"
+        ),
+
+      panel:
+        document.getElementById(
+          "auroraNotificationPanel"
+        ),
+
+      list:
+        document.getElementById(
+          "auroraNotificationList"
+        ),
+
+      status:
+        document.getElementById(
+          "auroraNotificationStatus"
+        )
+
+    };
+
+  }
+
+
+  /* ==========================================================
+     ICON
+  ========================================================== */
+
+  function icon(
+    type
+  ) {
+
+    const map = {
+
+      EXPENSE_ADDED:
+        "＋",
+
+      EXPENSE_UPDATED:
+        "✎",
+
+      EXPENSE_DELETED:
+        "−",
+
+      PAYMENT_ADDED:
+        "৳",
+
+      PAYMENT_UPDATED:
+        "↻",
+
+      PAYMENT_DELETED:
+        "×",
+
+      MEAL_ADDED:
+        "🍚",
+
+      MEAL_UPDATED:
+        "✎",
+
+      MEAL_DELETED:
+        "×",
+
+      BILL_ADDED:
+        "▣",
+
+      BILL_UPDATED:
+        "✎",
+
+      BILL_DELETED:
+        "×",
+
+      RENT_ADDED:
+        "⌂",
+
+      RENT_UPDATED:
+        "✎",
+
+      RENT_DELETED:
+        "×",
+
+      MEMBER_CONNECTED:
+        "＋",
+
+      MEMBER_REMOVED:
+        "−",
+
+      ROLE_CHANGED:
+        "♢",
+
+      OWNERSHIP_TRANSFERRED:
+        "♛",
+
+      INVITATION_CREATED:
+        "✉",
+
+      INVITATION_RESENT:
+        "↗",
+
+      INVITATION_ACCEPTED:
+        "✓",
+
+      INVITATION_REVOKED:
+        "×",
+
+      INVITATION_EXPIRED:
+        "⌛",
+
+      SETTINGS_UPDATED:
+        "⚙",
+
+      HOUSE_UPDATED:
+        "⌂",
+
+      MONTH_LOCKED:
+        "🔒",
+
+      MONTH_UNLOCKED:
+        "🔓",
+
+      VERSION_RESTORED:
+        "↶",
+
+      DATA_CREATED:
+        "◉",
+
+      DATA_UPDATED:
+        "↻"
+
+    };
+
+
+    return (
+      map[
+      String(
+        type || ""
+      ).toUpperCase()
+      ] ||
+      "◇"
+    );
+
+  }
+
+
+  /* ==========================================================
+     CLASS
+  ========================================================== */
+
+  function eventClass(
+    type
+  ) {
+
+    type =
+      String(
+        type || ""
+      ).toUpperCase();
+
+
+    if (
+      type.includes(
+        "DELETED"
+      ) ||
+      type.includes(
+        "REMOVED"
+      ) ||
+      type.includes(
+        "REVOKED"
+      )
+    ) {
+
+      return "danger";
+
+    }
+
+
+    if (
+      type.includes(
+        "PAYMENT"
+      ) ||
+      type.includes(
+        "ACCEPTED"
+      ) ||
+      type.includes(
+        "CONNECTED"
+      )
+    ) {
+
+      return "success";
+
+    }
+
+
+    if (
+      type.includes(
+        "BILL"
+      ) ||
+      type.includes(
+        "RENT"
+      )
+    ) {
+
+      return "amber";
+
+    }
+
+
+    if (
+      type.includes(
+        "MEAL"
+      )
+    ) {
+
+      return "blue";
+
+    }
+
+
+    if (
+      type.includes(
+        "ROLE"
+      ) ||
+      type.includes(
+        "OWNERSHIP"
+      ) ||
+      type.includes(
+        "SETTINGS"
+      ) ||
+      type.includes(
+        "VERSION"
+      ) ||
+      type.includes(
+        "MONTH"
+      )
+    ) {
+
+      return "purple";
+
+    }
+
+
+    return "cyan";
+
+  }
+
+
+  /* ==========================================================
+     DATE
+  ========================================================== */
+
+  function timeAgo(
+    value
+  ) {
+
+    if (!value) {
+      return "—";
+    }
+
+
+    const timestamp =
+      new Date(
+        value
+      ).getTime();
+
+
+    if (
+      Number.isNaN(
+        timestamp
+      )
+    ) {
+
+      return "—";
+
+    }
+
+
+    const seconds =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            Date.now() -
+            timestamp
+          ) / 1000
+        )
+      );
+
+
+    if (
+      seconds < 10
+    ) {
+
+      return "just now";
+
+    }
+
+
+    if (
+      seconds < 60
+    ) {
+
+      return `${seconds}s ago`;
+
+    }
+
+
+    const minutes =
+      Math.floor(
+        seconds / 60
+      );
+
+
+    if (
+      minutes < 60
+    ) {
+
+      return `${minutes}m ago`;
+
+    }
+
+
+    const hours =
+      Math.floor(
+        minutes / 60
+      );
+
+
+    if (
+      hours < 24
+    ) {
+
+      return `${hours}h ago`;
+
+    }
+
+
+    const days =
+      Math.floor(
+        hours / 24
+      );
+
+
+    return `${days}d ago`;
+
+  }
+
+
+  /* ==========================================================
+     ACTOR
+  ========================================================== */
+
+  function actorLabel(
+    item
+  ) {
+
+    if (
+      item.is_mine
+    ) {
+
+      return "YOU";
+
+    }
+
+
+    return (
+      item.actor_name ||
+      item.actor_email ||
+      "AURORA SYSTEM"
+    );
+
+  }
+
+
+  /* ==========================================================
+     DETAIL SUMMARY
+  ========================================================== */
+
+  function detailSummary(
+    item
+  ) {
+
+    const details =
+      item.details || {};
+
+
+    const output = [];
+
+
+    if (
+      details.month
+    ) {
+
+      output.push(
+        details.month
+      );
+
+    }
+
+
+    if (
+      details.category
+    ) {
+
+      output.push(
+        details.category
+      );
+
+    }
+
+
+    if (
+      details.amount !==
+      undefined
+    ) {
+
+      output.push(
+        money(
+          details.amount
+        )
+      );
+
+    }
+
+
+    if (
+      details.method
+    ) {
+
+      output.push(
+        details.method
+      );
+
+    }
+
+
+    return output
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(" · ");
+
+  }
+
+
+  /* ==========================================================
+     BADGE
+  ========================================================== */
+
+  function renderBadge() {
+
+    const {
+      badge
+    } =
+      elements();
+
+
+    if (!badge) {
+      return;
+    }
+
+
+    if (
+      unreadCount <= 0
+    ) {
+
+      badge.hidden =
+        true;
+
+      badge.textContent =
+        "0";
+
+      return;
+
+    }
+
+
+    badge.hidden =
+      false;
+
+
+    badge.textContent =
+      unreadCount > 99
+        ? "99+"
+        : String(
+          unreadCount
+        );
+
+  }
+
+
+  /* ==========================================================
+     RENDER LIST
+  ========================================================== */
+
+  function renderList() {
+
+    const {
+      list,
+      status
+    } =
+      elements();
+
+
+    if (
+      !list ||
+      !status
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      notifications.length ===
+      0
+    ) {
+
+      status.textContent =
+        "SIGNAL NETWORK CLEAR";
+
+
+      list.innerHTML = `
+
+        <div
+          class="aurora-notification-empty"
+        >
+
+          <span>
+            ◇
+          </span>
+
+          <strong>
+            No notifications
+          </strong>
+
+          <p>
+            New Aurora activity will appear here.
+          </p>
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    const unread =
+      notifications.filter(
+        item =>
+          item.is_unread
+      ).length;
+
+
+    status.textContent =
+      unread > 0
+        ? `${unread} NEW SIGNAL${unread === 1 ? "" : "S"}`
+        : "ALL SIGNALS REVIEWED";
+
+
+    list.innerHTML =
+      notifications
+        .map(
+          item => {
+
+            const className =
+              eventClass(
+                item.event_type
+              );
+
+
+            const detail =
+              detailSummary(
+                item
+              );
+
+
+            return `
+
+              <article
+                class="
+                  aurora-notification-item
+                  ${className}
+                  ${item.is_unread
+                ? "unread"
+                : ""
+              }
+                "
+              >
+
+                <div
+                  class="aurora-notification-event-icon"
+                >
+                  ${icon(
+                item.event_type
+              )
+              }
+                </div>
+
+
+                <div
+                  class="aurora-notification-body"
+                >
+
+                  <div
+                    class="aurora-notification-title"
+                  >
+
+                    <strong>
+                      ${esc(
+                item.title ||
+                "Aurora Activity"
+              )}
+                    </strong>
+
+                    ${item.is_unread
+
+                ? `
+                          <span
+                            class="aurora-notification-new"
+                          >
+                            NEW
+                          </span>
+                        `
+
+                : ""
+              }
+
+                  </div>
+
+
+                  ${detail
+
+                ? `
+                        <div
+                          class="aurora-notification-detail"
+                        >
+                          ${esc(detail)}
+                        </div>
+                      `
+
+                : ""
+              }
+
+
+                  <div
+                    class="aurora-notification-meta"
+                  >
+
+                    <span>
+                      ${esc(
+                actorLabel(
+                  item
+                )
+              )
+              }
+                    </span>
+
+                    ${item.actor_role
+
+                ? `
+                          <span>
+                            ${esc(
+                  String(
+                    item.actor_role
+                  )
+                    .toUpperCase()
+                )
+                }
+                          </span>
+                        `
+
+                : ""
+              }
+
+                    <span>
+                      ${timeAgo(
+                item.created_at
+              )
+              }
+                    </span>
+
+                    ${item.revision
+
+                ? `
+                          <span>
+                            REV ${Number(
+                  item.revision
+                )}
+                          </span>
+                        `
+
+                : ""
+              }
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            `;
+
+          }
+        )
+        .join("");
+
+  }
+
+
+  /* ==========================================================
+     LOAD COUNT
+  ========================================================== */
+
+  async function loadCount() {
+
+    const status =
+      cloud();
+
+
+    if (
+      !status.ready ||
+      !status.householdId
+    ) {
+
+      unreadCount =
+        0;
+
+      renderBadge();
+
+      return;
+
+    }
+
+
+    const supabase =
+      client();
+
+
+    if (!supabase) {
+      return;
+    }
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_get_unread_notification_count",
+          {
+
+            p_household_id:
+              status.householdId
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      unreadCount =
+        Number(
+          data || 0
+        );
+
+
+      renderBadge();
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora notification count error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     LOAD NOTIFICATIONS
+  ========================================================== */
+
+  async function load(
+    showLoading = true
+  ) {
+
+    if (loading) {
+      return;
+    }
+
+
+    const status =
+      cloud();
+
+
+    if (
+      !status.ready ||
+      !status.householdId
+    ) {
+
+      const {
+        status: statusElement
+      } =
+        elements();
+
+
+      if (
+        statusElement
+      ) {
+
+        statusElement
+          .textContent =
+          "CLOUD SESSION NOT READY";
+
+      }
+
+      return;
+
+    }
+
+
+    const supabase =
+      client();
+
+
+    if (!supabase) {
+      return;
+    }
+
+
+    const {
+      status:
+      statusElement
+    } =
+      elements();
+
+
+    if (
+      showLoading &&
+      statusElement
+    ) {
+
+      statusElement
+        .textContent =
+        "SCANNING EVENT NETWORK...";
+
+    }
+
+
+    loading =
+      true;
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "aurora_get_notifications",
+          {
+
+            p_household_id:
+              status.householdId,
+
+            p_limit:
+              40
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      notifications =
+        Array.isArray(
+          data
+        )
+          ? data
+          : [];
+
+
+      renderList();
+
+
+      await loadCount();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Aurora Notification Error:",
+        error
+      );
+
+
+      if (
+        statusElement
+      ) {
+
+        statusElement
+          .textContent =
+          "NOTIFICATION NETWORK ERROR";
+
+      }
+
+    }
+
+    finally {
+
+      loading =
+        false;
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     MARK READ
+  ========================================================== */
+
+  async function markAllRead() {
+
+    const status =
+      cloud();
+
+
+    if (
+      !status.ready ||
+      !status.householdId
+    ) {
+
+      return;
+
+    }
+
+
+    const supabase =
+      client();
+
+
+    if (!supabase) {
+      return;
+    }
+
+
+    try {
+
+      const {
+        error
+      } =
+        await supabase.rpc(
+          "aurora_mark_notifications_read",
+          {
+
+            p_household_id:
+              status.householdId,
+
+            p_through_activity_id:
+              null
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      unreadCount =
+        0;
+
+
+      renderBadge();
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Aurora mark notifications read error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     OPEN
+  ========================================================== */
+
+  async function open() {
+
+    const {
+      root
+    } =
+      elements();
+
+
+    if (!root) {
+      return;
+    }
+
+
+    opened =
+      true;
+
+
+    root.classList.add(
+      "open"
+    );
+
+
+    await load(
+      true
+    );
+
+
+    /*
+      Loaded notifications keep their NEW
+      indicator for this open session.
+
+      Cloud read position is then updated.
+    */
+
+    await markAllRead();
+
+  }
+
+
+  /* ==========================================================
+     CLOSE
+  ========================================================== */
+
+  function close() {
+
+    const {
+      root
+    } =
+      elements();
+
+
+    opened =
+      false;
+
+
+    root?.classList.remove(
+      "open"
+    );
+
+  }
+
+
+  /* ==========================================================
+     TOGGLE
+  ========================================================== */
+
+  function toggle() {
+
+    if (opened) {
+
+      close();
+
+    }
+
+    else {
+
+      open();
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     EVENTS
+  ========================================================== */
+
+  function installEvents() {
+
+    document
+      .getElementById(
+        "auroraNotificationBtn"
+      )
+      ?.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          toggle();
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "auroraNotificationRefresh"
+      )
+      ?.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          load(
+            true
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "auroraNotificationPanel"
+      )
+      ?.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "auroraNotificationActivityBtn"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+
+          close();
+
+
+          if (
+            typeof go ===
+            "function"
+          ) {
+
+            go(
+              "activity"
+            );
+
+          }
+
+          else {
+
+            AuroraApp
+              .navigate?.(
+                "activity"
+              );
+
+          }
+
+        }
+      );
+
+
+    document.addEventListener(
+      "click",
+      () => {
+
+        close();
+
+      }
+    );
+
+
+    window.addEventListener(
+      "focus",
+      () => {
+
+        loadCount();
+
+      }
+    );
+
+
+    window.addEventListener(
+      "online",
+      () => {
+
+        loadCount();
+
+      }
+    );
+
+
+    window.addEventListener(
+      "aurora:dataUpdated",
+      () => {
+
+        setTimeout(
+          () => {
+
+            loadCount();
+
+
+            if (opened) {
+
+              load(
+                false
+              );
+
+            }
+
+          },
+          500
+        );
+
+      }
+    );
+
+  }
+
+
+  /* ==========================================================
+     INIT
+  ========================================================== */
+
+  function init() {
+
+    installEvents();
+
+
+    setTimeout(
+      () => {
+
+        loadCount();
+
+      },
+      1000
+    );
+
+
+    /*
+      Other devices may create activity
+      without a local DOM event.
+
+      Lightweight polling keeps badge current.
+    */
+
+    pollingId =
+      setInterval(
+        () => {
+
+          if (
+            navigator.onLine
+          ) {
+
+            loadCount();
+
+          }
+
+        },
+        15000
+      );
+
+  }
+
+
+  return {
+
+    init,
+
+    open,
+
+    close,
+
+    load,
+
+    loadCount
+
+  };
+
+})();
+
+
+window.AuroraNotifications =
+  AuroraNotifications;
+
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    AuroraNotifications
+      .init();
+
+  }
+);
+
+
+
+
+/* ============================================================
+   AURORA // PWA SERVICE WORKER
+============================================================ */
+
+if (
+  "serviceWorker" in
+  navigator
+) {
+
+  window.addEventListener(
+    "load",
+    async () => {
+
+      try {
+
+        const registration =
+          await navigator
+            .serviceWorker
+            .register(
+              "./sw.js"
+            );
+
+
+        console.log(
+          "🌌 Aurora PWA Ready:",
+          registration.scope
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Aurora PWA Error:",
+          error
+        );
+
+      }
+
+    }
+  );
 
 }

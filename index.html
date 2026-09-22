@@ -5,6 +5,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#07111f">
+
+
+  <!-- AURORA // PWA -->
+  
+  <link rel="manifest" href="./manifest.json" /> 
+  <meta name="theme-color" content="#07111f" />  
+  <meta name="mobile-web-app-capable" content="yes" />  
+  <meta name="apple-mobile-web-app-capable" content="yes" /> 
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />  
+  <meta name="apple-mobile-web-app-title" content="Aurora" />
+  
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
   <link rel="stylesheet" href="./style_v3.css">
@@ -43,8 +54,9 @@
         <button class="nav-item" data-page="bills">▣ <span>House Bills</span></button>
         <button class="nav-item" data-page="reports">◌ <span>Monthly Report</span></button>
         <button class="nav-item" data-page="settlement">⇄ <span>Settlement</span></button>
-        <button class="nav-item" data-page="settings" type="button" onclick="go('settings')"> ⚙
-          <span>Settings</span>
+        <button class="nav-item" data-page="activity">◇<span>Activity</span></button>
+        <button class="nav-item" data-page="versions">⟳<span>Version History</span></button>
+        <button class="nav-item" data-page="settings" type="button" onclick="go('settings')"> ⚙<span>Settings</span>
         </button>
      
       </nav>
@@ -100,13 +112,57 @@
         <div class="top-actions">
 
           <!-- SYSTEM STATUS -->
-          <div class="hud-status">
-            <span class="status-orb"></span>
-            <div class="status-info">
-              <span class="status-label">SYSTEM</span>
-              <strong>ONLINE</strong>
+         <!-- AURORA CLOUD SYNC HUD -->
+
+          <div
+            class="hud-status aurora-sync-hud"
+            id="auroraSyncHud"
+            title="Aurora Cloud Sync"
+            >
+
+            <span
+              class="status-orb aurora-sync-orb"
+              id="auroraSyncOrb"
+            ></span>
+
+
+            <div class="aurora-sync-info">
+
+              <div class="aurora-sync-head">
+
+                <span class="status-label">
+                  CLOUD CORE
+                </span>
+
+                <span
+                  class="aurora-sync-revision"
+                  id="auroraSyncRevision"
+                >
+                  REV —
+                </span>
+
+              </div>
+
+
+              <strong id="auroraSyncState">
+                CONNECTING
+              </strong>
+
+
+              <span
+                class="aurora-sync-meta"
+                id="auroraSyncMeta"
+              >
+                Initializing cloud link...
+              </span>
+
             </div>
+
           </div>
+
+
+
+         
 
           <!-- MONTH CONTROL -->
 
@@ -118,15 +174,70 @@
             </span>
 
           </div>
+        
 
-          <!-- BACKUP DATA CORE -->
-          <button class="icon-btn data-core" id="backupBtn" title="Export Aurora Data">
-            <span class="core-ring"></span>
-            <span class="core-icon">⇩</span>
-            <span class="core-tooltip"> EXPORT DATA </span>
-          </button>
-
-          <!-- PROFILE -->
+          <!-- =========================================================
+                         AURORA // NOTIFICATION CENTER
+          ========================================================== -->
+          
+          <div class="aurora-notification" id="auroraNotification">
+          
+            <button type="button" class="aurora-notification-btn" id="auroraNotificationBtn" title="Aurora Notifications">
+          
+              <span class="aurora-notification-icon">
+                ♢
+              </span>
+          
+              <span class="aurora-notification-badge" id="auroraNotificationBadge" hidden>
+                0
+              </span>
+          
+            </button>
+          
+          
+            <div class="aurora-notification-panel" id="auroraNotificationPanel">
+          
+              <div class="aurora-notification-header">
+          
+                <div>
+          
+                  <span class="aurora-notification-code">
+                    AURORA // EVENT SIGNALS
+                  </span>
+          
+                  <h3>
+                    Notification Center
+                  </h3>
+          
+                </div>
+          
+          
+                <button type="button" class="aurora-notification-refresh" id="auroraNotificationRefresh" title="Refresh">
+                  ↻
+                </button>
+          
+              </div>
+          
+          
+              <div class="aurora-notification-status" id="auroraNotificationStatus">
+                CONNECTING TO ACTIVITY NETWORK...
+              </div>
+          
+          
+              <div class="aurora-notification-list" id="auroraNotificationList"></div>
+          
+          
+              <div class="aurora-notification-footer">
+          
+                <button type="button" id="auroraNotificationActivityBtn">
+                  VIEW FULL ACTIVITY LOG →
+                </button>
+          
+              </div>
+          
+            </div>
+          
+          </div>
 
         </div>
 
@@ -138,7 +249,9 @@
       <!-- Part-1.2: Sidebar Details -->
       <section id="page-dashboard" class="page active"></section>
 
-
+      <!-- =========================================================
+                 AURORA // MEAL MATRIX
+      ========================================================= -->
       <section id="page-meals" class="page">
 
         <div class="module-header">
@@ -222,7 +335,7 @@
           <button class="sheet-btn primary" id="addMealDayBtn">
             + ADD DAY
           </button>
-
+          
           <button class="sheet-btn" id="saveMealsBtn">
             ✓ SAVE
           </button>
@@ -258,7 +371,9 @@
       </section>
 
 
-
+      <!-- =========================================================
+                 AURORA // PAYMENT LEDGER
+      ========================================================= -->
       <section id="page-members" class="page">
 
         <div class="module-header">
@@ -491,7 +606,9 @@
 
 
 
-
+      <!-- =========================================================
+                 AURORA // EXPENSE CORE
+      ========================================================= -->
       <section id="page-expenses" class="page">
 
         <div class="module-header">
@@ -656,6 +773,10 @@
 
       </section>
 
+
+      <!-- =========================================================
+                 AURORA // PAYMENT LEDGER
+      ========================================================= -->
       <section id="page-payments" class="page">
 
         <div class="module-header">
@@ -823,7 +944,9 @@
       </section>
 
 
-
+      <!-- =========================================================
+                 AURORA // HOUSE BILLS CORE
+      ========================================================= -->
       <section id="page-bills" class="page">
 
         <div class="module-header">
@@ -1005,7 +1128,9 @@
       </section>
 
 
-
+      <!-- =========================================================
+                 AURORA // REPORTS ENGINE
+      ========================================================= -->
       <section id="page-reports" class="page">
 
         <div class="module-header">
@@ -1343,7 +1468,9 @@
       </section>
 
 
-
+      <!-- =========================================================
+                 AURORA // SETTLEMENT CORE
+      ========================================================= -->
       <section id="page-settlement" class="page">
 
         <div class="module-header">
@@ -1590,7 +1717,98 @@
 
 
 
+      <!-- =========================================================
+           AURORA // ACTIVITY LOG
+      ========================================================= -->
+      
+      <section id="page-activity" class="page">
+      
+        <div class="module-header">
+      
+          <div class="module-identity">
+      
+            <span class="module-orb purple">
+            </span>
+      
+            <div>
+      
+              <span class="module-code">
+                SYSTEM 09 // AUDIT NETWORK
+              </span>
+      
+              <h2>
+                Activity Log
+              </h2>
+      
+            </div>
+      
+          </div>
+      
+        </div>
+      
+      
+        <div id="auroraActivityRoot">
+      
+          <div class="card">
+      
+            <div class="muted">
+              Loading Aurora activity stream...
+            </div>
+      
+          </div>
+      
+        </div>
+      
+      </section>
 
+
+
+      <!-- =========================================================
+           AURORA // VERSION HISTORY
+      ========================================================= -->
+      
+      <section id="page-versions" class="page">
+      
+        <div class="module-header">
+      
+          <div class="module-identity">
+      
+            <span class="module-orb purple"></span>
+      
+            <div>
+      
+              <span class="module-code">
+                SYSTEM 10 // TEMPORAL ARCHIVE
+              </span>
+      
+              <h2>
+                Version History
+              </h2>
+      
+            </div>
+      
+          </div>
+      
+        </div>
+      
+      
+        <div id="auroraVersionRoot">
+      
+          <div class="card">
+      
+            <div class="muted">
+              Connecting to Aurora Temporal Archive...
+            </div>
+      
+          </div>
+      
+        </div>
+      
+      </section>
+
+      <!-- =========================================================
+                 AURORA // SYSTEM SETTINGS
+      ========================================================= -->
       <section id="page-settings" class="page">
 
         <div class="module-header">

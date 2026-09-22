@@ -15281,3 +15281,5191 @@ html[data-accent] .title-cursor {
   border:
     1px dashed rgba(92, 183, 220, 0.14);
 }
+
+
+
+/* ============================================================
+   AURORA // ACTIVITY NETWORK
+============================================================ */
+
+.aurora-activity-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-bottom: 22px;
+  padding: 16px 18px;
+
+  border: 1px solid rgba(74, 221, 255, 0.18);
+  border-radius: 16px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(8, 18, 38, 0.94),
+      rgba(9, 20, 43, 0.82));
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 14px 40px rgba(0, 0, 0, 0.20);
+
+  backdrop-filter: blur(16px);
+}
+
+/* ============================================================
+   LEFT SIDE
+============================================================ */
+
+.aurora-activity-toolbar>div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+
+.aurora-activity-toolbar>div:first-child strong {
+  color: #dff9ff;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+
+.aurora-activity-toolbar>div:first-child span {
+  color: rgba(190, 225, 255, 0.55);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.10em;
+}
+
+
+
+
+/* ============================================================
+   RIGHT SIDE
+============================================================ */
+
+.aurora-activity-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* ============================================================
+   FILTER SELECT
+============================================================ */
+
+#activityFilter {
+  min-width: 165px;
+  height: 42px;
+
+  padding: 0 38px 0 14px;
+
+  border:
+    1px solid rgba(90, 225, 255, 0.45);
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(180deg,
+      rgba(5, 18, 36, 0.98),
+      rgba(8, 27, 50, 0.96));
+
+  color: #e8fbff;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+
+  outline: none;
+
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 0 12px rgba(0, 210, 255, 0.04),
+    0 0 16px rgba(0, 180, 255, 0.08);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+#activityFilter:hover {
+  border-color:
+    rgba(85, 235, 255, 0.8);
+
+  box-shadow:
+    inset 0 0 14px rgba(0, 210, 255, 0.06),
+    0 0 18px rgba(0, 190, 255, 0.16);
+}
+
+
+#activityFilter:focus {
+  border-color:
+    rgba(107, 239, 255, 1);
+
+  box-shadow:
+    0 0 0 2px rgba(0, 210, 255, 0.10),
+    0 0 22px rgba(0, 190, 255, 0.22);
+}
+
+
+/* ============================================================
+   DROPDOWN OPTIONS
+============================================================ */
+
+#activityFilter option {
+  font-size: 12px;
+  font-weight: 700;
+
+  padding: 10px;
+
+  border: none;
+}
+
+
+/* ALL EVENTS */
+
+#activityFilter option[value="ALL"] {
+  background: #10293d;
+  color: #74ddff;
+}
+
+
+/* ACCOUNTING */
+
+#activityFilter option[value="ACCOUNTING"] {
+  background: #172b50;
+  color: #8fb9ff;
+}
+
+
+/* MEMBERS */
+
+#activityFilter option[value="MEMBERS"] {
+  background: #15392f;
+  color: #70f4bd;
+}
+
+
+/* INVITATIONS */
+
+#activityFilter option[value="INVITATIONS"] {
+  background: #493418;
+  color: #ffd479;
+}
+
+
+/* SECURITY */
+
+#activityFilter option[value="SECURITY"] {
+  background: #431c38;
+  color: #ff91d2;
+}
+
+
+/* ============================================================
+   REFRESH BUTTON
+============================================================ */
+
+#activityRefreshBtn {
+  height: 42px;
+
+  padding: 0 16px;
+
+  border:
+    1px solid rgba(124, 158, 215, 0.28);
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(180deg,
+      rgba(18, 29, 50, 0.92),
+      rgba(12, 21, 40, 0.92));
+
+  color: #dcecff;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+
+#activityRefreshBtn:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(84, 226, 255, 0.55);
+
+  background:
+    linear-gradient(180deg,
+      rgba(20, 43, 70, 0.98),
+      rgba(11, 27, 49, 0.98));
+
+  box-shadow:
+    0 0 18px rgba(0, 189, 255, 0.14);
+}
+
+
+#activityRefreshBtn:active {
+  transform:
+    scale(0.97);
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+  .aurora-activity-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+
+  .aurora-activity-actions {
+    width: 100%;
+  }
+
+
+  #activityFilter {
+    flex: 1;
+    min-width: 0;
+  }
+
+
+  #activityRefreshBtn {
+    flex-shrink: 0;
+  }
+
+}
+
+
+
+/* ============================================================
+   AURORA // ACTIVITY TIMELINE
+============================================================ */
+
+.aurora-activity-timeline {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding-left: 2px;
+}
+
+
+/* ============================================================
+   TIMELINE ENERGY LINE
+============================================================ */
+
+.aurora-activity-timeline::before {
+  content: "";
+
+  position: absolute;
+
+  top: 22px;
+  bottom: 22px;
+  left: 23px;
+
+  width: 2px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(to bottom,
+
+      rgba(82, 236, 255, 0.95),
+
+      rgba(94, 158, 255, 0.72),
+
+      rgba(176, 96, 255, 0.55),
+
+      rgba(255, 106, 201, 0.32),
+
+      transparent);
+
+  box-shadow:
+    0 0 8px rgba(82, 236, 255, 0.35),
+    0 0 18px rgba(126, 101, 255, 0.18);
+}
+
+
+/* ============================================================
+   EVENT CARD
+============================================================ */
+
+.aurora-activity-event {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    48px minmax(0, 1fr);
+
+  gap: 15px;
+
+  padding: 17px;
+
+  border:
+    1px solid rgba(121, 210, 255, 0.10);
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(7, 16, 33, 0.96),
+      rgba(8, 20, 43, 0.82));
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 12px 32px rgba(0, 0, 0, 0.15);
+
+  backdrop-filter:
+    blur(16px);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.aurora-activity-event::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(76, 222, 255, 0.09),
+      transparent 45%);
+
+  transition:
+    opacity 0.2s ease;
+}
+
+
+.aurora-activity-event:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(91, 225, 255, 0.25);
+
+  box-shadow:
+    0 15px 38px rgba(0, 0, 0, 0.22),
+    0 0 22px rgba(67, 207, 255, 0.06);
+}
+
+
+.aurora-activity-event:hover::before {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   EVENT ICON
+============================================================ */
+
+.aurora-activity-icon {
+  position: relative;
+
+  z-index: 2;
+
+  width: 46px;
+  height: 46px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  color: #8eeeff;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(29, 84, 116, 0.96),
+      rgba(7, 20, 39, 0.98));
+
+  border:
+    1px solid rgba(87, 229, 255, 0.55);
+
+  box-shadow:
+    inset 0 0 13px rgba(37, 211, 255, 0.08),
+    0 0 16px rgba(70, 218, 255, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.aurora-activity-event:hover .aurora-activity-icon {
+  transform:
+    scale(1.06);
+
+  box-shadow:
+    inset 0 0 14px rgba(37, 211, 255, 0.12),
+    0 0 22px rgba(70, 218, 255, 0.28);
+}
+
+
+/* ============================================================
+   COLOR TYPES
+============================================================ */
+
+/* CYAN / ACCOUNTING */
+
+.aurora-activity-event.cyan {
+  border-color:
+    rgba(79, 220, 255, 0.14);
+}
+
+
+.aurora-activity-event.cyan .aurora-activity-icon {
+  color: #75ecff;
+
+  border-color:
+    rgba(91, 231, 255, 0.72);
+
+  box-shadow:
+    0 0 20px rgba(65, 220, 255, 0.20);
+}
+
+
+/* PURPLE / ROLE + OWNERSHIP */
+
+.aurora-activity-event.purple {
+  border-color:
+    rgba(185, 113, 255, 0.15);
+}
+
+
+.aurora-activity-event.purple .aurora-activity-icon {
+  color: #d0a2ff;
+
+  border-color:
+    rgba(184, 110, 255, 0.75);
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(72, 36, 105, 0.96),
+      rgba(16, 10, 32, 0.98));
+
+  box-shadow:
+    0 0 22px rgba(177, 95, 255, 0.22);
+}
+
+
+/* GREEN / SUCCESS */
+
+.aurora-activity-event.success {
+  border-color:
+    rgba(84, 255, 171, 0.15);
+}
+
+
+.aurora-activity-event.success .aurora-activity-icon {
+  color: #7affc5;
+
+  border-color:
+    rgba(84, 255, 171, 0.75);
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(20, 79, 62, 0.98),
+      rgba(7, 29, 25, 0.98));
+
+  box-shadow:
+    0 0 22px rgba(67, 255, 172, 0.20);
+}
+
+
+/* RED / DANGER */
+
+.aurora-activity-event.danger {
+  border-color:
+    rgba(255, 83, 122, 0.16);
+}
+
+
+.aurora-activity-event.danger .aurora-activity-icon {
+  color: #ff8ba8;
+
+  border-color:
+    rgba(255, 83, 122, 0.78);
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(90, 28, 48, 0.98),
+      rgba(35, 9, 20, 0.98));
+
+  box-shadow:
+    0 0 22px rgba(255, 75, 115, 0.22);
+}
+
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
+.aurora-activity-content {
+  min-width: 0;
+}
+
+
+/* ============================================================
+   EVENT HEADER
+============================================================ */
+
+.aurora-activity-top {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  align-items: flex-start;
+}
+
+
+.aurora-activity-top>div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+
+.aurora-activity-top strong {
+  color: #e8f8ff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  letter-spacing: 0.015em;
+}
+
+
+.aurora-activity-top small {
+  color: #6daac4;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.10em;
+
+  opacity: 0.82;
+}
+
+
+/* ============================================================
+   DATE / TIME
+============================================================ */
+
+.aurora-activity-top time {
+  flex-shrink: 0;
+
+  padding:
+    4px 7px;
+
+  border-radius:
+    7px;
+
+  color:
+    rgba(191, 222, 241, 0.72);
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.05);
+
+  font-size:
+    10px;
+
+  white-space:
+    nowrap;
+}
+
+
+/* ============================================================
+   ACTOR
+============================================================ */
+
+.aurora-activity-actor {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  align-items: center;
+
+  margin-top: 11px;
+}
+
+
+.aurora-activity-actor span {
+  color:
+    rgba(213, 235, 248, 0.84);
+
+  font-size:
+    11px;
+}
+
+
+.aurora-activity-actor b {
+  padding:
+    3px 8px;
+
+  border-radius:
+    999px;
+
+  color:
+    #7ee8ff;
+
+  background:
+    rgba(50, 205, 255, 0.07);
+
+  border:
+    1px solid rgba(70, 218, 255, 0.18);
+
+  font-size:
+    9px;
+
+  font-style:
+    normal;
+
+  letter-spacing:
+    0.09em;
+}
+
+
+.aurora-activity-actor em {
+  padding:
+    3px 8px;
+
+  border-radius:
+    999px;
+
+  color:
+    #c4a0ff;
+
+  background:
+    rgba(177, 101, 255, 0.07);
+
+  border:
+    1px solid rgba(177, 101, 255, 0.18);
+
+  font-size:
+    9px;
+
+  font-style:
+    normal;
+
+  letter-spacing:
+    0.09em;
+}
+
+
+/* ============================================================
+   EVENT DETAILS
+============================================================ */
+
+.aurora-activity-details {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 12px;
+}
+
+
+.aurora-activity-details span {
+  padding:
+    6px 9px;
+
+  border-radius:
+    8px;
+
+  color:
+    rgba(210, 235, 250, 0.82);
+
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.015));
+
+  border:
+    1px solid rgba(255, 255, 255, 0.05);
+
+  font-size:
+    9px;
+}
+
+
+.aurora-activity-details b {
+  margin-right:
+    5px;
+
+  color:
+    #7edfff;
+
+  font-weight:
+    800;
+
+  opacity:
+    0.85;
+}
+
+
+/* ============================================================
+   EVENT TYPE BASED DETAILS COLOR
+============================================================ */
+
+.aurora-activity-event.success .aurora-activity-details b {
+  color:
+    #71f5bb;
+}
+
+
+.aurora-activity-event.purple .aurora-activity-details b {
+  color:
+    #c394ff;
+}
+
+
+.aurora-activity-event.danger .aurora-activity-details b {
+  color:
+    #ff839e;
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+  .aurora-activity-timeline {
+    gap:
+      10px;
+  }
+
+
+  .aurora-activity-timeline::before {
+    left:
+      18px;
+  }
+
+
+  .aurora-activity-event {
+    grid-template-columns:
+      38px minmax(0, 1fr);
+
+    gap:
+      11px;
+
+    padding:
+      13px;
+
+    border-radius:
+      14px;
+  }
+
+
+  .aurora-activity-icon {
+    width:
+      38px;
+
+    height:
+      38px;
+
+    font-size:
+      13px;
+  }
+
+
+  .aurora-activity-top {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+
+    gap:
+      7px;
+  }
+
+
+  .aurora-activity-top time {
+    align-self:
+      flex-start;
+  }
+
+
+  .aurora-activity-top strong {
+    font-size:
+      13px;
+  }
+
+
+  .aurora-activity-details {
+    gap:
+      5px;
+  }
+
+}
+
+
+
+
+
+/* ============================================================
+   ACTIVITY // BLUE — MEALS
+============================================================ */
+
+.aurora-activity-event.blue {
+  border-color:
+    rgba(86, 142, 255, 0.20);
+}
+
+.aurora-activity-event.blue .aurora-activity-icon {
+
+  color: #8db8ff;
+
+  border-color:
+    rgba(89, 151, 255, 0.78);
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(33, 61, 119, 0.98),
+      rgba(8, 18, 42, 0.98));
+
+  box-shadow:
+    0 0 22px rgba(72, 131, 255, 0.23);
+}
+
+.aurora-activity-event.blue .aurora-activity-details b {
+  color: #8db8ff;
+}
+
+
+/* ============================================================
+   ACTIVITY // AMBER — BILLS / RENT
+============================================================ */
+
+.aurora-activity-event.amber {
+  border-color:
+    rgba(255, 190, 78, 0.20);
+}
+
+.aurora-activity-event.amber .aurora-activity-icon {
+
+  color: #ffd27b;
+
+  border-color:
+    rgba(255, 191, 73, 0.80);
+
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(101, 67, 18, 0.98),
+      rgba(34, 20, 6, 0.98));
+
+  box-shadow:
+    0 0 22px rgba(255, 176, 50, 0.22);
+}
+
+.aurora-activity-event.amber .aurora-activity-details b {
+  color: #ffd27b;
+}
+
+
+
+/* ============================================================
+   AURORA // VERSION HISTORY — TEMPORAL ARCHIVE
+============================================================ */
+
+
+/* ============================================================
+   TOOLBAR
+============================================================ */
+
+.version-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-bottom: 22px;
+  padding: 16px 18px;
+
+  border: 1px solid rgba(112, 113, 255, 0.22);
+  border-radius: 17px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(9, 17, 39, 0.96),
+      rgba(18, 13, 47, 0.88));
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 15px 40px rgba(0, 0, 0, 0.22),
+    0 0 35px rgba(108, 76, 255, 0.06);
+
+  backdrop-filter: blur(18px);
+}
+
+
+.version-toolbar>div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+
+.version-toolbar>div:first-child strong {
+  color: #e8e7ff;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  letter-spacing: 0.12em;
+}
+
+
+.version-toolbar>div:first-child span {
+  color: rgba(193, 200, 255, 0.55);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.10em;
+}
+
+
+.version-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* ============================================================
+   CURRENT REVISION BADGE
+============================================================ */
+
+.version-current-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 38px;
+
+  padding: 0 13px;
+
+  border-radius: 999px;
+
+  border:
+    1px solid rgba(91, 240, 255, 0.30);
+
+  background:
+    rgba(52, 216, 255, 0.07);
+
+  color: #81ecff;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 0.10em;
+
+  box-shadow:
+    inset 0 0 14px rgba(58, 217, 255, 0.05),
+    0 0 18px rgba(58, 217, 255, 0.06);
+}
+
+
+/* ============================================================
+   VERSION LIST
+============================================================ */
+
+.version-list {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+
+/* timeline line */
+
+.version-list::before {
+  content: "";
+
+  position: absolute;
+
+  top: 30px;
+  bottom: 30px;
+  left: 52px;
+
+  width: 2px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(to bottom,
+      rgba(80, 230, 255, 0.75),
+      rgba(117, 103, 255, 0.62),
+      rgba(195, 91, 255, 0.38),
+      transparent);
+
+  box-shadow:
+    0 0 12px rgba(104, 128, 255, 0.24);
+}
+
+
+/* ============================================================
+   VERSION CARD
+============================================================ */
+
+.version-card {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    86px minmax(0, 1fr) auto;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 17px 18px;
+
+  border:
+    1px solid rgba(130, 150, 255, 0.10);
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(7, 15, 34, 0.97),
+      rgba(12, 17, 42, 0.90));
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 13px 34px rgba(0, 0, 0, 0.16);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+
+.version-card::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(95, 214, 255, 0.09),
+      transparent 42%);
+
+  transition: opacity 0.22s ease;
+}
+
+
+.version-card:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(116, 177, 255, 0.28);
+
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.24),
+    0 0 26px rgba(98, 120, 255, 0.08);
+}
+
+
+.version-card:hover::after {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   CURRENT VERSION
+============================================================ */
+
+.version-card.current {
+  border-color:
+    rgba(79, 234, 255, 0.35);
+
+  background:
+    linear-gradient(135deg,
+      rgba(5, 27, 43, 0.98),
+      rgba(10, 26, 55, 0.92));
+
+  box-shadow:
+    inset 0 0 22px rgba(66, 219, 255, 0.04),
+    0 0 26px rgba(61, 215, 255, 0.07);
+}
+
+
+.version-card.current::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 3px;
+
+  background:
+    linear-gradient(to bottom,
+      #72efff,
+      #5f9cff);
+
+  box-shadow:
+    0 0 15px rgba(98, 230, 255, 0.55);
+}
+
+
+/* ============================================================
+   REVISION NUMBER
+============================================================ */
+
+.version-revision {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 70px;
+
+  border-radius: 15px;
+
+  border:
+    1px solid rgba(141, 126, 255, 0.30);
+
+  background:
+    radial-gradient(circle at 50% 30%,
+      rgba(71, 61, 128, 0.46),
+      rgba(12, 18, 42, 0.92));
+
+  box-shadow:
+    inset 0 0 18px rgba(121, 101, 255, 0.06),
+    0 0 22px rgba(120, 103, 255, 0.08);
+}
+
+
+.version-card.current .version-revision {
+  border-color:
+    rgba(77, 227, 255, 0.45);
+
+  background:
+    radial-gradient(circle at 50% 30%,
+      rgba(28, 100, 125, 0.52),
+      rgba(8, 25, 44, 0.95));
+
+  box-shadow:
+    inset 0 0 18px rgba(67, 221, 255, 0.08),
+    0 0 24px rgba(67, 221, 255, 0.12);
+}
+
+
+.version-revision span {
+  color:
+    rgba(190, 196, 255, 0.58);
+
+  font-size:
+    8px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.11em;
+}
+
+
+.version-revision strong {
+  margin-top: 3px;
+
+  color: #c7bdff;
+
+  font-size: 24px;
+  font-weight: 900;
+
+  line-height: 1;
+}
+
+
+.version-card.current .version-revision strong {
+  color: #7defff;
+}
+
+
+/* ============================================================
+   MAIN CONTENT
+============================================================ */
+
+.version-main {
+  min-width: 0;
+}
+
+
+.version-title-row {
+  display: flex;
+
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 9px;
+}
+
+
+.version-title-row>strong {
+  color: #edf3ff;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+
+/* ============================================================
+   STATUS PILLS
+============================================================ */
+
+.version-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: 0.10em;
+}
+
+
+.version-status.current {
+  color: #7af4d5;
+
+  border:
+    1px solid rgba(82, 255, 198, 0.26);
+
+  background:
+    rgba(59, 255, 193, 0.07);
+
+  box-shadow:
+    0 0 12px rgba(64, 255, 198, 0.07);
+}
+
+
+.version-status.archived {
+  color: #b7b8d8;
+
+  border:
+    1px solid rgba(160, 164, 213, 0.14);
+
+  background:
+    rgba(130, 137, 188, 0.05);
+}
+
+
+/* ============================================================
+   VERSION META
+============================================================ */
+
+.version-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin-top: 10px;
+}
+
+
+.version-meta span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  color:
+    rgba(192, 211, 232, 0.58);
+
+  font-size:
+    10px;
+}
+
+
+/* ============================================================
+   VERSION ACTIONS
+============================================================ */
+
+.version-actions {
+  position: relative;
+  z-index: 3;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.version-actions .btn {
+  white-space: nowrap;
+}
+
+
+.version-actions .btn:disabled {
+  cursor: default;
+
+  opacity: 0.42;
+
+  filter: grayscale(0.4);
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+
+/* ============================================================
+   PREVIEW MODAL
+============================================================ */
+
+.version-preview {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+
+/* hero */
+
+.version-preview-hero {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 18px;
+
+  border-radius: 16px;
+
+  border:
+    1px solid rgba(116, 99, 255, 0.25);
+
+  background:
+    linear-gradient(135deg,
+      rgba(20, 18, 61, 0.90),
+      rgba(8, 27, 48, 0.90));
+
+  overflow: hidden;
+}
+
+
+.version-preview-hero::after {
+  content: "";
+
+  position: absolute;
+
+  width: 160px;
+  height: 160px;
+
+  top: -90px;
+  right: -40px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(100, 114, 255, 0.10);
+
+  filter: blur(15px);
+}
+
+
+.version-preview-hero span {
+  position: relative;
+  z-index: 2;
+
+  color:
+    rgba(196, 203, 255, 0.65);
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.13em;
+}
+
+
+.version-preview-hero strong {
+  position: relative;
+  z-index: 2;
+
+  color: #84efff;
+
+  font-size: 24px;
+  font-weight: 900;
+}
+
+
+/* ============================================================
+   PREVIEW STAT GRID
+============================================================ */
+
+.version-preview-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit,
+      minmax(120px, 1fr));
+
+  gap: 10px;
+}
+
+
+.version-preview-grid>div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 14px;
+
+  border:
+    1px solid rgba(135, 154, 255, 0.11);
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(11, 20, 42, 0.90),
+      rgba(13, 17, 39, 0.82));
+}
+
+
+.version-preview-grid small {
+  color:
+    rgba(185, 200, 229, 0.52);
+
+  font-size:
+    8px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.09em;
+}
+
+
+.version-preview-grid strong {
+  color: #e8f5ff;
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+
+/* ============================================================
+   AVAILABLE MONTHS
+============================================================ */
+
+.version-preview-months {
+  padding: 14px;
+
+  border:
+    1px solid rgba(119, 134, 219, 0.10);
+
+  border-radius: 13px;
+
+  background:
+    rgba(8, 15, 31, 0.65);
+}
+
+
+.version-preview-months>small {
+  color:
+    rgba(189, 203, 231, 0.55);
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.10em;
+}
+
+
+.version-preview-months>div {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 10px;
+}
+
+
+.version-preview-months span {
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  color: #98dfff;
+
+  background:
+    rgba(73, 202, 255, 0.06);
+
+  border:
+    1px solid rgba(73, 202, 255, 0.15);
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+}
+
+
+/* ============================================================
+   RESTORE BUTTON SPECIAL EFFECT
+============================================================ */
+
+.version-actions .btn.primary,
+.version-preview .btn.primary {
+  border-color:
+    rgba(134, 107, 255, 0.45);
+
+  background:
+    linear-gradient(135deg,
+      rgba(78, 75, 211, 0.82),
+      rgba(91, 49, 176, 0.82));
+
+  box-shadow:
+    0 0 18px rgba(113, 83, 255, 0.10);
+}
+
+
+.version-actions .btn.primary:hover,
+.version-preview .btn.primary:hover {
+  border-color:
+    rgba(161, 132, 255, 0.80);
+
+  box-shadow:
+    0 0 22px rgba(123, 95, 255, 0.24);
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 800px) {
+
+  .version-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+
+  .version-toolbar-actions {
+    width: 100%;
+  }
+
+
+  .version-current-badge {
+    flex: 1;
+  }
+
+
+  .version-card {
+    grid-template-columns:
+      68px minmax(0, 1fr);
+  }
+
+
+  .version-actions {
+    grid-column:
+      1 / -1;
+
+    justify-content:
+      flex-end;
+
+    padding-top:
+      4px;
+  }
+
+
+  .version-list::before {
+    left:
+      42px;
+  }
+
+
+  .version-revision {
+    min-height:
+      62px;
+  }
+
+
+  .version-revision strong {
+    font-size:
+      20px;
+  }
+
+}
+
+
+@media (max-width: 520px) {
+
+  .version-toolbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+
+  .version-card {
+    grid-template-columns:
+      1fr;
+
+    gap:
+      12px;
+  }
+
+
+  .version-list::before {
+    display: none;
+  }
+
+
+  .version-revision {
+    flex-direction: row;
+
+    justify-content:
+      flex-start;
+
+    gap:
+      8px;
+
+    min-height:
+      auto;
+
+    padding:
+      11px 13px;
+  }
+
+
+  .version-revision strong {
+    margin-top:
+      0;
+  }
+
+
+  .version-actions {
+    grid-column:
+      auto;
+
+    justify-content:
+      stretch;
+  }
+
+
+  .version-actions .btn {
+    flex: 1;
+  }
+
+
+  .version-preview-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}
+
+
+/* ============================================================
+   AURORA // FUTURISTIC CONFIRMATION
+============================================================ */
+
+.aurora-confirm-backdrop {
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(2, 7, 18, 0.82);
+
+  backdrop-filter:
+    blur(14px);
+
+  animation:
+    auroraConfirmFade 0.2s ease;
+}
+
+
+.aurora-confirm-modal {
+  position: relative;
+
+  width:
+    min(520px, 100%);
+
+  padding:
+    22px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(96, 221, 255, 0.26);
+
+  border-radius:
+    20px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(5, 15, 33, 0.98),
+      rgba(12, 17, 43, 0.98));
+
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.55),
+
+    0 0 45px rgba(65, 185, 255, 0.10),
+
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+
+  animation:
+    auroraConfirmEnter 0.25s ease;
+}
+
+
+/* futuristic scan */
+
+.aurora-confirm-scanline {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 2px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #58e9ff,
+      #9e77ff,
+      transparent);
+
+  box-shadow:
+    0 0 14px #58e9ff;
+
+  animation:
+    auroraScan 3s linear infinite;
+}
+
+
+/* header */
+
+.aurora-confirm-header {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    flex-start;
+
+  gap: 16px;
+}
+
+
+.aurora-confirm-eyebrow {
+  display: block;
+
+  margin-bottom:
+    6px;
+
+  color:
+    #64dfff;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.15em;
+}
+
+
+.aurora-confirm-header h2 {
+  margin: 0;
+
+  color:
+    #eff8ff;
+
+  font-size:
+    20px;
+}
+
+
+.aurora-confirm-close {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.10);
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color:
+    #a9b9cb;
+
+  font-size:
+    18px;
+
+  cursor: pointer;
+
+  transition:
+    0.2s ease;
+}
+
+
+.aurora-confirm-close:hover {
+  color:
+    #ffffff;
+
+  border-color:
+    rgba(93, 225, 255, 0.4);
+
+  box-shadow:
+    0 0 14px rgba(60, 220, 255, 0.12);
+}
+
+
+/* icon */
+
+.aurora-confirm-icon {
+  width: 62px;
+  height: 62px;
+
+  display: grid;
+  place-items: center;
+
+  margin:
+    25px auto 20px;
+
+  border-radius:
+    50%;
+
+  color:
+    #6fe9ff;
+
+  font-size:
+    23px;
+
+  font-weight:
+    900;
+
+  border:
+    1px solid rgba(91, 230, 255, 0.55);
+
+  background:
+    radial-gradient(circle,
+      rgba(34, 109, 137, 0.45),
+      rgba(6, 21, 39, 0.95));
+
+  box-shadow:
+    0 0 25px rgba(67, 222, 255, 0.18);
+}
+
+
+.aurora-confirm-icon.danger {
+  color:
+    #ff849e;
+
+  border-color:
+    rgba(255, 84, 120, 0.58);
+
+  background:
+    radial-gradient(circle,
+      rgba(116, 33, 55, 0.55),
+      rgba(32, 7, 18, 0.96));
+
+  box-shadow:
+    0 0 28px rgba(255, 68, 110, 0.20);
+}
+
+
+/* message */
+
+.aurora-confirm-message {
+  padding:
+    15px 17px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.055);
+
+  border-radius:
+    13px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+
+.aurora-confirm-message p {
+  margin:
+    5px 0;
+
+  color:
+    rgba(218, 237, 250, 0.78);
+
+  font-size:
+    12px;
+
+  line-height:
+    1.6;
+}
+
+
+/* warning indicator */
+
+.aurora-confirm-warning {
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+
+  margin-top:
+    13px;
+
+  padding:
+    9px 11px;
+
+  border-radius:
+    10px;
+
+  border:
+    1px solid rgba(255, 103, 136, 0.12);
+
+  background:
+    rgba(255, 68, 110, 0.035);
+}
+
+
+.aurora-confirm-warning span {
+  color:
+    rgba(190, 210, 230, 0.45);
+
+  font-size:
+    8px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.12em;
+}
+
+
+.aurora-confirm-warning strong {
+  color:
+    #ff91a8;
+
+  font-size:
+    9px;
+
+  letter-spacing:
+    0.08em;
+}
+
+
+/* buttons */
+
+.aurora-confirm-actions {
+  display: flex;
+
+  justify-content:
+    flex-end;
+
+  gap: 9px;
+
+  margin-top:
+    20px;
+}
+
+
+.aurora-confirm-cancel {
+  min-width:
+    100px;
+}
+
+
+.aurora-confirm-accept {
+  min-width:
+    165px;
+
+  border-color:
+    rgba(91, 224, 255, 0.48);
+
+  background:
+    linear-gradient(135deg,
+      rgba(30, 121, 164, 0.82),
+      rgba(45, 77, 167, 0.84));
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 0 18px rgba(72, 190, 255, 0.12);
+}
+
+
+.aurora-confirm-accept:hover {
+  box-shadow:
+    0 0 26px rgba(72, 208, 255, 0.26);
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* dangerous action */
+
+.aurora-confirm-accept.danger {
+  border-color:
+    rgba(255, 85, 125, 0.48);
+
+  background:
+    linear-gradient(135deg,
+      rgba(164, 42, 76, 0.92),
+      rgba(112, 39, 110, 0.88));
+
+  box-shadow:
+    0 0 20px rgba(255, 70, 115, 0.14);
+}
+
+
+.aurora-confirm-accept.danger:hover {
+  border-color:
+    rgba(255, 115, 150, 0.9);
+
+  box-shadow:
+    0 0 28px rgba(255, 70, 115, 0.28);
+}
+
+
+/* animations */
+
+@keyframes auroraConfirmFade {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes auroraConfirmEnter {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0) scale(1);
+  }
+
+}
+
+
+@keyframes auroraScan {
+
+  0% {
+    transform:
+      translateX(-100%);
+  }
+
+  100% {
+    transform:
+      translateX(100%);
+  }
+
+}
+
+
+/* mobile */
+
+@media (max-width: 600px) {
+
+  .aurora-confirm-modal {
+    padding:
+      18px;
+  }
+
+
+  .aurora-confirm-actions {
+    flex-direction:
+      column-reverse;
+  }
+
+
+  .aurora-confirm-actions .btn {
+    width:
+      100%;
+  }
+
+}
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // MONTH LOCK CONTROL — FINAL
+============================================================ */
+
+.aurora-month-lock-control,
+#auroraMonthLockControl {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  min-width: 125px !important;
+
+  margin-left: 9px;
+
+  background: transparent !important;
+  border: none !important;
+}
+
+
+/* ============================================================
+   VERTICAL STACK
+============================================================ */
+
+#auroraMonthLockControl .aurora-month-lock-stack {
+  width: 100% !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 15px !important;
+}
+
+
+/* ============================================================
+   LOCK / UNLOCK BUTTON
+============================================================ */
+
+#auroraMonthLockControl .aurora-month-lock-action {
+  appearance: none !important;
+
+  min-width: 112px !important;
+  height: 25px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  margin: 0 !important;
+  padding: 0 10px !important;
+
+  border:
+    1px solid rgba(94, 222, 255, .24) !important;
+
+  border-radius:
+    7px !important;
+
+  background:
+    linear-gradient(135deg,
+      rgba(46, 189, 226, .08),
+      rgba(119, 82, 215, .08)),
+    rgba(7, 16, 31, .92) !important;
+
+  color:
+    #dff8ff !important;
+
+  font-size:
+    8px !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .08em !important;
+
+  line-height:
+    1 !important;
+
+  white-space:
+    nowrap !important;
+
+  cursor:
+    pointer !important;
+
+  opacity:
+    1 !important;
+
+  filter:
+    none !important;
+
+  box-shadow:
+    inset 0 0 12px rgba(73, 217, 255, .03),
+
+    0 0 12px rgba(73, 217, 255, .04) !important;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+
+#auroraMonthLockControl .aurora-month-lock-action:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(96, 228, 255, .48) !important;
+
+  background:
+    linear-gradient(135deg,
+      rgba(46, 189, 226, .13),
+      rgba(119, 82, 215, .13)),
+    rgba(7, 16, 31, .96) !important;
+
+  box-shadow:
+    0 0 16px rgba(75, 221, 255, .09) !important;
+}
+
+
+/* ============================================================
+   OPEN / LOCKED STATUS
+============================================================ */
+
+#auroraMonthLockControl .aurora-month-lock-state {
+  width: auto !important;
+
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: none !important;
+
+  background:
+    transparent !important;
+
+  font-size:
+    7px !important;
+
+  font-weight:
+    900 !important;
+
+  line-height:
+    1 !important;
+
+  letter-spacing:
+    .12em !important;
+
+  white-space:
+    nowrap;
+}
+
+
+/* OPEN */
+
+#auroraMonthLockControl .aurora-month-lock-state.open {
+  color:
+    #58f0ba !important;
+
+  text-shadow:
+    0 0 8px rgba(88, 240, 186, .45);
+}
+
+
+/* LOCKED */
+
+#auroraMonthLockControl .aurora-month-lock-state.locked {
+  color:
+    #ffc368 !important;
+
+  text-shadow:
+    0 0 8px rgba(255, 195, 104, .40);
+}
+
+
+/* ============================================================
+   MEMBER // VIEW ONLY
+============================================================ */
+
+#auroraMonthLockControl .aurora-month-lock-view {
+  min-width: 112px;
+  min-height: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 10px;
+
+  border:
+    1px solid rgba(255, 255, 255, .07);
+
+  border-radius:
+    7px;
+
+  background:
+    rgba(255, 255, 255, .025);
+
+  color:
+    rgba(190, 204, 222, .48);
+
+  font-size:
+    8px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .08em;
+}
+
+
+/* ============================================================
+   LOCKED WRITE CONTROLS
+============================================================ */
+
+.aurora-lock-disabled {
+  position: relative !important;
+
+  opacity:
+    .42 !important;
+
+  filter:
+    grayscale(.45) saturate(.45) !important;
+
+  cursor:
+    not-allowed !important;
+
+  box-shadow:
+    none !important;
+
+  transform:
+    none !important;
+
+  transition:
+    opacity .18s ease,
+    filter .18s ease,
+    border-color .18s ease !important;
+}
+
+
+/* BUTTONS */
+
+button.aurora-lock-disabled {
+  border-color:
+    rgba(255, 173, 74, .16) !important;
+
+  background:
+    linear-gradient(135deg,
+      rgba(40, 31, 20, .62),
+      rgba(19, 21, 31, .72)) !important;
+
+  color:
+    rgba(214, 208, 196, .54) !important;
+}
+
+
+button.aurora-lock-disabled:hover {
+  opacity:
+    .58 !important;
+
+  transform:
+    none !important;
+
+  border-color:
+    rgba(255, 176, 74, .34) !important;
+
+  box-shadow:
+    0 0 18px rgba(255, 163, 52, .07) !important;
+}
+
+
+/* ============================================================
+   INPUTS
+============================================================ */
+
+input.aurora-lock-disabled,
+textarea.aurora-lock-disabled,
+select.aurora-lock-disabled {
+  border-color:
+    rgba(255, 175, 72, .14) !important;
+
+  background:
+    rgba(17, 20, 28, .76) !important;
+
+  color:
+    rgba(210, 218, 226, .42) !important;
+}
+
+
+/* ============================================================
+   MEAL MATRIX
+============================================================ */
+
+.meal-input.aurora-lock-disabled {
+  pointer-events:
+    auto;
+
+  color:
+    rgba(201, 213, 225, .38) !important;
+
+  background:
+    rgba(11, 17, 25, .76) !important;
+
+  border-color:
+    rgba(255, 171, 66, .13) !important;
+}
+
+
+/* ============================================================
+   SMALL LOCK INDICATOR
+============================================================ */
+
+button.aurora-lock-disabled::after {
+  content:
+    "🔒";
+
+  display:
+    inline-block;
+
+  margin-left:
+    7px;
+
+  font-size:
+    9px;
+
+  opacity:
+    .72;
+}
+
+
+/* ============================================================
+   LOCKED PAGE INDICATOR
+============================================================ */
+
+.page.active:has(.aurora-lock-disabled) {
+  position:
+    relative;
+}
+
+
+.page.active:has(.aurora-lock-disabled)::before {
+  content:
+    "🔒 MONTH LOCKED // READ ONLY";
+
+  display:
+    block;
+
+  width:
+    fit-content;
+
+  margin-bottom:
+    13px;
+
+  padding:
+    6px 10px;
+
+  border-radius:
+    999px;
+
+  border:
+    1px solid rgba(255, 179, 72, .20);
+
+  background:
+    rgba(255, 162, 46, .05);
+
+  color:
+    #ffc06e;
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .11em;
+
+  box-shadow:
+    0 0 16px rgba(255, 166, 56, .06);
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+  .aurora-month-lock-control,
+  #auroraMonthLockControl {
+    margin-left:
+      0;
+
+    margin-top:
+      8px;
+  }
+
+
+  #auroraMonthLockControl .aurora-month-lock-stack {
+    width:
+      125px !important;
+  }
+
+}
+
+
+
+
+
+/* ============================================================
+   AURORA // CLOUD SYNC HUD
+============================================================ */
+
+.aurora-sync-hud {
+  min-width: 158px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 7px 11px;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  border-radius: 12px;
+
+  transition:
+    border-color .25s ease,
+    background .25s ease,
+    box-shadow .25s ease,
+    transform .25s ease;
+}
+
+
+.aurora-sync-hud:hover {
+  transform:
+    translateY(-1px);
+}
+
+
+.aurora-sync-info {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+
+.aurora-sync-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+
+.aurora-sync-revision {
+  color:
+    rgba(172, 197, 218, .45);
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: .08em;
+}
+
+
+.aurora-sync-info strong {
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: .08em;
+
+  transition:
+    color .25s ease;
+}
+
+
+.aurora-sync-meta {
+  max-width: 145px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color:
+    rgba(172, 196, 216, .48);
+
+  font-size: 7px;
+
+  letter-spacing: .03em;
+}
+
+
+/* ============================================================
+   SYNCED
+============================================================ */
+
+.aurora-sync-hud.sync-synced {
+  border-color:
+    rgba(77, 244, 177, .18);
+
+  background:
+    rgba(57, 220, 156, .045);
+
+  box-shadow:
+    inset 0 0 16px rgba(57, 220, 156, .025);
+}
+
+
+.aurora-sync-hud.sync-synced .aurora-sync-orb {
+  background:
+    #62f5bd;
+
+  box-shadow:
+    0 0 6px #62f5bd,
+    0 0 15px rgba(98, 245, 189, .55);
+}
+
+
+.aurora-sync-hud.sync-synced .aurora-sync-info strong {
+  color:
+    #65efbd;
+}
+
+
+/* ============================================================
+   SYNCING
+============================================================ */
+
+.aurora-sync-hud.sync-syncing {
+  border-color:
+    rgba(81, 217, 255, .26);
+
+  background:
+    rgba(65, 193, 255, .055);
+
+  box-shadow:
+    0 0 20px rgba(59, 203, 255, .055);
+}
+
+
+.aurora-sync-hud.sync-syncing .aurora-sync-orb {
+  background:
+    #65dfff;
+
+  box-shadow:
+    0 0 7px #65dfff,
+    0 0 18px rgba(75, 213, 255, .7);
+
+  animation:
+    auroraSyncPulse .8s ease-in-out infinite;
+}
+
+
+.aurora-sync-hud.sync-syncing .aurora-sync-info strong {
+  color:
+    #74e5ff;
+}
+
+
+/* ============================================================
+   CONNECTING
+============================================================ */
+
+.aurora-sync-hud.sync-connecting {
+  border-color:
+    rgba(157, 123, 255, .22);
+
+  background:
+    rgba(121, 91, 255, .045);
+}
+
+
+.aurora-sync-hud.sync-connecting .aurora-sync-orb {
+  background:
+    #a583ff;
+
+  box-shadow:
+    0 0 15px rgba(159, 128, 255, .65);
+
+  animation:
+    auroraSyncPulse 1.2s ease-in-out infinite;
+}
+
+
+.aurora-sync-hud.sync-connecting .aurora-sync-info strong {
+  color:
+    #b69aff;
+}
+
+
+/* ============================================================
+   OFFLINE
+============================================================ */
+
+.aurora-sync-hud.sync-offline {
+  border-color:
+    rgba(160, 170, 184, .14);
+
+  background:
+    rgba(100, 110, 125, .045);
+}
+
+
+.aurora-sync-hud.sync-offline .aurora-sync-orb {
+  background:
+    #788694;
+
+  box-shadow:
+    none;
+
+  animation:
+    none;
+}
+
+
+.aurora-sync-hud.sync-offline .aurora-sync-info strong {
+  color:
+    #9aa8b5;
+}
+
+
+/* ============================================================
+   CONFLICT
+============================================================ */
+
+.aurora-sync-hud.sync-conflict {
+  border-color:
+    rgba(255, 177, 63, .32);
+
+  background:
+    rgba(255, 165, 47, .065);
+
+  box-shadow:
+    0 0 22px rgba(255, 167, 55, .08);
+}
+
+
+.aurora-sync-hud.sync-conflict .aurora-sync-orb {
+  background:
+    #ffb24d;
+
+  box-shadow:
+    0 0 7px #ffb24d,
+    0 0 20px rgba(255, 178, 77, .65);
+}
+
+
+.aurora-sync-hud.sync-conflict .aurora-sync-info strong {
+  color:
+    #ffc269;
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+.aurora-sync-hud.sync-error {
+  border-color:
+    rgba(255, 76, 111, .30);
+
+  background:
+    rgba(255, 61, 100, .055);
+
+  box-shadow:
+    0 0 22px rgba(255, 61, 100, .07);
+}
+
+
+.aurora-sync-hud.sync-error .aurora-sync-orb {
+  background:
+    #ff5978;
+
+  box-shadow:
+    0 0 7px #ff5978,
+    0 0 20px rgba(255, 79, 116, .65);
+}
+
+
+.aurora-sync-hud.sync-error .aurora-sync-info strong {
+  color:
+    #ff7892;
+}
+
+
+/* ============================================================
+   ANIMATION
+============================================================ */
+
+@keyframes auroraSyncPulse {
+
+  0%,
+  100% {
+    transform:
+      scale(1);
+
+    opacity:
+      1;
+  }
+
+  50% {
+    transform:
+      scale(1.45);
+
+    opacity:
+      .55;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 720px) {
+
+  .aurora-sync-hud {
+    min-width:
+      42px;
+
+    padding:
+      8px 9px;
+  }
+
+
+  .aurora-sync-info {
+    display:
+      none;
+  }
+
+
+  .aurora-sync-orb {
+    margin:
+      auto;
+  }
+
+}
+
+
+
+
+/* ============================================================
+   AURORA // NOTIFICATION CENTER
+============================================================ */
+
+.aurora-notification {
+  position: relative;
+}
+
+
+/* ============================================================
+   BELL BUTTON
+============================================================ */
+
+.aurora-notification-btn {
+  position: relative;
+
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  border:
+    1px solid rgba(102, 221, 255, .16);
+
+  border-radius:
+    12px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(68, 205, 255, .055),
+      rgba(148, 101, 255, .055)),
+    rgba(5, 13, 27, .82);
+
+  color:
+    #89e8ff;
+
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 0 14px rgba(76, 221, 255, .02);
+
+  transition:
+    .22s ease;
+}
+
+
+.aurora-notification-btn:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(102, 225, 255, .42);
+
+  box-shadow:
+    0 0 20px rgba(75, 211, 255, .10);
+}
+
+
+.aurora-notification-icon {
+  font-size: 18px;
+
+  line-height: 1;
+}
+
+
+/* ============================================================
+   BADGE
+============================================================ */
+
+.aurora-notification-badge {
+  position: absolute;
+
+  top: -5px;
+  right: -6px;
+
+  min-width: 18px;
+  height: 18px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 5px;
+
+  border:
+    2px solid #07101f;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(135deg,
+      #ff4d78,
+      #a95cff);
+
+  color: #fff;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 14px rgba(255, 75, 127, .55);
+
+  animation:
+    auroraNotificationBadgePulse 1.8s ease-in-out infinite;
+}
+
+
+@keyframes auroraNotificationBadgePulse {
+
+  0%,
+  100% {
+    transform:
+      scale(1);
+  }
+
+  50% {
+    transform:
+      scale(1.10);
+  }
+
+}
+
+
+/* ============================================================
+   PANEL
+============================================================ */
+
+.aurora-notification-panel {
+  position: absolute;
+
+  z-index: 9999;
+
+  top: calc(100% + 12px);
+  right: 0;
+
+  width:
+    min(390px, calc(100vw - 30px));
+
+  max-height:
+    560px;
+
+  display: flex;
+  flex-direction: column;
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transform:
+    translateY(-8px) scale(.985);
+
+  pointer-events: none;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(111, 199, 255, .20);
+
+  border-radius:
+    19px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(5, 13, 29, .985),
+      rgba(12, 14, 38, .97));
+
+  backdrop-filter:
+    blur(22px);
+
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, .58),
+
+    0 0 45px rgba(78, 158, 255, .08),
+
+    inset 0 0 0 1px rgba(255, 255, 255, .02);
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease,
+    visibility .2s ease;
+}
+
+
+.aurora-notification.open .aurora-notification-panel {
+  opacity: 1;
+
+  visibility: visible;
+
+  transform:
+    translateY(0) scale(1);
+
+  pointer-events: auto;
+}
+
+
+/* top energy line */
+
+.aurora-notification-panel::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #60e7ff,
+      #9d71ff,
+      transparent);
+
+  box-shadow:
+    0 0 12px rgba(99, 225, 255, .7);
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.aurora-notification-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding:
+    17px 17px 13px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, .055);
+}
+
+
+.aurora-notification-code {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color:
+    #64dcff;
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing:
+    .14em;
+}
+
+
+.aurora-notification-header h3 {
+  margin: 0;
+
+  color:
+    #eef7ff;
+
+  font-size:
+    15px;
+}
+
+
+.aurora-notification-refresh {
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid rgba(112, 208, 255, .14);
+
+  border-radius:
+    9px;
+
+  background:
+    rgba(255, 255, 255, .025);
+
+  color:
+    #8edfff;
+
+  cursor: pointer;
+
+  transition:
+    .2s ease;
+}
+
+
+.aurora-notification-refresh:hover {
+  transform:
+    rotate(45deg);
+
+  border-color:
+    rgba(104, 224, 255, .42);
+}
+
+
+/* ============================================================
+   NETWORK STATUS
+============================================================ */
+
+.aurora-notification-status {
+  padding:
+    8px 17px;
+
+  color:
+    rgba(160, 190, 215, .52);
+
+  background:
+    rgba(63, 174, 255, .025);
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, .04);
+
+  font-size:
+    7px;
+  font-weight:
+    900;
+
+  letter-spacing:
+    .10em;
+}
+
+
+/* ============================================================
+   LIST
+============================================================ */
+
+.aurora-notification-list {
+  overflow-y: auto;
+
+  overscroll-behavior:
+    contain;
+
+  scrollbar-width:
+    thin;
+
+  scrollbar-color:
+    rgba(98, 207, 255, .25) transparent;
+}
+
+
+.aurora-notification-item {
+  position: relative;
+
+  display: flex;
+
+  gap: 11px;
+
+  padding:
+    13px 15px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, .045);
+
+  transition:
+    background .18s ease;
+}
+
+
+.aurora-notification-item:hover {
+  background:
+    rgba(91, 174, 255, .035);
+}
+
+
+.aurora-notification-item.unread {
+  background:
+    linear-gradient(90deg,
+      rgba(70, 194, 255, .065),
+      transparent);
+}
+
+
+.aurora-notification-item.unread::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 2px;
+
+  background:
+    #63e5ff;
+
+  box-shadow:
+    0 0 9px rgba(99, 229, 255, .6);
+}
+
+
+/* ============================================================
+   EVENT ICON
+============================================================ */
+
+.aurora-notification-event-icon {
+  flex:
+    0 0 36px;
+
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid rgba(94, 226, 255, .28);
+
+  border-radius:
+    11px;
+
+  background:
+    rgba(53, 190, 225, .06);
+
+  color:
+    #77e8ff;
+
+  font-size:
+    13px;
+  font-weight: 900;
+
+  box-shadow:
+    inset 0 0 13px rgba(59, 211, 255, .025);
+}
+
+
+/* green */
+
+.aurora-notification-item.success .aurora-notification-event-icon {
+  color:
+    #6ff1bd;
+
+  border-color:
+    rgba(86, 243, 186, .30);
+
+  background:
+    rgba(67, 222, 167, .06);
+}
+
+
+/* purple */
+
+.aurora-notification-item.purple .aurora-notification-event-icon {
+  color:
+    #c09aff;
+
+  border-color:
+    rgba(180, 129, 255, .32);
+
+  background:
+    rgba(151, 93, 255, .07);
+}
+
+
+/* danger */
+
+.aurora-notification-item.danger .aurora-notification-event-icon {
+  color:
+    #ff8199;
+
+  border-color:
+    rgba(255, 93, 123, .32);
+
+  background:
+    rgba(255, 66, 105, .06);
+}
+
+
+/* amber */
+
+.aurora-notification-item.amber .aurora-notification-event-icon {
+  color:
+    #ffd178;
+
+  border-color:
+    rgba(255, 191, 76, .30);
+
+  background:
+    rgba(255, 177, 48, .06);
+}
+
+
+/* blue */
+
+.aurora-notification-item.blue .aurora-notification-event-icon {
+  color:
+    #8cbaff;
+
+  border-color:
+    rgba(90, 151, 255, .32);
+
+  background:
+    rgba(66, 125, 255, .06);
+}
+
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
+.aurora-notification-body {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.aurora-notification-title {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 7px;
+}
+
+
+.aurora-notification-title strong {
+  color:
+    #e8f2fa;
+
+  font-size:
+    11px;
+  font-weight:
+    800;
+
+  line-height:
+    1.35;
+}
+
+
+.aurora-notification-new {
+  flex: 0 0 auto;
+
+  padding:
+    2px 5px;
+
+  border:
+    1px solid rgba(88, 223, 255, .22);
+
+  border-radius:
+    999px;
+
+  background:
+    rgba(71, 210, 255, .06);
+
+  color:
+    #78e7ff;
+
+  font-size:
+    6px;
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+}
+
+
+.aurora-notification-detail {
+  margin-top:
+    5px;
+
+  color:
+    rgba(178, 201, 219, .64);
+
+  font-size:
+    9px;
+}
+
+
+.aurora-notification-meta {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap:
+    5px 8px;
+
+  margin-top:
+    7px;
+}
+
+
+.aurora-notification-meta span {
+  color:
+    rgba(142, 170, 193, .43);
+
+  font-size:
+    7px;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .05em;
+}
+
+
+/* ============================================================
+   EMPTY
+============================================================ */
+
+.aurora-notification-empty {
+  min-height:
+    200px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 25px;
+
+  text-align: center;
+}
+
+
+.aurora-notification-empty>span {
+  color:
+    #6eddf5;
+
+  font-size:
+    27px;
+}
+
+
+.aurora-notification-empty strong {
+  margin-top:
+    10px;
+
+  color:
+    #e6f3fb;
+
+  font-size:
+    12px;
+}
+
+
+.aurora-notification-empty p {
+  margin:
+    5px 0 0;
+
+  color:
+    rgba(166, 190, 208, .48);
+
+  font-size:
+    9px;
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.aurora-notification-footer {
+  padding:
+    10px 13px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, .055);
+
+  background:
+    rgba(4, 10, 23, .7);
+}
+
+
+.aurora-notification-footer button {
+  width: 100%;
+
+  padding:
+    9px 10px;
+
+  border:
+    1px solid rgba(100, 210, 255, .12);
+
+  border-radius:
+    9px;
+
+  background:
+    rgba(71, 181, 255, .035);
+
+  color:
+    #79daf2;
+
+  font-size:
+    8px;
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+
+  cursor: pointer;
+
+  transition:
+    .2s ease;
+}
+
+
+.aurora-notification-footer button:hover {
+  border-color:
+    rgba(99, 223, 255, .34);
+
+  background:
+    rgba(71, 196, 255, .07);
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+  .aurora-notification-panel {
+    position: fixed;
+
+    top: 72px;
+    right: 12px;
+    left: 12px;
+
+    width: auto;
+
+    max-height:
+      calc(100vh - 95px);
+  }
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // GLOBAL FUTURISTIC DROPDOWN SYSTEM
+============================================================ */
+
+select {
+  width: 100%;
+
+  background:
+    linear-gradient(135deg,
+      rgba(8, 18, 35, .98),
+      rgba(12, 17, 34, .98)) !important;
+
+  color:
+    #eaf8ff !important;
+
+  border:
+    1px solid rgba(86, 221, 255, .34) !important;
+
+  border-radius:
+    9px !important;
+
+  outline:
+    none !important;
+
+  cursor:
+    pointer;
+
+  box-shadow:
+    inset 0 0 14px rgba(72, 211, 255, .025);
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+
+select:focus {
+  border-color:
+    rgba(96, 229, 255, .75) !important;
+
+  box-shadow:
+    0 0 0 2px rgba(71, 211, 255, .06),
+
+    0 0 18px rgba(71, 211, 255, .10);
+}
+
+
+/* ============================================================
+   DEFAULT OPTION
+============================================================ */
+
+select option {
+  background:
+    #091321;
+
+  color:
+    #dff7ff;
+
+  font-weight:
+    600;
+}
+
+
+/* ============================================================
+   ROW 1
+============================================================ */
+
+select option:nth-child(6n + 1) {
+  background:
+    #0a1b29;
+
+  color:
+    #7feaff;
+}
+
+
+/* ============================================================
+   ROW 2
+============================================================ */
+
+select option:nth-child(6n + 2) {
+  background:
+    #11182d;
+
+  color:
+    #b69aff;
+}
+
+
+/* ============================================================
+   ROW 3
+============================================================ */
+
+select option:nth-child(6n + 3) {
+  background:
+    #0d211c;
+
+  color:
+    #77efbd;
+}
+
+
+/* ============================================================
+   ROW 4
+============================================================ */
+
+select option:nth-child(6n + 4) {
+  background:
+    #241b11;
+
+  color:
+    #ffd17d;
+}
+
+
+/* ============================================================
+   ROW 5
+============================================================ */
+
+select option:nth-child(6n + 5) {
+  background:
+    #24131b;
+
+  color:
+    #ff8ba4;
+}
+
+
+/* ============================================================
+   ROW 6
+============================================================ */
+
+select option:nth-child(6n + 6) {
+  background:
+    #101c30;
+
+  color:
+    #88baff;
+}
+
+
+/* ============================================================
+   SELECTED OPTION
+============================================================ */
+
+select option:checked {
+  background:
+    #16324a !important;
+
+  color:
+    #ffffff !important;
+
+  font-weight:
+    900;
+}
+
+
+/* ============================================================
+   DISABLED OPTION
+============================================================ */
+
+select option:disabled {
+  background:
+    #090f18 !important;
+
+  color:
+    rgba(190, 205, 220, .30) !important;
+}
+
+
+/* ============================================================
+   OPTGROUP
+============================================================ */
+
+select optgroup {
+  background:
+    #07101d;
+
+  color:
+    #58dfff;
+
+  font-weight:
+    900;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   AURORA // SMART DASHBOARD INTELLIGENCE
+============================================================ */
+
+.aurora-intel-hero {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  padding: 24px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(81, 220, 255, .14);
+
+  border-radius:
+    20px;
+
+  background:
+    radial-gradient(circle at 90% 20%,
+      rgba(105, 84, 255, .15),
+      transparent 35%),
+    radial-gradient(circle at 10% 0%,
+      rgba(45, 220, 255, .10),
+      transparent 30%),
+    linear-gradient(135deg,
+      rgba(7, 17, 34, .96),
+      rgba(9, 13, 30, .96));
+
+  box-shadow:
+    inset 0 0 30px rgba(64, 211, 255, .025),
+    0 18px 45px rgba(0, 0, 0, .18);
+}
+
+
+.aurora-intel-hero::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      #5ae5ff,
+      #9f74ff,
+      transparent);
+}
+
+
+.aurora-intel-eyebrow {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color:
+    #65dfff;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .14em;
+}
+
+
+.aurora-intel-hero h2 {
+  margin: 0;
+
+  color:
+    #eefaff;
+
+  font-size:
+    clamp(21px, 3vw, 30px);
+}
+
+
+.aurora-intel-hero p {
+  max-width: 530px;
+
+  margin:
+    8px 0 0;
+
+  color:
+    rgba(181, 204, 221, .55);
+
+  font-size:
+    10px;
+
+  line-height:
+    1.7;
+}
+
+
+/* ============================================================
+   LIVE RATE
+============================================================ */
+
+.aurora-intel-rate {
+  flex: 0 0 auto;
+
+  min-width: 145px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  padding:
+    13px 15px;
+
+  border:
+    1px solid rgba(91, 225, 255, .14);
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(42, 187, 255, .035);
+}
+
+
+.aurora-intel-rate span,
+.aurora-intel-rate small {
+  color:
+    rgba(146, 188, 211, .48);
+
+  font-size:
+    7px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .1em;
+}
+
+
+.aurora-intel-rate strong {
+  margin:
+    4px 0;
+
+  color:
+    #76e9ff;
+
+  font-size:
+    25px;
+
+  text-shadow:
+    0 0 16px rgba(80, 220, 255, .17);
+}
+
+
+/* ============================================================
+   SECTION HEADER
+============================================================ */
+
+.aurora-intel-section-head {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin:
+    24px 2px 11px;
+}
+
+
+.aurora-intel-section-head span,
+.aurora-intel-panel-head span {
+  color:
+    rgba(93, 222, 255, .58);
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .13em;
+}
+
+
+.aurora-intel-section-head h3,
+.aurora-intel-panel-head h3 {
+  margin:
+    3px 0 0;
+
+  color:
+    #e9f5fc;
+
+  font-size:
+    14px;
+}
+
+
+.aurora-intel-section-head button,
+.aurora-intel-panel-head button {
+  padding:
+    7px 9px;
+
+  border:
+    1px solid rgba(92, 211, 255, .12);
+
+  border-radius:
+    8px;
+
+  background:
+    rgba(52, 177, 255, .025);
+
+  color:
+    #75dff7;
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .08em;
+
+  cursor:
+    pointer;
+
+  transition:
+    .18s ease;
+}
+
+
+.aurora-intel-section-head button:hover,
+.aurora-intel-panel-head button:hover {
+  border-color:
+    rgba(92, 220, 255, .38);
+
+  background:
+    rgba(61, 195, 255, .06);
+}
+
+
+/* ============================================================
+   KPI GRID
+============================================================ */
+
+.aurora-intel-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 11px;
+}
+
+
+.aurora-intel-card {
+  position: relative;
+
+  min-height: 112px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding:
+    15px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(255, 255, 255, .07);
+
+  border-radius:
+    15px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(11, 20, 36, .92),
+      rgba(7, 13, 26, .94));
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+
+.aurora-intel-card:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+.aurora-intel-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 14px;
+
+  width: 36px;
+  height: 1px;
+
+  background:
+    currentColor;
+
+  box-shadow:
+    0 0 10px currentColor;
+}
+
+
+.aurora-intel-card>span {
+  color:
+    rgba(161, 187, 207, .48);
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .11em;
+}
+
+
+.aurora-intel-card>strong {
+  margin:
+    7px 0 4px;
+
+  color:
+    #edf8ff;
+
+  font-size:
+    20px;
+}
+
+
+.aurora-intel-card .aurora-intel-name {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size:
+    14px;
+}
+
+
+.aurora-intel-card small {
+  color:
+    rgba(155, 183, 203, .43);
+
+  font-size:
+    8px;
+}
+
+
+/* accent colors */
+
+.aurora-intel-card.cyan {
+  color:
+    #61e5ff;
+
+  border-color:
+    rgba(76, 220, 255, .13);
+}
+
+
+.aurora-intel-card.green {
+  color:
+    #65efb9;
+
+  border-color:
+    rgba(79, 239, 181, .13);
+}
+
+
+.aurora-intel-card.amber {
+  color:
+    #ffc36d;
+
+  border-color:
+    rgba(255, 185, 80, .14);
+}
+
+
+.aurora-intel-card.purple {
+  color:
+    #b28cff;
+
+  border-color:
+    rgba(171, 124, 255, .15);
+}
+
+
+.aurora-intel-card.blue {
+  color:
+    #80b4ff;
+
+  border-color:
+    rgba(93, 153, 255, .14);
+}
+
+
+/* ============================================================
+   COVERAGE BAR
+============================================================ */
+
+.aurora-intel-progress {
+  width: 100%;
+  height: 3px;
+
+  margin-top:
+    8px;
+
+  overflow: hidden;
+
+  border-radius:
+    999px;
+
+  background:
+    rgba(255, 255, 255, .055);
+}
+
+
+.aurora-intel-progress i {
+  display: block;
+
+  height: 100%;
+
+  border-radius:
+    inherit;
+
+  background:
+    linear-gradient(90deg,
+      #58dfff,
+      #a37cff);
+
+  box-shadow:
+    0 0 10px rgba(94, 218, 255, .35);
+}
+
+
+/* ============================================================
+   LOWER GRID
+============================================================ */
+
+.aurora-intel-lower {
+  display: grid;
+
+  grid-template-columns:
+    1.15fr .85fr;
+
+  gap: 13px;
+
+  margin-top:
+    23px;
+}
+
+
+.aurora-intel-panel {
+  padding:
+    16px;
+
+  border:
+    1px solid rgba(103, 202, 255, .09);
+
+  border-radius:
+    16px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(9, 18, 34, .92),
+      rgba(7, 12, 25, .94));
+
+  box-shadow:
+    inset 0 0 25px rgba(58, 209, 255, .018);
+}
+
+
+.aurora-intel-panel-head {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom:
+    12px;
+}
+
+
+/* ============================================================
+   SETTLEMENT SIGNALS
+============================================================ */
+
+.aurora-intel-balance-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.aurora-intel-balance-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding:
+    10px 11px;
+
+  border:
+    1px solid rgba(255, 255, 255, .045);
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(255, 255, 255, .018);
+}
+
+
+.aurora-intel-balance-row>div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.aurora-intel-balance-row div>strong {
+  color:
+    #e7f2f8;
+
+  font-size:
+    10px;
+}
+
+
+.aurora-intel-balance-row span {
+  font-size:
+    6px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .1em;
+}
+
+
+.aurora-intel-balance-row>strong {
+  font-size:
+    11px;
+}
+
+
+.aurora-intel-balance-row.pay span,
+.aurora-intel-balance-row.pay>strong {
+  color:
+    #ff8b9d;
+}
+
+
+.aurora-intel-balance-row.receive span,
+.aurora-intel-balance-row.receive>strong {
+  color:
+    #69efbd;
+}
+
+
+/* balanced */
+
+.aurora-intel-clear {
+  min-height: 155px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  text-align: left;
+}
+
+
+.aurora-intel-clear>span {
+  width: 37px;
+  height: 37px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid rgba(82, 242, 183, .19);
+
+  border-radius:
+    50%;
+
+  color:
+    #65efbd;
+
+  box-shadow:
+    0 0 17px rgba(82, 242, 183, .06);
+}
+
+
+.aurora-intel-clear strong {
+  color:
+    #dff8ef;
+
+  font-size:
+    11px;
+}
+
+
+.aurora-intel-clear p {
+  margin:
+    4px 0 0;
+
+  color:
+    rgba(164, 194, 208, .43);
+
+  font-size:
+    8px;
+}
+
+
+/* ============================================================
+   SYSTEM HEALTH
+============================================================ */
+
+.aurora-intel-system {
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.aurora-intel-system-row {
+  min-height: 39px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 13px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, .045);
+}
+
+
+.aurora-intel-system-row:last-child {
+  border-bottom:
+    none;
+}
+
+
+.aurora-intel-system-row>span {
+  color:
+    rgba(156, 184, 204, .45);
+
+  font-size:
+    7px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .09em;
+}
+
+
+.aurora-intel-system-row>strong {
+  color:
+    #d8e8f2;
+
+  font-size:
+    8px;
+
+  letter-spacing:
+    .06em;
+}
+
+
+.aurora-intel-system-row strong.open,
+.aurora-intel-system-row strong.online {
+  color:
+    #64efba;
+}
+
+
+.aurora-intel-system-row strong.locked {
+  color:
+    #ffc16b;
+}
+
+
+.aurora-intel-system-row strong.waiting {
+  color:
+    #b89aff;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 950px) {
+
+  .aurora-intel-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .aurora-intel-lower {
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .aurora-intel-hero {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+  }
+
+
+  .aurora-intel-rate {
+    align-items:
+      flex-start;
+  }
+
+
+  .aurora-intel-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .aurora-intel-section-head {
+    align-items:
+      center;
+  }
+
+}
+
+
+
+
+
+/* ============================================================
+   AURORA // DASHBOARD SIGNAL INTELLIGENCE
+============================================================ */
+
+.aurora-dash-signals-grid {
+  display: grid;
+
+  grid-template-columns:
+    .9fr 1.1fr;
+
+  gap: 13px;
+
+  margin-top: 13px;
+}
+
+
+.aurora-dash-signal-panel {
+  min-height: 260px;
+}
+
+
+/* ============================================================
+   LIVE TAG
+============================================================ */
+
+.aurora-dash-live-tag {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 7px;
+
+  border:
+    1px solid rgba(80, 240, 183, .16);
+
+  border-radius: 999px;
+
+  background:
+    rgba(62, 226, 168, .04);
+
+  color:
+    #69efbd !important;
+
+  font-size:
+    6px !important;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .11em !important;
+}
+
+
+/* ============================================================
+   SMART ALERTS
+============================================================ */
+
+.aurora-dash-alert-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.aurora-dash-alert {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px;
+
+  border:
+    1px solid rgba(255, 255, 255, .05);
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, .018);
+}
+
+
+.aurora-dash-alert-icon {
+  flex:
+    0 0 34px;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+
+  font-weight: 900;
+}
+
+
+.aurora-dash-alert>div {
+  min-width: 0;
+}
+
+
+.aurora-dash-alert strong {
+  display: block;
+
+  color:
+    #e7f3fa;
+
+  font-size: 9px;
+}
+
+
+.aurora-dash-alert p {
+  margin:
+    3px 0 0;
+
+  color:
+    rgba(160, 187, 206, .48);
+
+  font-size: 8px;
+
+  line-height: 1.45;
+}
+
+
+/* LOCKED */
+
+.aurora-dash-alert.locked .aurora-dash-alert-icon {
+  color:
+    #ffc16b;
+
+  border:
+    1px solid rgba(255, 186, 77, .19);
+
+  background:
+    rgba(255, 165, 43, .055);
+}
+
+
+/* WARNING */
+
+.aurora-dash-alert.warning .aurora-dash-alert-icon {
+  color:
+    #ff9b77;
+
+  border:
+    1px solid rgba(255, 118, 86, .20);
+
+  background:
+    rgba(255, 88, 54, .05);
+}
+
+
+/* INFO */
+
+.aurora-dash-alert.info .aurora-dash-alert-icon {
+  color:
+    #70dfff;
+
+  border:
+    1px solid rgba(75, 213, 255, .19);
+
+  background:
+    rgba(50, 194, 255, .05);
+}
+
+
+/* SIGNAL */
+
+.aurora-dash-alert.signal .aurora-dash-alert-icon {
+  color:
+    #b596ff;
+
+  border:
+    1px solid rgba(172, 128, 255, .20);
+
+  background:
+    rgba(144, 91, 255, .055);
+}
+
+
+/* CLEAR */
+
+.aurora-dash-alert.clear .aurora-dash-alert-icon {
+  color:
+    #64efba;
+
+  border:
+    1px solid rgba(80, 240, 181, .20);
+
+  background:
+    rgba(58, 220, 162, .05);
+}
+
+
+/* ============================================================
+   RECENT ACTIVITY
+============================================================ */
+
+.aurora-dash-activity-list {
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.aurora-dash-activity-row {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-height: 45px;
+
+  padding:
+    7px 3px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, .045);
+}
+
+
+.aurora-dash-activity-row:last-child {
+  border-bottom:
+    none;
+}
+
+
+.aurora-dash-activity-icon {
+  flex:
+    0 0 31px;
+
+  width: 31px;
+  height: 31px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid rgba(83, 218, 255, .17);
+
+  border-radius:
+    9px;
+
+  background:
+    rgba(52, 195, 255, .04);
+
+  color:
+    #70e1ff;
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+}
+
+
+.aurora-dash-activity-copy {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.aurora-dash-activity-copy>strong {
+  display: block;
+
+  overflow: hidden;
+
+  color:
+    #dfedf5;
+
+  font-size:
+    9px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.aurora-dash-activity-copy>div {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap:
+    3px 8px;
+
+  margin-top:
+    4px;
+}
+
+
+.aurora-dash-activity-copy>div span {
+  color:
+    rgba(145, 174, 195, .42);
+
+  font-size:
+    6px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .04em;
+
+  text-transform:
+    uppercase;
+}
+
+
+/* ============================================================
+   EVENT COLORS
+============================================================ */
+
+.aurora-dash-activity-row.green .aurora-dash-activity-icon {
+  color:
+    #67efba;
+
+  border-color:
+    rgba(80, 238, 181, .19);
+
+  background:
+    rgba(57, 220, 163, .045);
+}
+
+
+.aurora-dash-activity-row.amber .aurora-dash-activity-icon {
+  color:
+    #ffc675;
+
+  border-color:
+    rgba(255, 190, 83, .19);
+
+  background:
+    rgba(255, 173, 51, .045);
+}
+
+
+.aurora-dash-activity-row.purple .aurora-dash-activity-icon {
+  color:
+    #bb98ff;
+
+  border-color:
+    rgba(175, 132, 255, .20);
+
+  background:
+    rgba(142, 87, 255, .05);
+}
+
+
+.aurora-dash-activity-row.danger .aurora-dash-activity-icon {
+  color:
+    #ff8198;
+
+  border-color:
+    rgba(255, 94, 124, .19);
+
+  background:
+    rgba(255, 68, 106, .045);
+}
+
+
+/* ============================================================
+   LOADING / EMPTY
+============================================================ */
+
+.aurora-dash-loading,
+.aurora-dash-empty {
+  min-height: 175px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  color:
+    rgba(139, 180, 206, .43);
+
+  font-size: 7px;
+
+  font-weight: 900;
+
+  letter-spacing: .1em;
+
+  text-align: center;
+}
+
+
+.aurora-dash-empty>span {
+  color:
+    #69dcf7;
+
+  font-size: 20px;
+}
+
+
+.aurora-dash-empty strong {
+  color:
+    #dcecf5;
+
+  font-size: 10px;
+}
+
+
+.aurora-dash-empty p {
+  margin: 0;
+
+  color:
+    rgba(154, 183, 204, .42);
+
+  font-size: 8px;
+
+  font-weight: 500;
+
+  letter-spacing: 0;
+}
+
+
+.aurora-dash-empty.error {
+  color:
+    rgba(255, 121, 143, .65);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .aurora-dash-signals-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+}
