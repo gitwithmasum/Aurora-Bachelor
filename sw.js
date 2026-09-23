@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v3";
+    "aurora-bachelor-v4";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -54,6 +54,8 @@ self.addEventListener(
           AURORA_SKIP_WAITING when the user
           presses UPDATE NOW.
         */
+
+        self.skipWaiting();
 
     }
 );
