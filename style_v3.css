@@ -24601,3 +24601,12 @@ body.aurora-invite-gate-open {
   }
 
 }
+
+
+/* ============================================================
+   AURORA // INSTALL PORTAL ABOVE INVITATION GATE
+============================================================ */
+
+.aurora-install-portal {
+  z-index: 1000030 !important;
+}
