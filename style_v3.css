@@ -23996,3 +23996,608 @@ body.aurora-update-open {
   }
 
 }
+
+
+
+
+
+
+/* ============================================================
+   AURORA // INVITATION INSTALL GATE
+============================================================ */
+
+body.aurora-invite-gate-open {
+  overflow: hidden;
+}
+
+
+.aurora-invite-install-gate {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000010;
+
+  display: grid;
+  place-items: center;
+
+  padding: 18px;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: .25s ease;
+}
+
+
+.aurora-invite-install-gate.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+.aurora-invite-gate-bg {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 50% 20%,
+      rgba(84, 234, 255, .13),
+      transparent 34%),
+    radial-gradient(circle at 80% 80%,
+      rgba(183, 124, 255, .10),
+      transparent 35%),
+    rgba(2, 6, 15, .94);
+
+  backdrop-filter:
+    blur(18px);
+}
+
+
+.aurora-invite-gate-card {
+  position: relative;
+
+  width:
+    min(620px, 100%);
+
+  max-height:
+    calc(100vh - 36px);
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  border:
+    1px solid rgba(84, 234, 255, .30);
+
+  border-radius: 20px;
+
+  background:
+    radial-gradient(circle at 90% 0%,
+      rgba(183, 124, 255, .13),
+      transparent 28%),
+    linear-gradient(145deg,
+      rgba(7, 18, 34, .99),
+      rgba(4, 9, 22, .99));
+
+  box-shadow:
+    0 35px 110px rgba(0, 0, 0, .72),
+
+    0 0 45px rgba(84, 234, 255, .10);
+
+  transform:
+    scale(.96) translateY(12px);
+
+  transition:
+    transform .27s ease;
+}
+
+
+.aurora-invite-install-gate.active .aurora-invite-gate-card {
+  transform:
+    scale(1) translateY(0);
+}
+
+
+.aurora-invite-gate-line {
+  position: absolute;
+
+  top: 0;
+  left: 10%;
+
+  width: 80%;
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      transparent,
+      var(--cyan),
+      var(--violet),
+      transparent);
+
+  box-shadow:
+    0 0 18px var(--cyan);
+}
+
+
+/* HEADER */
+
+.aurora-invite-gate-header>span {
+  color:
+    var(--cyan);
+
+  font-size: 7px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .16em;
+}
+
+
+.aurora-invite-gate-header h1 {
+  margin:
+    8px 0;
+
+  font-size:
+    clamp(25px,
+      5vw,
+      36px);
+}
+
+
+.aurora-invite-gate-header h1 strong {
+  display: block;
+
+  background:
+    linear-gradient(90deg,
+      #65eaff,
+      #a98aff,
+      #ef99ff);
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color: transparent;
+}
+
+
+.aurora-invite-gate-header p {
+  max-width: 490px;
+
+  color:
+    var(--muted);
+
+  font-size: 10px;
+
+  line-height: 1.7;
+}
+
+
+/* STEPS */
+
+.aurora-invite-progress {
+  display: grid;
+
+  grid-template-columns:
+    1fr 35px 1fr;
+
+  align-items: center;
+
+  margin-top: 23px;
+}
+
+
+.aurora-invite-progress-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  opacity: .35;
+}
+
+
+.aurora-invite-progress-item.active,
+.aurora-invite-progress-item.complete {
+  opacity: 1;
+}
+
+
+.aurora-invite-progress-item i {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border:
+    1px solid rgba(84, 234, 255, .25);
+
+  border-radius: 50%;
+
+  color:
+    var(--cyan);
+
+  font-size: 8px;
+
+  font-style: normal;
+
+  font-weight: 900;
+}
+
+
+.aurora-invite-progress-item.complete i {
+  color:
+    var(--green);
+
+  border-color:
+    rgba(87, 227, 155, .40);
+
+  box-shadow:
+    0 0 15px rgba(87, 227, 155, .10);
+}
+
+
+.aurora-invite-progress-item span {
+  display: block;
+
+  color:
+    var(--muted);
+
+  font-size: 6px;
+
+  letter-spacing:
+    .10em;
+}
+
+
+.aurora-invite-progress-item strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    var(--text);
+
+  font-size: 9px;
+}
+
+
+.aurora-invite-progress-line {
+  height: 1px;
+
+  background:
+    linear-gradient(90deg,
+      rgba(84, 234, 255, .4),
+      rgba(183, 124, 255, .4));
+}
+
+
+/* DEVICE */
+
+.aurora-invite-device {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-top: 22px;
+
+  padding: 14px;
+
+  border:
+    1px solid rgba(125, 197, 255, .10);
+
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, .018);
+}
+
+
+.aurora-invite-device-orb {
+  width: 43px;
+  height: 43px;
+
+  flex: 0 0 43px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid rgba(84, 234, 255, .30);
+
+  border-radius: 50%;
+
+  color:
+    var(--cyan);
+
+  box-shadow:
+    0 0 18px rgba(84, 234, 255, .08);
+}
+
+
+.aurora-invite-device>div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+
+.aurora-invite-device span {
+  display: block;
+
+  color:
+    var(--muted);
+
+  font-size: 6px;
+
+  letter-spacing:
+    .10em;
+}
+
+
+.aurora-invite-device strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    #effaff;
+
+  font-size: 10px;
+}
+
+
+.aurora-invite-device small {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    rgba(150, 177, 197, .48);
+
+  font-size: 7px;
+}
+
+
+.aurora-invite-device-state {
+  color:
+    var(--amber);
+
+  font-size: 7px;
+
+  font-weight: 900;
+}
+
+
+.aurora-invite-device-state.ready {
+  color:
+    var(--green);
+}
+
+
+/* ACTIONS */
+
+.aurora-invite-gate-actions {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 18px;
+}
+
+
+.aurora-invite-install-btn,
+.aurora-invite-continue-btn {
+  min-height: 46px;
+
+  border-radius: 11px;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .07em;
+
+  transition:
+    .2s ease;
+}
+
+
+.aurora-invite-install-btn {
+  border:
+    1px solid rgba(84, 234, 255, .48);
+
+  background:
+    linear-gradient(135deg,
+      rgba(31, 158, 255, .47),
+      rgba(84, 234, 255, .13));
+
+  color: #fff;
+}
+
+
+.aurora-invite-install-btn:hover {
+  box-shadow:
+    0 0 24px rgba(84, 234, 255, .17);
+}
+
+
+.aurora-invite-continue-btn {
+  border:
+    1px solid rgba(183, 124, 255, .35);
+
+  background:
+    linear-gradient(135deg,
+      rgba(124, 84, 255, .24),
+      rgba(183, 124, 255, .08));
+
+  color:
+    #f0eaff;
+}
+
+
+.aurora-invite-continue-btn:disabled {
+  opacity: .25;
+
+  cursor:
+    not-allowed;
+}
+
+
+/* IOS */
+
+.aurora-invite-ios-help {
+  margin-top: 14px;
+
+  padding: 13px;
+
+  border:
+    1px solid rgba(255, 200, 107, .18);
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 200, 107, .035);
+}
+
+
+.aurora-invite-ios-help>span {
+  color:
+    var(--amber);
+
+  font-size: 6px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .10em;
+}
+
+
+.aurora-invite-ios-help p {
+  margin:
+    6px 0 10px;
+
+  color:
+    var(--muted);
+
+  font-size: 9px;
+}
+
+
+#auroraInviteIOSInstalled {
+  padding:
+    9px 12px;
+
+  border:
+    1px solid rgba(87, 227, 155, .27);
+
+  border-radius: 9px;
+
+  background:
+    rgba(87, 227, 155, .05);
+
+  color:
+    var(--green);
+
+  font-size: 7px;
+
+  font-weight: 900;
+}
+
+
+/* SECURITY */
+
+.aurora-invite-security {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 15px;
+
+  padding: 11px;
+
+  border-left:
+    2px solid var(--cyan);
+
+  background:
+    rgba(84, 234, 255, .025);
+}
+
+
+.aurora-invite-security p {
+  margin: 0;
+
+  color:
+    rgba(165, 190, 208, .52);
+
+  font-size: 7px;
+
+  line-height: 1.6;
+}
+
+
+.aurora-invite-gate-footer {
+  margin-top: 15px;
+
+  padding-top: 11px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, .05);
+
+  text-align: center;
+
+  color:
+    rgba(104, 145, 173, .38);
+
+  font-size: 5px;
+
+  letter-spacing:
+    .13em;
+}
+
+
+@media (max-width: 600px) {
+
+  .aurora-invite-gate-card {
+    padding: 20px 16px;
+  }
+
+
+  .aurora-invite-progress {
+    grid-template-columns:
+      1fr;
+    gap: 10px;
+  }
+
+
+  .aurora-invite-progress-line {
+    display: none;
+  }
+
+
+  .aurora-invite-gate-actions {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .aurora-invite-device {
+    flex-wrap: wrap;
+  }
+
+}

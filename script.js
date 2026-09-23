@@ -28445,6 +28445,15 @@ async function acceptAuroraInvitation(
 
     }
 
+    window.AuroraInviteInstallGate
+      ?.complete?.();
+
+    toast(
+      "Invitation accepted."
+    );
+
+
+
 
     clearAuroraInvitationToken();
 
@@ -33599,6 +33608,11 @@ const AuroraInstall = (() => {
     "appinstalled",
     () => {
 
+      localStorage.setItem(
+        "aurora_pwa_installed_v1",
+        "1"
+      );
+
       deferredPrompt =
         null;
 
@@ -33646,6 +33660,911 @@ const AuroraInstall = (() => {
   };
 
 })();
+
+  window.AuroraInstall =
+    AuroraInstall;
+
+
+/* ============================================================
+   AURORA // INVITATION INSTALL ONBOARDING
+============================================================ */
+
+window.AuroraInviteInstallGate =
+  (() => {
+
+    const PENDING_KEY =
+      "aurora_pending_invite_token";
+
+
+    const INSTALLED_KEY =
+      "aurora_pwa_installed_v1";
+
+
+    const state =
+      window
+        .__AURORA_INVITE_INSTALL_GATE__ ||
+      null;
+
+
+    /* ==========================================================
+       INSTALLED CHECK
+    ========================================================== */
+
+    function isStandalone() {
+
+      return (
+
+        window.matchMedia(
+          "(display-mode: standalone)"
+        ).matches ||
+
+        window.navigator
+          .standalone === true
+
+      );
+
+    }
+
+
+    function installedKnown() {
+
+      return (
+
+        isStandalone() ||
+
+        localStorage.getItem(
+          INSTALLED_KEY
+        ) === "1"
+
+      );
+
+    }
+
+
+    /* ==========================================================
+       DEVICE
+    ========================================================== */
+
+    function isIOS() {
+
+      return (
+        /iphone|ipad|ipod/i
+          .test(
+            navigator.userAgent
+          )
+      );
+
+    }
+
+
+    /* ==========================================================
+       CREATE PORTAL
+    ========================================================== */
+
+    function ensurePortal() {
+
+      let portal =
+        document.getElementById(
+          "auroraInviteInstallGate"
+        );
+
+
+      if (portal) {
+        return portal;
+      }
+
+
+      portal =
+        document.createElement(
+          "div"
+        );
+
+
+      portal.id =
+        "auroraInviteInstallGate";
+
+
+      portal.className =
+        "aurora-invite-install-gate";
+
+
+      portal.innerHTML = `
+
+      <div
+        class="aurora-invite-gate-bg"
+      ></div>
+
+
+      <div
+        class="aurora-invite-gate-card"
+      >
+
+        <div
+          class="aurora-invite-gate-line"
+        ></div>
+
+
+        <!-- ================================================
+             HEADER
+        ================================================= -->
+
+        <div
+          class="aurora-invite-gate-header"
+        >
+
+          <span>
+            AURORA // MEMBER ONBOARDING
+          </span>
+
+
+          <h1>
+            Welcome to
+            <strong>
+              Aurora Bachelor
+            </strong>
+          </h1>
+
+
+          <p>
+            You have received a secure
+            household invitation.
+            Install Aurora on this device
+            before continuing.
+          </p>
+
+        </div>
+
+
+
+        <!-- ================================================
+             PROGRESS
+        ================================================= -->
+
+        <div
+          class="aurora-invite-progress"
+        >
+
+          <div
+            class="aurora-invite-progress-item active"
+            id="auroraInviteStep1"
+          >
+
+            <i>
+              01
+            </i>
+
+            <div>
+
+              <span>
+                DEVICE SETUP
+              </span>
+
+              <strong>
+                Install Aurora
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="aurora-invite-progress-line"
+          ></div>
+
+
+          <div
+            class="aurora-invite-progress-item"
+            id="auroraInviteStep2"
+          >
+
+            <i>
+              02
+            </i>
+
+            <div>
+
+              <span>
+                HOUSE ACCESS
+              </span>
+
+              <strong>
+                Accept Invitation
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ================================================
+             INSTALL STATUS
+        ================================================= -->
+
+        <div
+          class="aurora-invite-device"
+        >
+
+          <div
+            class="aurora-invite-device-orb"
+          >
+            ◈
+          </div>
+
+
+          <div>
+
+            <span>
+              APPLICATION STATUS
+            </span>
+
+            <strong
+              id="auroraInviteInstallStatus"
+            >
+              INSTALLATION REQUIRED
+            </strong>
+
+            <small
+              id="auroraInviteInstallHint"
+            >
+              Install Aurora to unlock
+              your household invitation.
+            </small>
+
+          </div>
+
+
+          <div
+            class="aurora-invite-device-state"
+            id="auroraInviteDeviceState"
+          >
+            WAITING
+          </div>
+
+        </div>
+
+
+
+        <!-- ================================================
+             ACTIONS
+        ================================================= -->
+
+        <div
+          class="aurora-invite-gate-actions"
+        >
+
+          <button
+            type="button"
+            class="aurora-invite-install-btn"
+            id="auroraInviteInstallBtn"
+          >
+            <span>
+              ⇩
+            </span>
+
+            INSTALL AURORA
+          </button>
+
+
+          <button
+            type="button"
+            class="aurora-invite-continue-btn"
+            id="auroraInviteContinueBtn"
+            disabled
+          >
+            CONTINUE INVITATION
+            <span>
+              ››
+            </span>
+          </button>
+
+        </div>
+
+
+
+        <!-- ================================================
+             iOS HELP
+        ================================================= -->
+
+        <div
+          class="aurora-invite-ios-help"
+          id="auroraInviteIOSHelp"
+          hidden
+        >
+
+          <span>
+            iPHONE / iPAD INSTALLATION
+          </span>
+
+          <p>
+            Safari → Share →
+            <strong>
+              Add to Home Screen
+            </strong>
+          </p>
+
+
+          <button
+            type="button"
+            id="auroraInviteIOSInstalled"
+          >
+            ✓ I'VE ADDED AURORA
+          </button>
+
+        </div>
+
+
+
+        <!-- ================================================
+             SECURITY
+        ================================================= -->
+
+        <div
+          class="aurora-invite-security"
+        >
+
+          <span>
+            🔐
+          </span>
+
+          <p>
+            Installing Aurora does not
+            automatically grant access.
+            Your Google account and secure
+            invitation token will still be
+            verified before joining the house.
+          </p>
+
+        </div>
+
+
+        <div
+          class="aurora-invite-gate-footer"
+        >
+          AURORA BACHELOR //
+          SECURE HOUSE MANAGEMENT
+        </div>
+
+      </div>
+
+    `;
+
+
+      document.body
+        .appendChild(
+          portal
+        );
+
+
+      document
+        .getElementById(
+          "auroraInviteInstallBtn"
+        )
+        ?.addEventListener(
+          "click",
+          requestInstall
+        );
+
+
+      document
+        .getElementById(
+          "auroraInviteContinueBtn"
+        )
+        ?.addEventListener(
+          "click",
+          continueInvitation
+        );
+
+
+      document
+        .getElementById(
+          "auroraInviteIOSInstalled"
+        )
+        ?.addEventListener(
+          "click",
+          confirmIOSInstall
+        );
+
+
+      return portal;
+
+    }
+
+
+    /* ==========================================================
+       SHOW
+    ========================================================== */
+
+    function show() {
+
+      if (
+        !state?.required
+      ) {
+        return;
+      }
+
+
+      const portal =
+        ensurePortal();
+
+
+      document.body
+        .classList
+        .add(
+          "aurora-invite-gate-open"
+        );
+
+
+      requestAnimationFrame(
+        () => {
+
+          portal.classList
+            .add(
+              "active"
+            );
+
+        }
+      );
+
+
+      refresh();
+
+    }
+
+
+    /* ==========================================================
+       INSTALL
+    ========================================================== */
+
+    function requestInstall() {
+
+      /*
+        iOS Safari has no
+        beforeinstallprompt API.
+      */
+
+      if (
+        isIOS()
+      ) {
+
+        const help =
+          document.getElementById(
+            "auroraInviteIOSHelp"
+          );
+
+
+        if (help) {
+
+          help.hidden =
+            false;
+
+        }
+
+
+        return;
+
+      }
+
+
+      /*
+        Use the futuristic installation
+        portal that we already built.
+      */
+
+      if (
+        window.AuroraInstall &&
+        typeof window
+          .AuroraInstall
+          .open ===
+        "function"
+      ) {
+
+        window
+          .AuroraInstall
+          .open();
+
+
+        return;
+
+      }
+
+
+      /*
+        Fallback:
+        browser install system unavailable.
+      */
+
+      if (
+        typeof toast ===
+        "function"
+      ) {
+
+        toast(
+          "Use your browser Install App option."
+        );
+
+      }
+
+    }
+
+
+    /* ==========================================================
+       iOS CONFIRMATION
+  
+       Safari gives JavaScript no reliable
+       appinstalled event, so the user must
+       confirm Add to Home Screen manually.
+    ========================================================== */
+
+    function confirmIOSInstall() {
+
+      localStorage.setItem(
+        INSTALLED_KEY,
+        "1"
+      );
+
+
+      refresh();
+
+    }
+
+
+    /* ==========================================================
+       INSTALLED
+    ========================================================== */
+
+    function refresh() {
+
+      const installed =
+        installedKnown();
+
+
+      const installButton =
+        document.getElementById(
+          "auroraInviteInstallBtn"
+        );
+
+
+      const continueButton =
+        document.getElementById(
+          "auroraInviteContinueBtn"
+        );
+
+
+      const status =
+        document.getElementById(
+          "auroraInviteInstallStatus"
+        );
+
+
+      const hint =
+        document.getElementById(
+          "auroraInviteInstallHint"
+        );
+
+
+      const deviceState =
+        document.getElementById(
+          "auroraInviteDeviceState"
+        );
+
+
+      const step1 =
+        document.getElementById(
+          "auroraInviteStep1"
+        );
+
+
+      const step2 =
+        document.getElementById(
+          "auroraInviteStep2"
+        );
+
+
+      if (
+        installed
+      ) {
+
+        if (status) {
+
+          status.textContent =
+            "AURORA INSTALLED";
+
+        }
+
+
+        if (hint) {
+
+          hint.textContent =
+            "Device ready. Continue to secure invitation verification.";
+
+        }
+
+
+        if (deviceState) {
+
+          deviceState.textContent =
+            "READY";
+
+
+          deviceState.classList
+            .add(
+              "ready"
+            );
+
+        }
+
+
+        if (
+          installButton
+        ) {
+
+          installButton.hidden =
+            true;
+
+        }
+
+
+        if (
+          continueButton
+        ) {
+
+          continueButton.disabled =
+            false;
+
+        }
+
+
+        step1
+          ?.classList
+          .add(
+            "complete"
+          );
+
+
+        step2
+          ?.classList
+          .add(
+            "active"
+          );
+
+
+        return;
+
+      }
+
+
+      if (
+        continueButton
+      ) {
+
+        continueButton.disabled =
+          true;
+
+      }
+
+    }
+
+
+    /* ==========================================================
+       CONTINUE INVITATION
+    ========================================================== */
+
+    function continueInvitation() {
+
+      if (
+        !installedKnown()
+      ) {
+
+        if (
+          typeof toast ===
+          "function"
+        ) {
+
+          toast(
+            "Install Aurora first."
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      const token =
+        localStorage.getItem(
+          PENDING_KEY
+        ) ||
+
+        state?.token;
+
+
+      if (!token) {
+
+        if (
+          typeof toast ===
+          "function"
+        ) {
+
+          toast(
+            "Invitation token is missing."
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      /*
+        Restore ?invite=TOKEN.
+  
+        On reload, pre-boot sees that Aurora
+        is installed and DOES NOT block it.
+  
+        Your existing invitation system then
+        handles Google login / email check /
+        acceptance exactly as before.
+      */
+
+      const url =
+        new URL(
+          window.location.href
+        );
+
+
+      url.searchParams.set(
+        "invite",
+        token
+      );
+
+
+      window.location.replace(
+        url.href
+      );
+
+    }
+
+
+    /* ==========================================================
+       INVITATION COMPLETE
+  
+       Call after successful invitation RPC.
+    ========================================================== */
+
+    function complete() {
+
+      localStorage.removeItem(
+        PENDING_KEY
+      );
+
+
+      const url =
+        new URL(
+          window.location.href
+        );
+
+
+      url.searchParams.delete(
+        "invite"
+      );
+
+
+      history.replaceState(
+        {},
+        "",
+        url.pathname +
+        url.search +
+        url.hash
+      );
+
+    }
+
+
+    /* ==========================================================
+       PWA INSTALL COMPLETE
+    ========================================================== */
+
+    window.addEventListener(
+      "appinstalled",
+      () => {
+
+        localStorage.setItem(
+          INSTALLED_KEY,
+          "1"
+        );
+
+
+        refresh();
+
+
+        if (
+          typeof toast ===
+          "function"
+        ) {
+
+          toast(
+            "Aurora installed. Continue your invitation."
+          );
+
+        }
+
+      }
+    );
+
+
+    /* ==========================================================
+       INIT
+    ========================================================== */
+
+    function init() {
+
+      /*
+        Standalone launch means installation
+        is confirmed.
+      */
+
+      if (
+        isStandalone()
+      ) {
+
+        localStorage.setItem(
+          INSTALLED_KEY,
+          "1"
+        );
+
+      }
+
+
+      if (
+        state?.required
+      ) {
+
+        show();
+
+      }
+
+    }
+
+
+    if (
+      document.readyState ===
+      "loading"
+    ) {
+
+      document.addEventListener(
+        "DOMContentLoaded",
+        init,
+        {
+          once: true
+        }
+      );
+
+    }
+
+    else {
+
+      init();
+
+    }
+
+
+    return {
+
+      show,
+      refresh,
+      continueInvitation,
+      complete,
+      installedKnown
+
+    };
+
+  })();
 
 
 

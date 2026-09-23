@@ -2113,6 +2113,156 @@
   </script>
 
 
+  <script>
+    /* ============================================================
+       AURORA // INVITATION PRE-BOOT INSTALL GATE
+    ============================================================ */
+
+    (() => {
+
+      const PENDING_KEY =
+        "aurora_pending_invite_token";
+
+      const INSTALLED_KEY =
+        "aurora_pwa_installed_v1";
+
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+
+      const inviteToken =
+        String(
+          params.get("invite") || ""
+        ).trim();
+
+
+      const standalone =
+        window.matchMedia(
+          "(display-mode: standalone)"
+        ).matches ||
+
+        window.navigator
+          .standalone === true;
+
+
+      /*
+        If Aurora is running as an installed
+        PWA, remember that this device has
+        installed Aurora.
+      */
+
+      if (standalone) {
+
+        localStorage.setItem(
+          INSTALLED_KEY,
+          "1"
+        );
+
+      }
+
+
+      /*
+        No invitation URL.
+      */
+
+      if (!inviteToken) {
+        return;
+      }
+
+
+      /*
+        Preserve invitation token before any
+        login/install navigation happens.
+      */
+
+      localStorage.setItem(
+        PENDING_KEY,
+        inviteToken
+      );
+
+
+      const installedKnown =
+        standalone ||
+
+        localStorage.getItem(
+          INSTALLED_KEY
+        ) === "1";
+
+
+      /*
+        Already installed:
+        leave ?invite=TOKEN untouched.
+    
+        Existing Aurora invitation system
+        continues normally.
+      */
+
+      if (installedKnown) {
+        return;
+      }
+
+
+      /*
+        NOT INSTALLED.
+    
+        Tell the main application to show
+        installation onboarding.
+      */
+
+      window.__AURORA_INVITE_INSTALL_GATE__ = {
+
+        required: true,
+
+        token:
+          inviteToken
+
+      };
+
+
+      /*
+        Critical:
+        remove ?invite from the current URL
+        BEFORE script.js loads.
+    
+        This prevents the existing invitation
+        accept system from running before the
+        installation step.
+      */
+
+      params.delete(
+        "invite"
+      );
+
+
+      const query =
+        params.toString();
+
+
+      const cleanUrl =
+        window.location.pathname +
+
+        (
+          query
+            ? `?${query}`
+            : ""
+        ) +
+
+        window.location.hash;
+
+
+      history.replaceState(
+        {},
+        "",
+        cleanUrl
+      );
+
+    })();
+  </script>
+
+
   <script src="./script.js" defer></script>
 
 </body>
