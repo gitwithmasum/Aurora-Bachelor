@@ -4270,7 +4270,7 @@ const AuroraCloudSync = (() => {
           );
 
         },
-        2500
+        5000
       );
 
 
@@ -37312,7 +37312,7 @@ const AuroraUXState = (() => {
 
     setInterval(
       monitor,
-      700
+      2000
     );
 
   }
