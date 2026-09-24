@@ -33356,37 +33356,69 @@ const AuroraInstall = (() => {
         "auroraInstallConfirm"
       );
 
-
     const terminal =
       document.getElementById(
         "auroraInstallTerminal"
       );
 
 
-    if (
-      !deferredPrompt
-    ) {
+    /* =========================================
+       ALREADY INSTALLED
+    ========================================= */
+
+    if (isInstalled()) {
+
+      return {
+        status: "installed"
+      };
+
+    }
+
+
+    /* =========================================
+       INSTALL PROMPT NOT AVAILABLE
+    ========================================= */
+
+    if (!deferredPrompt) {
 
       if (terminal) {
 
         terminal.innerHTML = `
+        <span>
+          SYSTEM
+        </span>
 
-          <span>
-            SYSTEM
-          </span>
-
-          <strong>
-            INSTALL SIGNAL UNAVAILABLE
-          </strong>
-
-        `;
+        <strong>
+          INSTALL SIGNAL UNAVAILABLE
+        </strong>
+      `;
 
       }
 
 
-      return;
+      console.warn(
+        "Aurora PWA: browser install prompt unavailable."
+      );
+
+
+      return {
+        status: "unavailable"
+      };
 
     }
+
+
+    /*
+      beforeinstallprompt can only
+      be used once.
+    */
+
+    const promptEvent =
+      deferredPrompt;
+
+
+    deferredPrompt =
+      null;
 
 
     try {
@@ -33402,29 +33434,38 @@ const AuroraInstall = (() => {
       if (terminal) {
 
         terminal.innerHTML = `
+        <span>
+          DEPLOYMENT
+        </span>
 
-          <span>
-            DEPLOYMENT
-          </span>
-
-          <strong>
-            HANDING OFF TO SYSTEM INSTALLER...
-          </strong>
-
-        `;
+        <strong>
+          OPENING SYSTEM INSTALLER...
+        </strong>
+      `;
 
       }
 
 
-      deferredPrompt
-        .prompt();
+      /* =========================================
+         REAL BROWSER PWA INSTALL PROMPT
+      ========================================= */
+
+      await promptEvent.prompt();
 
 
       const {
         outcome
       } =
-        await deferredPrompt
-          .userChoice;
+        await promptEvent.userChoice;
+
+
+      console.log(
+        "Aurora installation:",
+        outcome
+      );
+
+
+      updateButton();
 
 
       if (
@@ -33432,56 +33473,16 @@ const AuroraInstall = (() => {
         "accepted"
       ) {
 
-        if (terminal) {
-
-          terminal.innerHTML = `
-
-            <span>
-              DEPLOYMENT
-            </span>
-
-            <strong>
-              INSTALLATION ACCEPTED
-            </strong>
-
-          `;
-
-        }
-
-      }
-
-      else {
-
-        if (terminal) {
-
-          terminal.innerHTML = `
-
-            <span>
-              DEPLOYMENT
-            </span>
-
-            <strong>
-              INSTALLATION CANCELLED
-            </strong>
-
-          `;
-
-        }
+        return {
+          status: "accepted"
+        };
 
       }
 
 
-      deferredPrompt =
-        null;
-
-
-      setTimeout(
-        close,
-        450
-      );
-
-
-      updateButton();
+      return {
+        status: "dismissed"
+      };
 
     }
 
@@ -33493,21 +33494,10 @@ const AuroraInstall = (() => {
       );
 
 
-      if (terminal) {
-
-        terminal.innerHTML = `
-
-          <span>
-            ERROR
-          </span>
-
-          <strong>
-            DEPLOYMENT FAILED
-          </strong>
-
-        `;
-
-      }
+      return {
+        status: "error",
+        error
+      };
 
     }
 
@@ -33523,7 +33513,6 @@ const AuroraInstall = (() => {
     }
 
   }
-
 
   /* ==========================================================
      BROWSER INSTALL EVENT
@@ -34119,27 +34108,199 @@ window.AuroraInviteInstallGate =
        INSTALL
     ========================================================== */
 
-    function requestInstall() {
+  async function requestInstall() {
 
-      /*
-        iOS Safari has no
-        beforeinstallprompt API.
-      */
+    /* =========================================
+       iPHONE / iPAD
+    ========================================= */
+
+    if (isIOS()) {
+
+      const help =
+        document.getElementById(
+          "auroraInviteIOSHelp"
+        );
+
+
+      if (help) {
+
+        help.hidden =
+          false;
+
+      }
+
+
+      return;
+
+    }
+
+
+    /* =========================================
+       AURORA INSTALL ENGINE
+    ========================================= */
+
+    const installer =
+      window.AuroraInstall;
+
+
+    if (
+      !installer ||
+      typeof installer.install !==
+      "function"
+    ) {
 
       if (
-        isIOS()
+        typeof toast ===
+        "function"
       ) {
 
-        const help =
-          document.getElementById(
-            "auroraInviteIOSHelp"
+        toast(
+          "Aurora installer is not ready."
+        );
+
+      }
+
+      return;
+
+    }
+
+
+    const button =
+      document.getElementById(
+        "auroraInviteInstallBtn"
+      );
+
+
+    const status =
+      document.getElementById(
+        "auroraInviteInstallStatus"
+      );
+
+
+    const hint =
+      document.getElementById(
+        "auroraInviteInstallHint"
+      );
+
+
+    const deviceState =
+      document.getElementById(
+        "auroraInviteDeviceState"
+      );
+
+
+    try {
+
+      /* =======================================
+         BUTTON LOADING STATE
+      ======================================= */
+
+      if (button) {
+
+        button.disabled =
+          true;
+
+        button.innerHTML = `
+        <span>
+          ◌
+        </span>
+
+        PREPARING INSTALLER...
+      `;
+
+      }
+
+
+      if (status) {
+
+        status.textContent =
+          "PREPARING INSTALLATION";
+
+      }
+
+
+      if (deviceState) {
+
+        deviceState.textContent =
+          "WORKING";
+
+      }
+
+
+      /* =======================================
+         DIRECT NATIVE INSTALL PROMPT
+      ======================================= */
+
+      const result =
+        await installer.install();
+
+
+      /* =======================================
+         ALREADY INSTALLED
+      ======================================= */
+
+      if (
+        result?.status ===
+        "installed"
+      ) {
+
+        localStorage.setItem(
+          INSTALLED_KEY,
+          "1"
+        );
+
+
+        refresh();
+
+        return;
+
+      }
+
+
+      /* =======================================
+         BROWSER DOES NOT SUPPORT PROMPT
+      ======================================= */
+
+      if (
+        result?.status ===
+        "unavailable"
+      ) {
+
+        if (status) {
+
+          status.textContent =
+            "BROWSER INSTALL REQUIRED";
+
+        }
+
+
+        if (hint) {
+
+          hint.innerHTML = `
+          Open this invitation in
+          <strong>Chrome or Edge</strong>
+          and press INSTALL AURORA again.
+        `;
+
+        }
+
+
+        if (deviceState) {
+
+          deviceState.textContent =
+            "UNAVAILABLE";
+
+        }
+
+
+        if (
+          typeof toast ===
+          "function"
+        ) {
+
+          toast(
+            "Open this invitation in Chrome or Edge."
           );
-
-
-        if (help) {
-
-          help.hidden =
-            false;
 
         }
 
@@ -34149,22 +34310,37 @@ window.AuroraInviteInstallGate =
       }
 
 
-      /*
-        Use the futuristic installation
-        portal that we already built.
-      */
+      /* =======================================
+         USER CANCELLED
+      ======================================= */
 
       if (
-        window.AuroraInstall &&
-        typeof window
-          .AuroraInstall
-          .open ===
-        "function"
+        result?.status ===
+        "dismissed"
       ) {
 
-        window
-          .AuroraInstall
-          .open();
+        if (status) {
+
+          status.textContent =
+            "INSTALLATION CANCELLED";
+
+        }
+
+
+        if (hint) {
+
+          hint.textContent =
+            "Press INSTALL AURORA when you are ready.";
+
+        }
+
+
+        if (deviceState) {
+
+          deviceState.textContent =
+            "WAITING";
+
+        }
 
 
         return;
@@ -34172,10 +34348,93 @@ window.AuroraInviteInstallGate =
       }
 
 
-      /*
-        Fallback:
-        browser install system unavailable.
-      */
+      /* =======================================
+         USER ACCEPTED INSTALL
+      ======================================= */
+
+      if (
+        result?.status ===
+        "accepted"
+      ) {
+
+        if (status) {
+
+          status.textContent =
+            "INSTALLING AURORA...";
+
+        }
+
+
+        if (hint) {
+
+          hint.textContent =
+            "Waiting for device installation confirmation.";
+
+        }
+
+
+        if (deviceState) {
+
+          deviceState.textContent =
+            "INSTALLING";
+
+        }
+
+
+        /*
+          appinstalled event below
+          will call refresh()
+          and unlock CONTINUE INVITATION.
+        */
+
+        return;
+
+      }
+
+
+      /* =======================================
+         ERROR
+      ======================================= */
+
+      if (
+        result?.status ===
+        "error"
+      ) {
+
+        if (status) {
+
+          status.textContent =
+            "INSTALLATION FAILED";
+
+        }
+
+
+        if (hint) {
+
+          hint.textContent =
+            "Please try again.";
+
+        }
+
+
+        if (deviceState) {
+
+          deviceState.textContent =
+            "ERROR";
+
+        }
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Invitation Install Error:",
+        error
+      );
+
 
       if (
         typeof toast ===
@@ -34183,14 +34442,42 @@ window.AuroraInviteInstallGate =
       ) {
 
         toast(
-          "Use your browser Install App option."
+          "Unable to start Aurora installation."
         );
 
       }
 
     }
 
+    finally {
 
+      /*
+        appinstalled → refresh()
+        will hide this button
+        when installation succeeds.
+      */
+
+      if (
+        button &&
+        !installedKnown()
+      ) {
+
+        button.disabled =
+          false;
+
+        button.innerHTML = `
+        <span>
+          ⇩
+        </span>
+
+        INSTALL AURORA
+      `;
+
+      }
+
+    }
+
+  }
     /* ==========================================================
        iOS CONFIRMATION
   
