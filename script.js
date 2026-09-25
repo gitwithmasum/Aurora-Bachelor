@@ -27065,35 +27065,6 @@ function restoreSettingsDefaults() {
 
 
 
-/* ----------------------------------------------------------
-              SERVICE WORKER REGISTRATION
----------------------------------------------------------- */
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js")
-      .then(registration => {
-        console.log(
-          "Aurora Service Worker registered:",
-          registration.scope
-        );
-      })
-      .catch(error => {
-        console.error(
-          "Aurora Service Worker registration failed:",
-          error
-        );
-      });
-  });
-}
-
-
-
-
-
-
-
 
 
 
@@ -32818,51 +32789,6 @@ document.addEventListener(
 
 
 
-/* ============================================================
-   AURORA // PWA SERVICE WORKER
-============================================================ */
-
-if (
-  "serviceWorker" in
-  navigator
-) {
-
-  window.addEventListener(
-    "load",
-    async () => {
-
-      try {
-
-        const registration =
-          await navigator
-            .serviceWorker
-            .register(
-              "./sw.js"
-            );
-
-
-        console.log(
-          "🌌 Aurora PWA Ready:",
-          registration.scope
-        );
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Aurora PWA Error:",
-          error
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
 
 
 /* ============================================================
@@ -35812,32 +35738,6 @@ const AuroraUpdateSystem = (() => {
       }
 
 
-      /*
-        Remember the server build we're
-        about to load so the modal does
-        not immediately appear again.
-      */
-
-      if (
-        latestFingerprint
-      ) {
-
-        localStorage
-          .setItem(
-            STORAGE_KEY,
-            latestFingerprint
-          );
-
-      }
-
-
-      /* ------------------------------------------------------
-         CLEAR OLD STATIC FILES
-      ------------------------------------------------------ */
-
-      await clearCaches();
-
-
       /* ------------------------------------------------------
          SERVICE WORKER UPDATE
       ------------------------------------------------------ */
@@ -35846,68 +35746,77 @@ const AuroraUpdateSystem = (() => {
         registration
       ) {
 
-        try {
-
-          await registration
-            .update();
-
+        if (!registration.waiting) {
+          await registration.update();
         }
 
-        catch (error) {
+        if (registration.installing) {
 
-          console.warn(
-            "Aurora SW update:",
-            error
-          );
+          await new Promise((resolve, reject) => {
 
-        }
+            const worker = registration.installing;
 
+            const timeout = setTimeout(() => {
+              worker.removeEventListener("statechange", onStateChange);
+              reject(new Error("Aurora update download timed out."));
+            }, 20000);
 
-        if (
-          registration.waiting
-        ) {
-
-          registration.waiting
-            .postMessage({
-              type:
-                "AURORA_SKIP_WAITING"
-            });
-
-        }
-
-
-        else if (
-          registration.installing
-        ) {
-
-          registration.installing
-            .addEventListener(
-              "statechange",
-              event => {
-
-                const worker =
-                  event.target;
-
-
-                if (
-                  worker.state ===
-                  "installed" &&
-                  registration.waiting
-                ) {
-
-                  registration.waiting
-                    .postMessage({
-                      type:
-                        "AURORA_SKIP_WAITING"
-                    });
-
-                }
-
+            function onStateChange() {
+              if (worker.state === "redundant") {
+                clearTimeout(timeout);
+                worker.removeEventListener("statechange", onStateChange);
+                reject(new Error("Aurora update installation failed."));
+              } else if (worker.state === "installed" || worker.state === "activated") {
+                clearTimeout(timeout);
+                worker.removeEventListener("statechange", onStateChange);
+                resolve();
               }
-            );
+            }
+
+            worker.addEventListener("statechange", onStateChange);
+            onStateChange();
+
+          });
 
         }
 
+        if (registration.waiting) {
+
+          const controllerChanged = new Promise((resolve, reject) => {
+
+            const timeout = setTimeout(() => {
+              navigator.serviceWorker.removeEventListener("controllerchange", onChange);
+              reject(new Error("Aurora update activation timed out."));
+            }, 20000);
+
+            function onChange() {
+              clearTimeout(timeout);
+              navigator.serviceWorker.removeEventListener("controllerchange", onChange);
+              resolve();
+            }
+
+            navigator.serviceWorker.addEventListener("controllerchange", onChange);
+
+          });
+
+          registration.waiting.postMessage({ type: "AURORA_SKIP_WAITING" });
+
+          await controllerChanged;
+
+        } else {
+
+          /* Static files may change without a service worker change. */
+          await clearCaches();
+
+        }
+
+      }
+
+      const appliedFingerprint =
+        latestFingerprint || await createFingerprint();
+
+      if (appliedFingerprint) {
+        localStorage.setItem(STORAGE_KEY, appliedFingerprint);
       }
 
 
@@ -35998,7 +35907,7 @@ const AuroraUpdateSystem = (() => {
       registration =
         await navigator
           .serviceWorker
-          .getRegistration();
+          .register("./sw.js", { updateViaCache: "none" });
 
 
       if (
@@ -36072,31 +35981,6 @@ const AuroraUpdateSystem = (() => {
           }
         );
 
-
-      navigator
-        .serviceWorker
-        .addEventListener(
-          "controllerchange",
-          () => {
-
-            if (
-              reloading
-            ) {
-
-              return;
-
-            }
-
-
-            reloading =
-              true;
-
-
-            window.location
-              .reload();
-
-          }
-        );
 
     }
 
