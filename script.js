@@ -28661,6 +28661,10 @@ async function switchAuroraInvitationAccount() {
 
 function finishAuroraInvitation() {
 
+  localStorage.removeItem(
+    "aurora_invite_onboarding_active"
+  );
+
   const overlay =
     document.getElementById(
       "auroraInviteOverlay"
@@ -35484,6 +35488,7 @@ const AuroraUpdateSystem = (() => {
 
     /* Finish invitation onboarding before displaying an app update. */
     const invitationOpen =
+      localStorage.getItem("aurora_invite_onboarding_active") === "1" ||
       document.getElementById("auroraInviteOverlay") ||
       document.getElementById("auroraInviteInstallGate")
         ?.classList.contains("active");

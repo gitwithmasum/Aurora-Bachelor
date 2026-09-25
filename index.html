@@ -2109,6 +2109,9 @@
       const INSTALLED_KEY =
         "aurora_pwa_installed_v1";
 
+      const ONBOARDING_KEY =
+        "aurora_invite_onboarding_active";
+
 
       const params =
         new URLSearchParams(
@@ -2152,6 +2155,9 @@
       */
 
       if (!inviteToken) {
+        if (!localStorage.getItem(PENDING_KEY)) {
+          localStorage.removeItem(ONBOARDING_KEY);
+        }
         return;
       }
 
@@ -2164,6 +2170,11 @@
       localStorage.setItem(
         PENDING_KEY,
         inviteToken
+      );
+
+      localStorage.setItem(
+        ONBOARDING_KEY,
+        "1"
       );
 
 
@@ -2246,7 +2257,7 @@
   </script>
 
 
-  <script src="./script.js?v=14" defer></script>
+  <script src="./script.js?v=15" defer></script>
 
 </body>
 
