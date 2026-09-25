@@ -2134,6 +2134,12 @@
           .standalone === true;
 
 
+      const mobile =
+        /Android|iPhone|iPad|iPod/i.test(
+          window.navigator.userAgent
+        );
+
+
       /*
         If Aurora is running as an installed
         PWA, remember that this device has
@@ -2147,6 +2153,19 @@
           "1"
         );
 
+      }
+
+
+      /* Resume an invitation when the newly installed mobile app opens. */
+      if (!inviteToken && mobile && standalone) {
+        const pendingToken = localStorage.getItem(PENDING_KEY);
+
+        if (pendingToken) {
+          const resumeUrl = new URL(window.location.href);
+          resumeUrl.searchParams.set("invite", pendingToken);
+          window.location.replace(resumeUrl.href);
+          return;
+        }
       }
 
 
@@ -2257,7 +2276,7 @@
   </script>
 
 
-  <script src="./script.js?v=15" defer></script>
+  <script src="./script.js?v=16" defer></script>
 
 </body>
 

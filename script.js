@@ -35487,13 +35487,18 @@ const AuroraUpdateSystem = (() => {
   function showModal() {
 
     /* Finish invitation onboarding before displaying an app update. */
+    const mobileBrowser =
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) &&
+      !window.matchMedia("(display-mode: standalone)").matches &&
+      window.navigator.standalone !== true;
+
     const invitationOpen =
       localStorage.getItem("aurora_invite_onboarding_active") === "1" ||
       document.getElementById("auroraInviteOverlay") ||
       document.getElementById("auroraInviteInstallGate")
         ?.classList.contains("active");
 
-    if (invitationOpen) {
+    if (mobileBrowser || invitationOpen) {
       return;
     }
 
