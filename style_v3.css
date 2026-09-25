@@ -24349,9 +24349,10 @@ body.aurora-invite-gate-open {
 }
 
 
-/* IOS */
+/* MANUAL INSTALL HELP */
 
-.aurora-invite-ios-help {
+.aurora-invite-ios-help,
+.aurora-invite-manual-help {
   margin-top: 14px;
 
   padding: 13px;
@@ -24366,7 +24367,8 @@ body.aurora-invite-gate-open {
 }
 
 
-.aurora-invite-ios-help>span {
+.aurora-invite-ios-help>span,
+.aurora-invite-manual-help>span {
   color:
     var(--amber);
 
@@ -24379,7 +24381,8 @@ body.aurora-invite-gate-open {
 }
 
 
-.aurora-invite-ios-help p {
+.aurora-invite-ios-help p,
+.aurora-invite-manual-help p {
   margin:
     6px 0 10px;
 
@@ -24390,7 +24393,8 @@ body.aurora-invite-gate-open {
 }
 
 
-#auroraInviteIOSInstalled {
+#auroraInviteIOSInstalled,
+#auroraInviteManualInstalled {
   padding:
     9px 12px;
 
@@ -24408,6 +24412,11 @@ body.aurora-invite-gate-open {
   font-size: 7px;
 
   font-weight: 900;
+}
+
+.aurora-invite-manual-help[hidden],
+.aurora-invite-ios-help[hidden] {
+  display: none;
 }
 
 

@@ -34057,6 +34057,30 @@ window.AuroraInviteInstallGate =
 
         </div>
 
+        <div
+          class="aurora-invite-manual-help"
+          id="auroraInviteManualHelp"
+          hidden
+        >
+          <span>INSTALL FROM YOUR BROWSER</span>
+
+          <p>
+            On Android Chrome, tap <strong>⋮</strong> →
+            <strong>Install app</strong> or
+            <strong>Add to Home screen</strong> →
+            <strong>Install</strong>. Some Chrome versions show
+            <strong>Install and create shortcut</strong> instead.
+            If this opened inside Gmail or another app, reopen the
+            <strong>original invitation link</strong> in Chrome first.
+          </p>
+
+          <p>Only confirm after Aurora appears on your Home screen.</p>
+
+          <button type="button" id="auroraInviteManualInstalled">
+            ✓ I'VE INSTALLED AURORA
+          </button>
+        </div>
+
 
 
         <!-- ================================================
@@ -34126,7 +34150,16 @@ window.AuroraInviteInstallGate =
         )
         ?.addEventListener(
           "click",
-          confirmIOSInstall
+          confirmManualInstall
+        );
+
+      document
+        .getElementById(
+          "auroraInviteManualInstalled"
+        )
+        ?.addEventListener(
+          "click",
+          confirmManualInstall
         );
 
 
@@ -34221,13 +34254,25 @@ window.AuroraInviteInstallGate =
       "function"
     ) {
 
+      const manualHelp = document.getElementById(
+        "auroraInviteManualHelp"
+      );
+
+      if (manualHelp) manualHelp.hidden = false;
+
+      const status = document.getElementById(
+        "auroraInviteInstallStatus"
+      );
+
+      if (status) status.textContent = "INSTALL FROM CHROME MENU";
+
       if (
         typeof toast ===
         "function"
       ) {
 
         toast(
-          "Aurora installer is not ready."
+          "Use Chrome's install option in the browser menu."
         );
 
       }
@@ -34258,6 +34303,11 @@ window.AuroraInviteInstallGate =
     const deviceState =
       document.getElementById(
         "auroraInviteDeviceState"
+      );
+
+    const manualHelp =
+      document.getElementById(
+        "auroraInviteManualHelp"
       );
 
 
@@ -34338,21 +34388,20 @@ window.AuroraInviteInstallGate =
         "unavailable"
       ) {
 
+        if (manualHelp) manualHelp.hidden = false;
+
         if (status) {
 
           status.textContent =
-            "BROWSER INSTALL REQUIRED";
+            "INSTALL FROM CHROME MENU";
 
         }
 
 
         if (hint) {
 
-          hint.innerHTML = `
-          Open this invitation in
-          <strong>Chrome or Edge</strong>
-          and press INSTALL AURORA again.
-        `;
+          hint.textContent =
+            "The browser did not offer an automatic prompt. Use its install menu below.";
 
         }
 
@@ -34360,7 +34409,7 @@ window.AuroraInviteInstallGate =
         if (deviceState) {
 
           deviceState.textContent =
-            "UNAVAILABLE";
+            "MANUAL INSTALL";
 
         }
 
@@ -34371,7 +34420,7 @@ window.AuroraInviteInstallGate =
         ) {
 
           toast(
-            "Open this invitation in Chrome or Edge."
+            "Use the install option in Chrome's menu."
           );
 
         }
@@ -34429,6 +34478,8 @@ window.AuroraInviteInstallGate =
         "accepted"
       ) {
 
+        if (manualHelp) manualHelp.hidden = false;
+
         if (status) {
 
           status.textContent =
@@ -34473,6 +34524,8 @@ window.AuroraInviteInstallGate =
         "error"
       ) {
 
+        if (manualHelp) manualHelp.hidden = false;
+
         if (status) {
 
           status.textContent =
@@ -34484,7 +34537,7 @@ window.AuroraInviteInstallGate =
         if (hint) {
 
           hint.textContent =
-            "Please try again.";
+            "Try again or install from Chrome's menu below.";
 
         }
 
@@ -34501,6 +34554,8 @@ window.AuroraInviteInstallGate =
     }
 
     catch (error) {
+
+      if (manualHelp) manualHelp.hidden = false;
 
       console.error(
         "Invitation Install Error:",
@@ -34550,15 +34605,8 @@ window.AuroraInviteInstallGate =
     }
 
   }
-    /* ==========================================================
-       iOS CONFIRMATION
-  
-       Safari gives JavaScript no reliable
-       appinstalled event, so the user must
-       confirm Add to Home Screen manually.
-    ========================================================== */
-
-    function confirmIOSInstall() {
+    /* Browser install events are not reliable after manual installation. */
+    function confirmManualInstall() {
 
       localStorage.setItem(
         INSTALLED_KEY,
@@ -34626,6 +34674,13 @@ window.AuroraInviteInstallGate =
       if (
         installed
       ) {
+
+        const manualHelp =
+          document.getElementById(
+            "auroraInviteManualHelp"
+          );
+
+        if (manualHelp) manualHelp.hidden = true;
 
         if (status) {
 
