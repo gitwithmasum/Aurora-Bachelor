@@ -15163,7 +15163,8 @@ html[data-accent] .title-cursor {
 ============================================================ */
 
 .aurora-pending-row .aac-access {
-  gap: 10px;
+  column-gap: 18px;
+  row-gap: 14px;
   flex-wrap: wrap;
 }
 
