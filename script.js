@@ -35482,11 +35482,22 @@ const AuroraUpdateSystem = (() => {
 
   function showModal() {
 
-    ensureModal()
-      .classList
-      .add(
-        "active"
-      );
+    /* Finish invitation onboarding before displaying an app update. */
+    const invitationOpen =
+      document.getElementById("auroraInviteOverlay") ||
+      document.getElementById("auroraInviteInstallGate")
+        ?.classList.contains("active");
+
+    if (invitationOpen) {
+      return;
+    }
+
+    const portal = ensureModal();
+
+    /* Keep the action above any onboarding layer on mobile. */
+    portal.style.zIndex = "1000040";
+
+    portal.classList.add("active");
 
 
     document.body
