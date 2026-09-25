@@ -13798,6 +13798,7 @@ async function loadAuroraAccessControl() {
                         remove-invite
                       "
                       type="button"
+                      aria-label="Remove invitation for ${email}"
                       onclick="
                         removeAuroraInvitation(
                           '${invite.invitation_id}',
@@ -13808,6 +13809,7 @@ async function loadAuroraAccessControl() {
                         )
                       "
                     >
+                      <span aria-hidden="true">✕</span>
                       REMOVE
                     </button>
 
@@ -14331,6 +14333,45 @@ async function revokeAuroraInvitation(
 
 }
 
+
+
+/* ============================================================
+   OWNER + ADMIN // REMOVE PENDING INVITATION
+============================================================ */
+
+async function removeAuroraInvitation(invitationId, householdId, encodedEmail) {
+  const email = decodeURIComponent(encodedEmail || "");
+
+  // AuroraConfirmSystem handles confirmation after it is installed.
+  if (
+    !window.removeAuroraInvitation?.__auroraConfirmWrapped &&
+    !confirm(
+      `Permanently remove the pending invitation for ${email}?\n\n` +
+      "Its link will stop working and the invitation record will be deleted."
+    )
+  ) return;
+
+  const client = getAuroraSupabaseClient();
+  if (!client?.auth) {
+    toast("Sign in to remove invitations.");
+    return;
+  }
+
+  try {
+    const { error } = await client.rpc("aurora_remove_invitation", {
+      p_household_id: householdId,
+      p_invitation_id: invitationId
+    });
+
+    if (error) throw error;
+
+    toast("Invitation removed permanently.");
+    await loadAuroraAccessControl();
+  } catch (error) {
+    console.error("Aurora remove invitation:", error);
+    alert(error?.message || "Unable to remove invitation.");
+  }
+}
 
 
 /* ============================================================
@@ -30077,6 +30118,23 @@ const AuroraConfirmSystem = (() => {
   }
 
 
+  function protectInvitationRemove() {
+    wrapGlobal(
+      "removeAuroraInvitation",
+      (_id, _householdId, encodedEmail) => ({
+        eyebrow: "AURORA // INVITATION CONTROL",
+        title: "Remove Invitation Permanently?",
+        message:
+          `TARGET // ${decodeURIComponent(encodedEmail || "")}\n\n` +
+          "The invitation link will stop working and its record will be deleted.",
+        confirmText: "✕ REMOVE INVITATION",
+        danger: true
+      }),
+      { managerOnly: true }
+    );
+  }
+
+
   /* ==========================================================
      INSTALL
   ========================================================== */
@@ -30108,6 +30166,8 @@ const AuroraConfirmSystem = (() => {
     protectOwnershipTransfer();
 
     protectInvitationRevoke();
+
+    protectInvitationRemove();
 
 
     console.log(
