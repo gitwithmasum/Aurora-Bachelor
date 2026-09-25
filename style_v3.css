@@ -15156,6 +15156,36 @@ html[data-accent] .title-cursor {
   box-shadow: 0 0 20px rgba(255, 92, 143, 0.2);
 }
 
+
+
+/* ============================================================
+   AURORA // REMOVE INVITATION
+============================================================ */
+
+.aac-btn.remove-invite {
+  border-color:
+    rgba(255, 90, 120, .38);
+
+  color:
+    #ff7892;
+
+  background:
+    rgba(255, 75, 105, .07);
+}
+
+.aac-btn.remove-invite:hover {
+  border-color:
+    rgba(255, 90, 120, .7);
+
+  background:
+    rgba(255, 75, 105, .13);
+
+  box-shadow:
+    0 0 18px rgba(255, 70, 105, .12);
+}
+
+
+
 .aac-btn.lock {
   color: #ffd86c;
   border: 1px solid rgba(255, 196, 72, 0.2);

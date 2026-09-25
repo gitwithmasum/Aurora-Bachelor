@@ -13783,13 +13783,32 @@ async function loadAuroraAccessControl() {
                           '${invite.invitation_id}',
                           '${householdId}',
                           '${encodeURIComponent(
-                invite.email ||
-                ""
-              )}'
+                            invite.email ||
+                            ""
+                          )}'
+                        )
+                        "
+                      >
+                      Revoke Invite
+                    </button>
+
+                    <button
+                      class="
+                        aac-btn
+                        remove-invite
+                      "
+                      type="button"
+                      onclick="
+                        removeAuroraInvitation(
+                          '${invite.invitation_id}',
+                          '${householdId}',
+                          '${encodeURIComponent(
+                            invite.email || ""
+                          )}'
                         )
                       "
                     >
-                      Revoke Invite
+                      REMOVE
                     </button>
 
                   </div>
