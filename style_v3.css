@@ -21905,7 +21905,7 @@ body.aurora-update-open {
   position: fixed;
   inset: 0;
 
-  z-index: 1000000;
+  z-index: 1000040;
 
   display: grid;
   place-items: center;
