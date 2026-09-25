@@ -142,6 +142,7 @@ nav {
 #nav {
   flex: 1;
   min-height: 0;
+  align-content: start;
 
   overflow-y: auto;
   overflow-x: hidden;
