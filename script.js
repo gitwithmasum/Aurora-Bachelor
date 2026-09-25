@@ -14267,17 +14267,15 @@ async function revokeAuroraInvitation(
     );
 
 
-  const confirmed =
-    confirm(
-
+  // AuroraConfirmSystem shows the confirmation once installed.
+  // Use the native dialog only during its short startup interval.
+  if (
+    !window.revokeAuroraInvitation?.__auroraConfirmWrapped &&
+    !confirm(
       `Revoke invitation for ${email}?\n\n` +
-
-      `The invitation link will stop working immediately.`
-
-    );
-
-
-  if (!confirmed) return;
+      "The invitation link will stop working immediately."
+    )
+  ) return;
 
 
   const client =
