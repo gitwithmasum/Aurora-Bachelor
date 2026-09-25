@@ -13775,21 +13775,20 @@ async function loadAuroraAccessControl() {
                     <button
                       class="
                         aac-btn
-                        remove-admin
+                        resend-invite
                       "
                       type="button"
+                      aria-label="Resend invitation to ${email}"
                       onclick="
-                        revokeAuroraInvitation(
+                        resendAuroraInvitation(
                           '${invite.invitation_id}',
                           '${householdId}',
-                          '${encodeURIComponent(
-                            invite.email ||
-                            ""
-                          )}'
+                          this
                         )
                         "
                       >
-                      Revoke Invite
+                      <span aria-hidden="true">↻</span>
+                      RESEND INVITE
                     </button>
 
                     <button
@@ -14251,84 +14250,80 @@ async function transferAuroraOwnership(
 
 
 /* ============================================================
-   OWNER + ADMIN // REVOKE INVITATION
+   OWNER + ADMIN // RESEND PENDING INVITATION
 ============================================================ */
 
-async function revokeAuroraInvitation(
-  invitationId,
-  householdId,
-  encodedEmail
-) {
+async function resendAuroraInvitation(invitationId, householdId, button) {
+  const email = button?.closest(".aurora-pending-row")
+    ?.querySelector(".aac-user-meta span")?.textContent?.trim() || "this member";
 
-  const email =
-    decodeURIComponent(
-      encodedEmail ||
-      ""
-    );
-
-
-  // AuroraConfirmSystem shows the confirmation once installed.
-  // Use the native dialog only during its short startup interval.
+  // The Aurora dialog handles this once its confirmation system is ready.
   if (
-    !window.revokeAuroraInvitation?.__auroraConfirmWrapped &&
-    !confirm(
-      `Revoke invitation for ${email}?\n\n` +
-      "The invitation link will stop working immediately."
-    )
+    !window.resendAuroraInvitation?.__auroraConfirmWrapped &&
+    !confirm(`Resend invitation to ${email}?\n\nThe previous link will stop working.`)
   ) return;
 
-
-  const client =
-    getAuroraSupabaseClient();
-
-
-  try {
-
-    const {
-      error
-    } =
-      await client.rpc(
-        "aurora_revoke_invitation",
-        {
-
-          p_household_id:
-            householdId,
-
-          p_invitation_id:
-            invitationId
-
-        }
-      );
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    toast(
-      "Invitation revoked."
-    );
-
-
-    await loadAuroraAccessControl();
-
-
-  } catch (error) {
-
-    console.error(
-      "❌ Revoke Invitation:",
-      error
-    );
-
-
-    alert(
-      error?.message ||
-      "Unable to revoke invitation."
-    );
-
+  const client = getAuroraSupabaseClient();
+  if (!client?.auth) {
+    toast("Sign in to resend invitations.");
+    return;
   }
 
+  const originalLabel = button?.innerHTML;
+
+  try {
+    if (button) {
+      button.disabled = true;
+      button.textContent = "SENDING...";
+    }
+
+    // Read the current row so the email and member details cannot go stale.
+    const { data: invitations, error: lookupError } = await client.rpc(
+      "aurora_get_pending_invitations",
+      { p_household_id: householdId }
+    );
+    if (lookupError) throw lookupError;
+
+    const invitation = (invitations || [])
+      .find(item => item.invitation_id === invitationId);
+    if (!invitation) throw new Error("Pending invitation no longer exists.");
+
+    const { data, error } = await client.functions.invoke(
+      "send-house-invite",
+      {
+        body: {
+          householdId,
+          email: invitation.email,
+          fullName: invitation.full_name || "",
+          phone: invitation.phone || "",
+          room: invitation.room || ""
+        }
+      }
+    );
+
+    if (error) {
+      let detail = error.message;
+      try {
+        const response = await error.context?.json();
+        detail = response?.error || response?.message || detail;
+      } catch (_) { /* Keep the original error. */ }
+      throw new Error(detail || "Unable to resend invitation.");
+    }
+    if (!data?.success) {
+      throw new Error(data?.error || "Invitation email was not sent.");
+    }
+
+    toast(`Fresh invitation sent to ${invitation.email}.`);
+    await loadAuroraAccessControl();
+  } catch (error) {
+    console.error("Aurora resend invitation:", error);
+    alert(error?.message || "Unable to resend invitation. Please try again.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalLabel;
+    }
+  }
 }
 
 
@@ -30078,31 +30073,31 @@ const AuroraConfirmSystem = (() => {
 
 
   /* ==========================================================
-     INVITATION REVOKE
+     INVITATION RESEND
   ========================================================== */
 
-  function protectInvitationRevoke() {
+  function protectInvitationResend() {
 
     wrapGlobal(
 
-      "revokeAuroraInvitation",
+      "resendAuroraInvitation",
 
-      () => ({
+      (_id, _householdId, button) => ({
 
         eyebrow:
           "AURORA // INVITATION CONTROL",
 
         title:
-          "Revoke Invitation?",
+          "Resend Invitation?",
 
         message:
-          `The pending invitation will become invalid and can no longer be accepted.`,
+          `Send a fresh invitation to ${button?.closest(".aurora-pending-row")?.querySelector(".aac-user-meta span")?.textContent?.trim() || "this member"}?\n\nThe previous link will stop working. The new link expires in 7 days.`,
 
         confirmText:
-          "× REVOKE INVITE",
+          "↻ RESEND INVITE",
 
         danger:
-          true
+          false
 
       }),
 
@@ -30163,7 +30158,7 @@ const AuroraConfirmSystem = (() => {
 
     protectOwnershipTransfer();
 
-    protectInvitationRevoke();
+    protectInvitationResend();
 
     protectInvitationRemove();
 

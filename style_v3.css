@@ -15159,8 +15159,43 @@ html[data-accent] .title-cursor {
 
 
 /* ============================================================
-   AURORA // REMOVE INVITATION
+   AURORA // INVITATION ACTIONS
 ============================================================ */
+
+.aurora-pending-row .aac-access {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aac-btn.resend-invite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #dffaff;
+  border: 1px solid rgba(77, 231, 255, .52);
+  background: linear-gradient(125deg, rgba(5, 41, 72, .98), rgba(33, 42, 115, .92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    0 0 18px rgba(42, 213, 255, .13);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.aac-btn.resend-invite:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #8cf4ff;
+  box-shadow: 0 0 24px rgba(68, 225, 255, .36);
+}
+
+.aac-btn.resend-invite:focus-visible {
+  outline: 2px solid #8cf4ff;
+  outline-offset: 3px;
+}
+
+.aac-btn.resend-invite:disabled {
+  cursor: wait;
+  opacity: .64;
+}
 
 .aac-btn.remove-invite {
   position: relative;
@@ -15199,7 +15234,8 @@ html[data-accent] .title-cursor {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aac-btn.remove-invite {
+  .aac-btn.remove-invite,
+  .aac-btn.resend-invite {
     transition: none;
   }
 }
