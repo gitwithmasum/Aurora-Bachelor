@@ -4738,6 +4738,15 @@ const AuroraMemberGuard = (() => {
       return true;
     }
 
+    if (
+      (target.closest("#auroraInviteInstallGate") &&
+        ["auroraInviteInstallBtn", "auroraInviteContinueBtn",
+          "auroraInviteIOSInstalled", "auroraInviteManualInstalled"].includes(target.id)) ||
+      (target.closest("#auroraInstallPortal") && target.id === "auroraInstallConfirm")
+    ) {
+      return true;
+    }
+
 
     /* -----------------------------------------
        CLOSE / CANCEL

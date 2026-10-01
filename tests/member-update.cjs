@@ -12,13 +12,14 @@ const guard = vm.createContext({
   toast() {}, setTimeout() {},
 });
 vm.runInContext(guardSource, guard);
-function click(id, text, inPortal, nested = false) {
+function click(id, text, inPortal, nested = false, inInstallGate = false) {
   let blocked = false;
   const button = {
     id, textContent: text, className: "", getAttribute: () => "",
     hasAttribute: () => false, matches: () => false,
     closest(selector) {
       if (selector === "#auroraUpdatePortal") return inPortal ? {} : null;
+      if (selector === "#auroraInviteInstallGate") return inInstallGate ? {} : null;
       if (selector.startsWith("button,")) return this;
       return null;
     }
@@ -33,6 +34,10 @@ assert.equal(click("auroraUpdateNow", "RETRY UPDATE", true, true), false);
 assert.equal(click("auroraUpdateLater", "LATER", true), false);
 assert.equal(click("updateExpense", "UPDATE EXPENSE", false), true);
 assert.equal(click("auroraUpdateNow", "UPDATE NOW", false), true);
+assert.equal(click("auroraInviteInstallBtn", "INSTALL AURORA", false, true, true), false);
+assert.equal(click("auroraInviteContinueBtn", "CONTINUE INVITATION", false, false, true), false);
+assert.equal(click("auroraInviteManualInstalled", "I HAVE INSTALLED", false, false, true), false);
+assert.equal(click("auroraInviteInstallBtn", "INSTALL AURORA", false), true);
 role = "owner";
 assert.equal(click("updateExpense", "UPDATE EXPENSE", false), false);
 
@@ -80,5 +85,5 @@ vm.runInContext(updateSource, context);
   assert.equal(sent.type, "AURORA_SKIP_WAITING");
   assert.equal(reloads, 1);
   assert.match(elements.auroraUpdateStatus.innerHTML, /RESTARTING AURORA/);
-  console.log("6 member guard scenarios and update activation/reload passed.");
+  console.log("10 member guard scenarios and update activation/reload passed.");
 })().catch(error => {console.error(error); process.exitCode = 1;});
