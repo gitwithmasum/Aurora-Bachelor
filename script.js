@@ -28079,6 +28079,9 @@ function getAuroraInvitationToken() {
 
 function clearAuroraInvitationToken() {
 
+  // Clear both stores so installed apps cannot resume an already used link.
+  localStorage.removeItem(AURORA_INVITE_STORAGE_KEY);
+
   sessionStorage.removeItem(
     AURORA_INVITE_STORAGE_KEY
   );
@@ -28719,9 +28722,7 @@ async function initializeAuroraInvitationFlow() {
 
 
     if (
-      invitation
-        .invitation_status !==
-      "pending"
+      !["pending", "accepted"].includes(invitation.invitation_status)
     ) {
 
       throw new Error(
@@ -28732,6 +28733,7 @@ async function initializeAuroraInvitationFlow() {
 
 
     if (
+      invitation.invitation_status === "pending" &&
       invitation.expires_at &&
       new Date(
         invitation.expires_at
@@ -28763,8 +28765,8 @@ async function initializeAuroraInvitationFlow() {
 
 
     /*
-      Already signed in:
-      automatically attempt acceptance.
+      Already signed in: the RPC verifies accepted links belong to this
+      account and that membership still exists before returning success.
     */
 
     if (
@@ -28860,7 +28862,7 @@ async function initializeAuroraInvitationFlow() {
           </span>
 
           <strong>
-            PENDING
+            ${invitation.invitation_status === "accepted" ? "ACCEPTED" : "PENDING"}
           </strong>
 
         </div>
