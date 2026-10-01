@@ -4730,6 +4730,14 @@ const AuroraMemberGuard = (() => {
       return true;
     }
 
+    // App updates change this device's files, not household data.
+    if (
+      target.closest("#auroraUpdatePortal") &&
+      ["auroraUpdateNow", "auroraUpdateLater"].includes(target.id)
+    ) {
+      return true;
+    }
+
 
     /* -----------------------------------------
        CLOSE / CANCEL
