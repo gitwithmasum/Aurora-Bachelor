@@ -2197,10 +2197,7 @@
 
       const installedKnown =
         standalone ||
-
-        localStorage.getItem(
-          INSTALLED_KEY
-        ) === "1";
+        sessionStorage.getItem("aurora_invite_install_confirmed_token") === inviteToken;
 
 
       /*
@@ -2231,6 +2228,9 @@
           inviteToken
 
       };
+
+      // A cached token must not start acceptance behind the install gate.
+      sessionStorage.removeItem(PENDING_KEY);
 
 
       /*
@@ -2274,7 +2274,7 @@
   </script>
 
 
-  <script src="./script.js?v=19" defer></script>
+  <script src="./script.js?v=20" defer></script>
 
 </body>
 

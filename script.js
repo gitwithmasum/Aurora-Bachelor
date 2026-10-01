@@ -33748,12 +33748,16 @@ window.AuroraInviteInstallGate =
 
         isStandalone() ||
 
-        localStorage.getItem(
-          INSTALLED_KEY
-        ) === "1"
+        Boolean(state?.token &&
+          sessionStorage.getItem("aurora_invite_install_confirmed_token") === state.token)
 
       );
 
+    }
+
+    function rememberInvitationInstallation() {
+      const token = state?.token || localStorage.getItem(PENDING_KEY);
+      if (token) sessionStorage.setItem("aurora_invite_install_confirmed_token", token);
     }
 
 
@@ -34341,6 +34345,8 @@ window.AuroraInviteInstallGate =
         "installed"
       ) {
 
+        rememberInvitationInstallation();
+
         localStorage.setItem(
           INSTALLED_KEY,
           "1"
@@ -34582,6 +34588,8 @@ window.AuroraInviteInstallGate =
   }
     /* Browser install events are not reliable after manual installation. */
     function confirmManualInstall() {
+
+      rememberInvitationInstallation();
 
       localStorage.setItem(
         INSTALLED_KEY,
@@ -34862,6 +34870,8 @@ window.AuroraInviteInstallGate =
     window.addEventListener(
       "appinstalled",
       () => {
+
+        rememberInvitationInstallation();
 
         localStorage.setItem(
           INSTALLED_KEY,
