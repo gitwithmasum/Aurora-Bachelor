@@ -144,7 +144,8 @@ async function invitationEmailStatus(invitation: any, key: string) {
       String(item.tag || "").includes("aurora-house-invitation")) &&
     Date.parse(item.date) >= Date.parse(invitation.created_at || "1970-01-01"))
     .sort((a: any, b: any) => Date.parse(b.date) - Date.parse(a.date));
-  const newest = events[0];
+  // A late event from an older send must not override a newer request.
+  const newest = events.find((item: any) => item.event === "request") || events[0];
   if (!newest) return {status: "unknown", message:
     "No recent Aurora email event found for this recipient. Delivery is not confirmed."};
   const messageEvents = events.filter((item: any) => item.messageId === newest.messageId);

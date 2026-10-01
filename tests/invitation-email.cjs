@@ -53,5 +53,9 @@ function event(event, date, messageId, reason) {
   assert.equal(result.body.status, "delivered");
   result = await run({events: [event("delivered", "2026-09-30T02:00:00Z", "old")]});
   assert.equal(result.body.status, "unknown");
-  console.log("8 invitation email authorization and delivery scenarios passed.");
+  result = await run({events: [event("request", "2026-10-01T01:00:00Z", "old"),
+    event("request", "2026-10-01T02:00:00Z", "new"),
+    event("delivered", "2026-10-01T03:00:00Z", "old")]});
+  assert.equal(result.body.status, "request");
+  console.log("9 invitation email authorization and delivery scenarios passed.");
 })().catch(error => {console.error(error); process.exitCode = 1;});
