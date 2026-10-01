@@ -12337,7 +12337,7 @@ async function addMember(event) {
 
 
     toast(
-      `Invitation sent to ${googleEmail}`
+      `Invitation queued for ${googleEmail}. Check email status in Access Control.`
     );
 
 
@@ -13791,6 +13791,12 @@ async function loadAuroraAccessControl() {
                       RESEND INVITE
                     </button>
 
+                    <button class="aac-btn resend-invite" type="button"
+                      onclick="checkAuroraInvitationEmail('${invite.invitation_id}', '${householdId}', this)">
+                      CHECK EMAIL
+                    </button>
+                    <span class="aurora-email-status" role="status" aria-live="polite"></span>
+
                     <button
                       class="
                         aac-btn
@@ -14253,6 +14259,35 @@ async function transferAuroraOwnership(
    OWNER + ADMIN // RESEND PENDING INVITATION
 ============================================================ */
 
+async function checkAuroraInvitationEmail(invitationId, householdId, button) {
+  const client = getAuroraSupabaseClient();
+  const output = button?.closest(".aurora-pending-row")?.querySelector(".aurora-email-status");
+  if (!client?.auth || !output) return;
+  button.disabled = true;
+  output.textContent = "Checking Brevo...";
+  try {
+    const {data: pending, error: lookupError} = await client.rpc(
+      "aurora_get_pending_invitations", {p_household_id: householdId});
+    if (lookupError) throw lookupError;
+    const invite = (pending || []).find(item => item.invitation_id === invitationId);
+    if (!invite) throw new Error("Pending invitation no longer exists.");
+    const {data, error} = await client.functions.invoke("send-house-invite", {
+      body: {action: "status", householdId, invitationId, email: invite.email}
+    });
+    if (error) {
+      let detail = error.message;
+      try { detail = (await error.context?.json())?.error || detail; } catch (_) {}
+      throw new Error(detail || "Email status is unavailable.");
+    }
+    if (!data?.success) throw new Error(data?.error || "Email status is unavailable.");
+    output.textContent = data.message;
+  } catch (error) {
+    output.textContent = error?.message || "Email status is unavailable. Try again.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
 async function resendAuroraInvitation(invitationId, householdId, button) {
   const email = button?.closest(".aurora-pending-row")
     ?.querySelector(".aac-user-meta span")?.textContent?.trim() || "this member";
@@ -14313,7 +14348,7 @@ async function resendAuroraInvitation(invitationId, householdId, button) {
       throw new Error(data?.error || "Invitation email was not sent.");
     }
 
-    toast(`Fresh invitation sent to ${invitation.email}.`);
+    toast(`Invitation queued for ${invitation.email}. Check email status to confirm delivery.`);
     await loadAuroraAccessControl();
   } catch (error) {
     console.error("Aurora resend invitation:", error);

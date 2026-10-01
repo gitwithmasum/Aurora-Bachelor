@@ -15169,6 +15169,16 @@ html[data-accent] .title-cursor {
   flex-wrap: wrap;
 }
 
+.aurora-email-status {
+  flex-basis: 100%;
+  order: 2;
+  max-width: 38rem;
+  color: #b9dbe8;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .aac-btn.resend-invite {
   display: inline-flex;
   align-items: center;
