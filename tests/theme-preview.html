@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora responsive theme preview</title>
+  <style>
+    body { margin: 0; padding: 16px; font: 14px system-ui; background: #e9e4d8; color: #30291d; }
+    header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    button { padding: 8px 12px; border: 1px solid #896315; border-radius: 8px; background: #fff; cursor: pointer; }
+    iframe { display: block; width: 390px; max-width: 100%; height: 820px; border: 1px solid #bca365; border-radius: 12px; margin: auto; background: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Aurora responsive theme preview</strong>
+    <button type="button" onclick="resizePreview(390)">Mobile · 390px</button>
+    <button type="button" onclick="resizePreview(1280)">Desktop · 1280px</button>
+    <span id="previewWidth">390px</span>
+  </header>
+  <iframe id="preview" title="Aurora app preview" src="../index.html"></iframe>
+  <script>
+    function resizePreview(width) {
+      document.getElementById('preview').style.width = width + 'px';
+      document.getElementById('previewWidth').textContent = width + 'px';
+    }
+  </script>
+</body>
+</html>

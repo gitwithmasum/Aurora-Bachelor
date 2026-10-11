@@ -70,7 +70,8 @@ html[data-theme="white-gold"] :is(
   .aurora-update-modal, .aurora-restore-modal, .aurora-invite-gate-card,
   #page-profile .profile-core, #page-profile .profile-identity,
   #page-profile .profile-info-card, .profile-data-card, .profile-core,
-  .core-tooltip, #toast, .toast
+  .core-tooltip, #toast, .toast, .aurora-sync-hud,
+  .aurora-dash-signal-panel, .aurora-dash-alert, .aurora-dash-activity-row
 ) {
   background: linear-gradient(145deg, #fff, #fcfaf4) !important;
   border-color: var(--line) !important;
@@ -104,6 +105,21 @@ html[data-theme="white-gold"] :is(
   .aurora-invite-gate-card span, .aac-name, .aac-email,
   .aac-row span, .data-core, .notification-title, .notification-text
 ) { color: var(--text) !important; }
+
+html[data-theme="white-gold"] span { color: inherit !important; }
+html[data-theme="white-gold"] :is(.aurora-sync-meta, .aurora-sync-revision,
+  .meta-line > span, .status-label, .aurora-month-lock-view,
+  .aurora-dash-empty, .aurora-notification-status) { color: var(--muted) !important; }
+html[data-theme="white-gold"] :is(.aurora-intel-eyebrow,
+  .aurora-notification-code, .profile-eyebrow, .eyebrow-code,
+  .aurora-intel-section-head span, .aurora-intel-panel-head span) { color: var(--cyan) !important; }
+html[data-theme="white-gold"] :is(.aurora-month-lock-state.open,
+  .meta-live, .aurora-dash-live-tag, .profile-status) { color: var(--green) !important; }
+html[data-theme="white-gold"] .aurora-notification-badge {
+  background: #896315 !important;
+  color: #fff !important;
+  box-shadow: none;
+}
 
 html[data-theme="white-gold"] :is(
   .eyebrow, .settings-eyebrow, .section-head h2, .settings-icon,
@@ -161,6 +177,17 @@ html[data-theme="white-gold"] button:hover { border-color: #a88534 !important; }
 html[data-theme="white-gold"] :is(button, a, select):focus-visible {
   outline: 2px solid #896315;
   outline-offset: 3px;
+}
+
+html[data-theme="white-gold"] .settings-toggle { background: #faf7ef; border-color: var(--line); }
+html[data-theme="white-gold"] .settings-toggle i { background: #e0d8c5; border-color: #bca365; }
+html[data-theme="white-gold"] .settings-toggle input:checked + i { background: #dcc78c; border-color: #896315; box-shadow: none; }
+html[data-theme="white-gold"] .settings-toggle input:checked + i::after { background: #896315; box-shadow: none; }
+html[data-theme="white-gold"] .title-cursor { box-shadow: 0 0 8px #89631530 !important; }
+html[data-theme="white-gold"] :is(.brand-text, .page-heading, .top-actions, .module-header)::before,
+html[data-theme="white-gold"] :is(.brand-text, .page-heading, .top-actions, .module-header)::after {
+  background: linear-gradient(90deg, transparent, #b7953e50, transparent) !important;
+  box-shadow: none !important;
 }
 
 /* Preserve the meaning of success/error statuses on the light palette. */
