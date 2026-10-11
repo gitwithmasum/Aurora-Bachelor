@@ -4730,6 +4730,11 @@ const AuroraMemberGuard = (() => {
       return true;
     }
 
+    // Theme changes are device preferences, never household writes.
+    if (target.id === "settingsTheme" && target.closest("#page-settings")) {
+      return true;
+    }
+
     // App updates change this device's files, not household data.
     if (
       target.closest("#auroraUpdatePortal") &&
@@ -24708,7 +24713,7 @@ function renderSettings() {
     db.settings.security;
 
   const personalization =
-    db.settings.personalization;
+    { ...db.settings.personalization, theme: getAuroraTheme(db.settings.personalization.theme) };
 
 
   page.innerHTML = `
@@ -25388,6 +25393,7 @@ function renderSettings() {
 
             <select
               id="settingsTheme"
+              onchange="setAuroraTheme(this.value)"
             >
 
               <option
@@ -25412,7 +25418,13 @@ function renderSettings() {
                 Midnight
               </option>
 
+              <option value="white-gold" ${personalization.theme === "white-gold" ? "selected" : ""}>
+                White &amp; Gold
+              </option>
+
             </select>
+
+            <small class="theme-device-note">Theme applies immediately and is remembered on this device. White &amp; Gold uses a fixed gold accent.</small>
 
           </label>
 
@@ -26036,13 +26048,9 @@ function savePersonalizationSettings() {
 
   db.settings.personalization = {
 
-    theme:
-      document
-        .getElementById(
-          "settingsTheme"
-        )
-        ?.value ||
-      "aurora",
+    // The theme selector already saves a device preference immediately.
+    // Keep the legacy household default intact for existing backups.
+    theme: db.settings.personalization?.theme || "aurora",
 
 
     accent:
@@ -26927,7 +26935,21 @@ function saveAccountingSettings() {
    AURORA — PERSONALIZATION APPLY ENGINE
 ============================================================ */
 
-function applyAuroraPersonalization() {
+function getAuroraTheme(fallback = "aurora") {
+  let saved;
+  try { saved = localStorage.getItem("aurora_device_theme_v1"); } catch (_) {}
+  const theme = saved || fallback;
+  return ["aurora", "midnight", "white-gold"].includes(theme) ? theme : "aurora";
+}
+
+function setAuroraTheme(theme) {
+  if (!["aurora", "midnight", "white-gold"].includes(theme)) return;
+  try { localStorage.setItem("aurora_device_theme_v1", theme); } catch (_) {}
+  applyAuroraPersonalization(theme);
+  toast("Theme applied to this device.");
+}
+
+function applyAuroraPersonalization(themeOverride) {
 
   const database =
     AuroraDataStore.get();
@@ -26945,8 +26967,11 @@ function applyAuroraPersonalization() {
   ---------------------------------------------------------- */
 
   root.dataset.theme =
-    personalization.theme ||
-    "aurora";
+    themeOverride || getAuroraTheme(personalization.theme);
+
+  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+    meta.content = root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
+  });
 
 
   /* ----------------------------------------------------------
@@ -27102,6 +27127,7 @@ function restoreSettingsDefaults() {
   AuroraDataStore.save();
 
 
+  try { localStorage.removeItem("aurora_device_theme_v1"); } catch (_) {}
   applyAuroraPersonalization();
 
 
