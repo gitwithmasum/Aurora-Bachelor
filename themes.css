@@ -120,6 +120,8 @@ html[data-theme="white-gold"] .aurora-notification-badge {
   color: #fff !important;
   box-shadow: none;
 }
+html[data-theme="white-gold"] #auroraMonthLockControl .aurora-month-lock-state.open { color: var(--green) !important; }
+html[data-theme="white-gold"] #auroraSyncHud :is(span, strong) { color: var(--muted) !important; }
 
 html[data-theme="white-gold"] :is(
   .eyebrow, .settings-eyebrow, .section-head h2, .settings-icon,
@@ -223,4 +225,13 @@ html[data-theme="white-gold"] * { scrollbar-color: #bda263 #f4eedf; }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="white-gold"] .aurora { animation: none; }
+}
+
+/* Keep Profile beside the mobile navigation rather than shrinking/covering it. */
+@media (max-width: 720px) {
+  .sidebar { flex-direction: row; align-items: center; gap: 6px; }
+  .sidebar #nav { flex: 1; min-width: 0; width: auto; }
+  .sidebar-profile { flex: 0 0 48px; width: 48px; margin: 0; padding: 0; }
+  .sidebar-profile .profile-btn { width: 48px; height: 52px; padding: 8px; justify-content: center; }
+  .sidebar-profile .profile-label { display: none; }
 }
