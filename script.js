@@ -3086,6 +3086,8 @@ const AuroraCloudSync = (() => {
   let saving =
     false;
 
+  let lastSaveError = null;
+
 
   let remoteRefreshQueued =
     false;
@@ -3739,6 +3741,7 @@ const AuroraCloudSync = (() => {
         cloneData(
           database
         );
+      lastSaveError = null;
 
     } catch (error) {
 
@@ -3874,6 +3877,7 @@ const AuroraCloudSync = (() => {
 
     saving =
       true;
+    lastSaveError = null;
 
 
     try {
@@ -3986,6 +3990,8 @@ const AuroraCloudSync = (() => {
 
 
     } catch (error) {
+
+      lastSaveError = {message: error?.message || "Cloud save failed. Local copy preserved."};
 
       console.error(
         "❌ Aurora Cloud Save Error:",
@@ -4355,6 +4361,7 @@ const AuroraCloudSync = (() => {
 
     pendingSnapshot =
       null;
+    lastSaveError = null;
 
 
     saving =
@@ -4403,7 +4410,9 @@ const AuroraCloudSync = (() => {
       revision:
         currentRevision,
 
-      saving
+      saving,
+      pending: Boolean(pendingSnapshot || saveTimer),
+      error: lastSaveError
 
     };
 
@@ -37157,19 +37166,8 @@ const AuroraUXState = (() => {
       ...args
     ) {
 
-      lastPendingData =
-        cloneData(
-          data
-        );
-
-
-      setStatus(
-        "syncing",
-        "SYNCING",
-        "Saving changes to Aurora Cloud..."
-      );
-
-
+      // queueSave may be a no-op for a member or an unready connection.
+      // Render the engine's actual state after the call, not an assumed write.
       try {
 
         const result =
@@ -37178,6 +37176,13 @@ const AuroraUXState = (() => {
             ...args
           );
 
+
+        const status = cloudStatus();
+        if (status.pending || status.saving) {
+          lastPendingData = cloneData(data);
+        }
+        previousNormalizedState = "";
+        monitor();
 
         /* Promise-based cloud implementation */
 
@@ -37472,8 +37477,8 @@ const AuroraUXState = (() => {
     */
 
     if (
-      state ===
-      previousNormalizedState
+      state === previousNormalizedState &&
+      state === currentState
     ) {
 
       return;
@@ -37555,8 +37560,10 @@ const AuroraUXState = (() => {
 
       setStatus(
         "synced",
-        "CLOUD SYNCED",
-        "Aurora data is up to date."
+        normalized.status.canWrite === false ? "CLOUD CONNECTED" : "CLOUD SYNCED",
+        normalized.status.canWrite === false
+          ? "Member view • Cloud data is up to date."
+          : "Aurora data is up to date."
       );
 
 
