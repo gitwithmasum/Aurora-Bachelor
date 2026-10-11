@@ -30,6 +30,13 @@ assert.equal(values.get("aurora_device_theme_v1"), "copper-cocoa");
 assert.deepEqual(db, original);
 assert.equal(writes, 0);
 vm.runInContext('setAuroraTheme("white-gold")', context);
+vm.runInContext('setAuroraTheme("sea-olive")', context);
+assert.equal(root.dataset.theme, "sea-olive");
+assert.equal(meta.content, "#0a5045");
+assert.equal(values.get("aurora_device_theme_v1"), "sea-olive");
+assert.deepEqual(db, original);
+assert.equal(writes, 0);
+vm.runInContext('setAuroraTheme("white-gold")', context);
 // A cloud refresh and reapplication cannot overwrite this device's preference.
 db.settings.personalization.theme = "midnight";
 vm.runInContext("applyAuroraPersonalization()", context);
@@ -51,7 +58,7 @@ assert.equal(root.dataset.theme, "white-gold");
 assert.match(script, /id="settingsTheme"\s+onchange="setAuroraTheme\(this.value\)"/);
 assert.match(script, /value="white-gold"/);
 assert.match(script, /target.id === "settingsTheme" && target.closest\("#page-settings"\)/);
-assert.match(html, /themes.css\?v=26/);
+assert.match(html, /themes.css\?v=27/);
 assert.match(fs.readFileSync("sw.js", "utf8"), /"\.\/themes.css"/);
 // First paint restores theme without needing the data store or an auth session.
 const boot = html.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -71,4 +78,9 @@ assert.match(css, /--personal-accent: #9a6449/);
 assert.match(css, /--bg: #63342d/);
 assert.match(css, /--text: #fff7ed/);
 assert.match(css, /linear-gradient\(135deg, #9a6449 0%, #63342d 100%\)/);
+vm.runInNewContext(boot, {localStorage: {getItem: () => "sea-olive"},
+  document: {documentElement: bootRoot, querySelector: () => bootMeta}});
+assert.equal(bootRoot.dataset.theme, "sea-olive");
+assert.equal(bootMeta.content, "#0a5045");
+assert.match(css, /linear-gradient\(135deg, #6d8f21 0%, #0a5045 100%\)/);
 console.log("Theme switching, reload/cloud refresh persistence, storage fallback, member controls and data preservation passed.");

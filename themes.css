@@ -147,24 +147,93 @@ html[data-theme="copper-cocoa"] {
   --skin-33: #63342d;
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) body {
+html[data-theme="sea-olive"] {
+  color-scheme: dark;
+  --bg: #0a5045;
+  --panel: #0a5045;
+  --panel-2: #6d8f21;
+  --line: #a0bb65;
+  --text: #f5ffe4;
+  --muted: #dfebc9;
+  --cyan: #dcf7a3;
+  --blue: #cae4a0;
+  --violet: #c5e18d;
+  --green: #b8efd0;
+  --red: #ffbdc7;
+  --amber: #ffe1a0;
+  --personal-accent: #6d8f21;
+  --personal-rgb: 109, 143, 33;
+  --aurora-bg: var(--bg);
+  --aurora-panel: var(--panel);
+  --aurora-panel-2: var(--panel-2);
+  --aurora-text: var(--text);
+  --aurora-muted: var(--muted);
+  --aurora-border: var(--line);
+  --aurora-border-strong: #6d8f21;
+  --aurora-primary: var(--cyan);
+  --aurora-cyan: var(--cyan);
+  --aurora-primary-soft: #6d8f21;
+  --aurora-success: var(--green);
+  --aurora-danger: var(--red);
+  --aurora-warning: var(--amber);
+  --shadow: 0 12px 35px rgba(10, 80, 69, .10);
+  --aurora-shadow: var(--shadow);
+  --aurora-glow-small: 0 0 6px rgba(109, 143, 33, .06);
+  --aurora-glow-large: 0 0 20px rgba(109, 143, 33, .08);
+  --skin-0: #6d8f21;
+  --skin-1: #dfebc9;
+  --skin-2: #dfebc920;
+  --skin-3: #0a5045;
+  --skin-4: #6d8f21;
+  --skin-5: #0a5045;
+  --skin-6: #0a5045;
+  --skin-7: #dfebc940;
+  --skin-8: #6d8f21;
+  --skin-9: #0a5045;
+  --skin-10: #6d8f21;
+  --skin-11: #0a5045;
+  --skin-12: #6d8f21;
+  --skin-13: #0a5045;
+  --skin-14: #f5ffe4;
+  --skin-15: #6d8f21;
+  --skin-16: #0a5045;
+  --skin-17: #f5ffe4;
+  --skin-18: #a0bb65;
+  --skin-19: #0a504560;
+  --skin-20: #dfebc9;
+  --skin-21: #0a5045;
+  --skin-22: #6d8f21;
+  --skin-23: #a0bb65;
+  --skin-24: #6d8f21;
+  --skin-25: #dfebc930;
+  --skin-26: #dfebc950;
+  --skin-27: #0a5045;
+  --skin-28: #df9da6;
+  --skin-29: #6d8f21;
+  --skin-30: #0a5045;
+  --skin-31: #dfebc940;
+  --skin-32: #a0bb65;
+  --skin-33: #0a5045;
+}
+
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) body {
   background: radial-gradient(ellipse at 85% 0, var(--skin-0), transparent 45%), var(--bg) !important;
   color: var(--text);
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .stars {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .stars {
   opacity: .18;
   background-image: radial-gradient(var(--skin-1) 1px, transparent 1px);
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .aurora { opacity: .07; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"])[data-background="grid"] body::before {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .aurora { opacity: .07; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"])[data-background="grid"] body::before {
   background-image: linear-gradient(var(--skin-2) 1px, transparent 1px), linear-gradient(90deg, var(--skin-2) 1px, transparent 1px);
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"])[data-background="minimal"] body { background: var(--bg) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"])[data-background="minimal"] body { background: var(--bg) !important; }
 
 /* Main surfaces, accounting tables, settings, profile and onboarding dialogs. */
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(
   .sidebar, .card, .stat-card, .report-panel, .setting-card, .settings-card,
   .hero, .settings-hero, .module-header, .sheet-toolbar, .data-sheet,
   .top-actions, .month-select, .month-dropdown, .account-switcher,
@@ -185,7 +254,7 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
   box-shadow: var(--shadow) !important;
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(
   .ledger-grid > div, .ledger-final > div, .profile-id,
   .version-preview-grid > div, .version-preview-months,
   .aurora-install-terminal, .aurora-update-status,
@@ -199,7 +268,7 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
 }
 
 /* The legacy UI uses literal neon/white text in many component variants. */
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(
   h1, h2, h3, h4, p, label, strong, small, td, th, li,
   .brand-text, .brand-subtitle, .nav-item, .system-status,
   .stat-value, .stat-label, .stat-sub, .identity-line, .meta-line,
@@ -212,24 +281,24 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
   .aac-row span, .data-core, .notification-title, .notification-text
 ) { color: var(--text) !important; }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) span { color: inherit !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.aurora-sync-meta, .aurora-sync-revision,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) span { color: inherit !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.aurora-sync-meta, .aurora-sync-revision,
   .meta-line > span, .status-label, .aurora-month-lock-view,
   .aurora-dash-empty, .aurora-notification-status) { color: var(--muted) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.aurora-intel-eyebrow,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.aurora-intel-eyebrow,
   .aurora-notification-code, .profile-eyebrow, .eyebrow-code,
   .aurora-intel-section-head span, .aurora-intel-panel-head span) { color: var(--cyan) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.aurora-month-lock-state.open,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.aurora-month-lock-state.open,
   .meta-live, .aurora-dash-live-tag, .profile-status) { color: var(--green) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .aurora-notification-badge {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .aurora-notification-badge {
   background: var(--skin-6) !important;
   color: var(--skin-3) !important;
   box-shadow: none;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) #auroraMonthLockControl .aurora-month-lock-state.open { color: var(--green) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) #auroraSyncHud :is(span, strong) { color: var(--muted) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) #auroraMonthLockControl .aurora-month-lock-state.open { color: var(--green) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) #auroraSyncHud :is(span, strong) { color: var(--muted) !important; }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(
   .eyebrow, .settings-eyebrow, .section-head h2, .settings-icon,
   .month-day-number, .meal-day-number, .meal-row-total,
   .aurora-activity-icon, .version-revision, .profile-id,
@@ -237,29 +306,29 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(
   .aurora-invite-gate-icon, .login-core-icon
 ) { color: var(--cyan) !important; border-color: var(--line) !important; }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(h1, h2, h3, .aurora-install-header h2 span,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(h1, h2, h3, .aurora-install-header h2 span,
   .aurora-update-modal h2 span, .aurora-invite-gate-header h1 strong) {
   -webkit-text-fill-color: currentColor;
   text-shadow: none !important;
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(input, select, textarea, option, optgroup,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(input, select, textarea, option, optgroup,
   .meal-input, .sheet-search, .settings-field input, .settings-field select) {
   background: var(--skin-3) !important;
   color: var(--text) !important;
   border-color: var(--line) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(input, textarea)::placeholder { color: var(--muted); }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(input, select, textarea):focus {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(input, textarea)::placeholder { color: var(--muted); }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(input, select, textarea):focus {
   border-color: var(--cyan) !important;
   box-shadow: 0 0 0 3px var(--skin-7) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) option:checked { background: var(--skin-8) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(th, .data-sheet th) { background: var(--skin-9) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(td, th) { border-color: var(--line) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) tbody tr:hover { background: var(--skin-10) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) option:checked { background: var(--skin-8) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(th, .data-sheet th) { background: var(--skin-9) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(td, th) { border-color: var(--line) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) tbody tr:hover { background: var(--skin-10) !important; }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(button, .btn, .icon-btn, .sheet-btn,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(button, .btn, .icon-btn, .sheet-btn,
   .member-action, .aurora-action-btn, .profile-action, .aac-btn,
   .settings-action, .google-login-btn, .aurora-invite-google) {
   color: var(--text);
@@ -267,12 +336,12 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(button, .btn
   background: var(--skin-11);
   text-shadow: none;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .nav-item { background: transparent; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.nav-item.active, .month-option.active) {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .nav-item { background: transparent; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.nav-item.active, .month-option.active) {
   background: linear-gradient(90deg, var(--skin-12), var(--skin-13)) !important;
   color: var(--skin-14) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.btn.primary, .sheet-btn.primary,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.btn.primary, .sheet-btn.primary,
   .settings-save-btn, .aurora-install-primary, .aurora-update-primary,
   .aurora-invite-install-btn, .aurora-invite-continue-btn, .aurora-restore-confirm,
   .aurora-confirm-accept) {
@@ -281,56 +350,56 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.btn.primary
   border-color: var(--skin-18) !important;
   box-shadow: 0 5px 16px var(--skin-19) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) button:hover { border-color: var(--skin-20) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(button, a, select):focus-visible {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) button:hover { border-color: var(--skin-20) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(button, a, select):focus-visible {
   outline: 2px solid var(--skin-6);
   outline-offset: 3px;
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .settings-toggle { background: var(--skin-21); border-color: var(--line); }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .settings-toggle i { background: var(--skin-22); border-color: var(--skin-23); }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .settings-toggle input:checked + i { background: var(--skin-24); border-color: var(--skin-6); box-shadow: none; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .settings-toggle input:checked + i::after { background: var(--skin-6); box-shadow: none; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .title-cursor { box-shadow: 0 0 8px var(--skin-25) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.brand-text, .page-heading, .top-actions, .module-header)::before,
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.brand-text, .page-heading, .top-actions, .module-header)::after {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .settings-toggle { background: var(--skin-21); border-color: var(--line); }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .settings-toggle i { background: var(--skin-22); border-color: var(--skin-23); }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .settings-toggle input:checked + i { background: var(--skin-24); border-color: var(--skin-6); box-shadow: none; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .settings-toggle input:checked + i::after { background: var(--skin-6); box-shadow: none; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .title-cursor { box-shadow: 0 0 8px var(--skin-25) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.brand-text, .page-heading, .top-actions, .module-header)::before,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.brand-text, .page-heading, .top-actions, .module-header)::after {
   background: linear-gradient(90deg, transparent, var(--skin-26), transparent) !important;
   box-shadow: none !important;
 }
 
 /* Preserve the meaning of success/error statuses on the light palette. */
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.danger, .btn.danger, .negative,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.danger, .btn.danger, .negative,
   .member-action.delete, .aac-btn.remove-admin, .aac-btn.remove-invite,
   .aurora-confirm-accept.danger, .aurora-confirm-icon.danger) {
   color: var(--red) !important;
   background: var(--skin-27) !important;
   border-color: var(--skin-28) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.positive, .success, .member-status.active) { color: var(--green) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.warning, .pending, .aac-role-badge.admin) { color: var(--amber) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.progress > i, .aurora-intel-progress i) {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.positive, .success, .member-status.active) { color: var(--green) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.warning, .pending, .aac-role-badge.admin) { color: var(--amber) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.progress > i, .aurora-intel-progress i) {
   background: linear-gradient(90deg, var(--skin-29), var(--skin-30)) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.avatar, .member-avatar, .aac-avatar, .profile-avatar) {
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.avatar, .member-avatar, .aac-avatar, .profile-avatar) {
   color: var(--skin-14) !important;
   background: var(--skin-8) !important;
   border-color: var(--line) !important;
 }
 
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.modal-backdrop, .aurora-modal-backdrop,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.modal-backdrop, .aurora-modal-backdrop,
   .ledger-overlay, .profile-overlay, .aurora-invite-overlay, .aurora-confirm-backdrop,
   .aurora-install-backdrop, .aurora-update-backdrop, .aurora-restore-backdrop) {
   background: rgba(65, 52, 25, .25) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .aurora-invite-gate-bg { background: var(--bg) !important; }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) :is(.settings-card, .card, .hero, .module-header,
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .aurora-invite-gate-bg { background: var(--bg) !important; }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) :is(.settings-card, .card, .hero, .module-header,
   .aurora-profile-panel, .aurora-install-modal, .aurora-update-modal)::before {
   background: linear-gradient(90deg, transparent, var(--skin-31), transparent) !important;
 }
-html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) * { scrollbar-color: var(--skin-32) var(--skin-33); }
+html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) * { scrollbar-color: var(--skin-32) var(--skin-33); }
 
 @media (prefers-reduced-motion: reduce) {
-  html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) .aurora { animation: none; }
+  html:is([data-theme="white-gold"], [data-theme="copper-cocoa"], [data-theme="sea-olive"]) .aurora { animation: none; }
 }
 
 html[data-theme="copper-cocoa"] .aurora-notification-badge { color: #fff7ed !important; }
@@ -352,6 +421,27 @@ html[data-theme="copper-cocoa"] :is(.modal-backdrop, .aurora-modal-backdrop,
   .ledger-overlay, .profile-overlay, .aurora-invite-overlay, .aurora-confirm-backdrop,
   .aurora-install-backdrop, .aurora-update-backdrop, .aurora-restore-backdrop) {
   background: rgba(99, 52, 45, .8) !important;
+}
+
+html[data-theme="sea-olive"] .aurora-notification-badge { color: #f5ffe4 !important; }
+html[data-theme="sea-olive"] .settings-toggle input:checked + i::after { background: #0a5045; }
+
+/* Deep Sea & Olive fills the entire viewport in every background mode. */
+html[data-theme="sea-olive"] body,
+html[data-theme="sea-olive"][data-background] body {
+  background: linear-gradient(135deg, #6d8f21 0%, #0a5045 100%) !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="sea-olive"] .aurora,
+html[data-theme="sea-olive"] .stars { display: none; }
+html[data-theme="sea-olive"] :is(.app, .main, .main-content) { background: transparent !important; }
+html[data-theme="sea-olive"] .aurora-invite-gate-bg {
+  background: linear-gradient(135deg, #6d8f21, #0a5045) !important;
+}
+html[data-theme="sea-olive"] :is(.modal-backdrop, .aurora-modal-backdrop,
+  .ledger-overlay, .profile-overlay, .aurora-invite-overlay, .aurora-confirm-backdrop,
+  .aurora-install-backdrop, .aurora-update-backdrop, .aurora-restore-backdrop) {
+  background: rgba(10, 80, 69, .8) !important;
 }
 
 /* Keep Profile beside the mobile navigation rather than shrinking/covering it. */

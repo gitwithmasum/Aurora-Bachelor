@@ -9,9 +9,9 @@
     // Restore the device theme before the first paint; never write household data.
     try {
       const theme = localStorage.getItem("aurora_device_theme_v1");
-      if (["aurora", "midnight", "white-gold", "copper-cocoa"].includes(theme)) {
+      if (["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive"].includes(theme)) {
         document.documentElement.dataset.theme = theme;
-        document.querySelector('meta[name="theme-color"]').content = theme === "copper-cocoa" ? "#63342d" : theme === "white-gold" ? "#faf7ef" : "#07111f";
+        document.querySelector('meta[name="theme-color"]').content = theme === "sea-olive" ? "#0a5045" : theme === "copper-cocoa" ? "#63342d" : theme === "white-gold" ? "#faf7ef" : "#07111f";
       }
     } catch (_) {}
   </script>
@@ -28,7 +28,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
   <link rel="stylesheet" href="./style_v3.css?v=15">
-  <link rel="stylesheet" href="./themes.css?v=26">
+  <link rel="stylesheet" href="./themes.css?v=27">
 
 </head>
 
@@ -2284,7 +2284,7 @@
   </script>
 
 
-  <script src="./script.js?v=23" defer></script>
+  <script src="./script.js?v=24" defer></script>
 
 </body>
 
