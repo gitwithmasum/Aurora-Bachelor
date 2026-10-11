@@ -25421,6 +25421,9 @@ function renderSettings() {
               <option value="white-gold" ${personalization.theme === "white-gold" ? "selected" : ""}>
                 White &amp; Gold
               </option>
+              <option value="copper-cocoa" ${personalization.theme === "copper-cocoa" ? "selected" : ""}>
+                Copper &amp; Cocoa
+              </option>
 
             </select>
 
@@ -26939,11 +26942,11 @@ function getAuroraTheme(fallback = "aurora") {
   let saved;
   try { saved = localStorage.getItem("aurora_device_theme_v1"); } catch (_) {}
   const theme = saved || fallback;
-  return ["aurora", "midnight", "white-gold"].includes(theme) ? theme : "aurora";
+  return ["aurora", "midnight", "white-gold", "copper-cocoa"].includes(theme) ? theme : "aurora";
 }
 
 function setAuroraTheme(theme) {
-  if (!["aurora", "midnight", "white-gold"].includes(theme)) return;
+  if (!["aurora", "midnight", "white-gold", "copper-cocoa"].includes(theme)) return;
   try { localStorage.setItem("aurora_device_theme_v1", theme); } catch (_) {}
   applyAuroraPersonalization(theme);
   toast("Theme applied to this device.");
@@ -26970,7 +26973,7 @@ function applyAuroraPersonalization(themeOverride) {
     themeOverride || getAuroraTheme(personalization.theme);
 
   document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
-    meta.content = root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
+    meta.content = root.dataset.theme === "copper-cocoa" ? "#63342d" : root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
   });
 
 

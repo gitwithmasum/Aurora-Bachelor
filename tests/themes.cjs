@@ -23,6 +23,13 @@ assert.equal(root.dataset.animation, "reduced");
 assert.equal(root.dataset.density, "compact");
 assert.deepEqual(db, original);
 assert.equal(writes, 0); // Members change appearance without cloud/database writes.
+vm.runInContext('setAuroraTheme("copper-cocoa")', context);
+assert.equal(root.dataset.theme, "copper-cocoa");
+assert.equal(meta.content, "#63342d");
+assert.equal(values.get("aurora_device_theme_v1"), "copper-cocoa");
+assert.deepEqual(db, original);
+assert.equal(writes, 0);
+vm.runInContext('setAuroraTheme("white-gold")', context);
 // A cloud refresh and reapplication cannot overwrite this device's preference.
 db.settings.personalization.theme = "midnight";
 vm.runInContext("applyAuroraPersonalization()", context);
@@ -44,7 +51,7 @@ assert.equal(root.dataset.theme, "white-gold");
 assert.match(script, /id="settingsTheme"\s+onchange="setAuroraTheme\(this.value\)"/);
 assert.match(script, /value="white-gold"/);
 assert.match(script, /target.id === "settingsTheme" && target.closest\("#page-settings"\)/);
-assert.match(html, /themes.css\?v=24/);
+assert.match(html, /themes.css\?v=25/);
 assert.match(fs.readFileSync("sw.js", "utf8"), /"\.\/themes.css"/);
 // First paint restores theme without needing the data store or an auth session.
 const boot = html.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -54,4 +61,12 @@ vm.runInNewContext(boot, {localStorage: {getItem: () => "white-gold"},
   document: {documentElement: bootRoot, querySelector: () => bootMeta}});
 assert.equal(bootRoot.dataset.theme, "white-gold");
 assert.equal(bootMeta.content, "#faf7ef");
+vm.runInNewContext(boot, {localStorage: {getItem: () => "copper-cocoa"},
+  document: {documentElement: bootRoot, querySelector: () => bootMeta}});
+assert.equal(bootRoot.dataset.theme, "copper-cocoa");
+assert.equal(bootMeta.content, "#63342d");
+assert.match(script, /value="copper-cocoa"/);
+const css = fs.readFileSync("themes.css", "utf8");
+assert.match(css, /--personal-accent: #9a6449/);
+assert.match(css, /--cyan: #63342d/);
 console.log("Theme switching, reload/cloud refresh persistence, storage fallback, member controls and data preservation passed.");
