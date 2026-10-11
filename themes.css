@@ -79,19 +79,19 @@ html[data-theme="white-gold"] {
 }
 
 html[data-theme="copper-cocoa"] {
-  color-scheme: light;
-  --bg: #f8f0eb;
-  --panel: #fffaf7;
-  --panel-2: #f1e1d7;
-  --line: #d9b9a6;
-  --text: #3b211d;
-  --muted: #76594e;
-  --cyan: #63342d;
-  --blue: #63342d;
-  --violet: #9a6449;
-  --green: #176344;
-  --red: #b02b46;
-  --amber: #805709;
+  color-scheme: dark;
+  --bg: #63342d;
+  --panel: #63342d;
+  --panel-2: #9a6449;
+  --line: #c39179;
+  --text: #fff7ed;
+  --muted: #f0d8c9;
+  --cyan: #ffdbbd;
+  --blue: #f3c7a5;
+  --violet: #efbb9b;
+  --green: #b8efd0;
+  --red: #ffbdc7;
+  --amber: #ffe1a0;
   --personal-accent: #9a6449;
   --personal-rgb: 154, 100, 73;
   --aurora-bg: var(--bg);
@@ -103,7 +103,7 @@ html[data-theme="copper-cocoa"] {
   --aurora-border-strong: #9a6449;
   --aurora-primary: var(--cyan);
   --aurora-cyan: var(--cyan);
-  --aurora-primary-soft: #ead4c7;
+  --aurora-primary-soft: #9a6449;
   --aurora-success: var(--green);
   --aurora-danger: var(--red);
   --aurora-warning: var(--amber);
@@ -111,40 +111,40 @@ html[data-theme="copper-cocoa"] {
   --aurora-shadow: var(--shadow);
   --aurora-glow-small: 0 0 6px rgba(154, 100, 73, .06);
   --aurora-glow-large: 0 0 20px rgba(154, 100, 73, .08);
-  --skin-0: #ead8cf;
-  --skin-1: #9a6449;
-  --skin-2: #9a644920;
-  --skin-3: #fffaf7;
-  --skin-4: #f7eee8;
-  --skin-5: #f1e1d7;
+  --skin-0: #9a6449;
+  --skin-1: #f0d8c9;
+  --skin-2: #f0d8c920;
+  --skin-3: #63342d;
+  --skin-4: #9a6449;
+  --skin-5: #63342d;
   --skin-6: #63342d;
-  --skin-7: #9a644925;
-  --skin-8: #ead4c7;
-  --skin-9: #f0dfd4;
-  --skin-10: #f4e6dc;
-  --skin-11: #fff6ef;
-  --skin-12: #e3c6b7;
-  --skin-13: #f7eee8;
-  --skin-14: #63342d;
+  --skin-7: #f0d8c940;
+  --skin-8: #9a6449;
+  --skin-9: #63342d;
+  --skin-10: #9a6449;
+  --skin-11: #63342d;
+  --skin-12: #9a6449;
+  --skin-13: #63342d;
+  --skin-14: #fff7ed;
   --skin-15: #9a6449;
   --skin-16: #63342d;
   --skin-17: #fff7ed;
-  --skin-18: #63342d;
-  --skin-19: #9a644920;
-  --skin-20: #9a6449;
-  --skin-21: #f8f0eb;
-  --skin-22: #dfc3b3;
-  --skin-23: #9a6449;
-  --skin-24: #c9a18b;
-  --skin-25: #63342d30;
-  --skin-26: #9a644950;
-  --skin-27: #fff0f3;
-  --skin-28: #e1a7b3;
-  --skin-29: #63342d;
-  --skin-30: #9a6449;
-  --skin-31: #9a644940;
-  --skin-32: #b48c75;
-  --skin-33: #f4e6dc;
+  --skin-18: #c39179;
+  --skin-19: #63342d60;
+  --skin-20: #f0d8c9;
+  --skin-21: #63342d;
+  --skin-22: #9a6449;
+  --skin-23: #c39179;
+  --skin-24: #9a6449;
+  --skin-25: #f0d8c930;
+  --skin-26: #f0d8c950;
+  --skin-27: #63342d;
+  --skin-28: #df9da6;
+  --skin-29: #9a6449;
+  --skin-30: #63342d;
+  --skin-31: #f0d8c940;
+  --skin-32: #c39179;
+  --skin-33: #63342d;
 }
 
 html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) body {
@@ -335,6 +335,24 @@ html:is([data-theme="white-gold"], [data-theme="copper-cocoa"]) * { scrollbar-co
 
 html[data-theme="copper-cocoa"] .aurora-notification-badge { color: #fff7ed !important; }
 html[data-theme="copper-cocoa"] .settings-toggle input:checked + i::after { background: #63342d; }
+
+/* Copper & Cocoa fills the entire viewport in every background mode. */
+html[data-theme="copper-cocoa"] body,
+html[data-theme="copper-cocoa"][data-background] body {
+  background: linear-gradient(135deg, #9a6449 0%, #63342d 100%) !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="copper-cocoa"] .aurora,
+html[data-theme="copper-cocoa"] .stars { display: none; }
+html[data-theme="copper-cocoa"] :is(.app, .main, .main-content) { background: transparent !important; }
+html[data-theme="copper-cocoa"] .aurora-invite-gate-bg {
+  background: linear-gradient(135deg, #9a6449, #63342d) !important;
+}
+html[data-theme="copper-cocoa"] :is(.modal-backdrop, .aurora-modal-backdrop,
+  .ledger-overlay, .profile-overlay, .aurora-invite-overlay, .aurora-confirm-backdrop,
+  .aurora-install-backdrop, .aurora-update-backdrop, .aurora-restore-backdrop) {
+  background: rgba(99, 52, 45, .8) !important;
+}
 
 /* Keep Profile beside the mobile navigation rather than shrinking/covering it. */
 @media (max-width: 720px) {

@@ -51,7 +51,7 @@ assert.equal(root.dataset.theme, "white-gold");
 assert.match(script, /id="settingsTheme"\s+onchange="setAuroraTheme\(this.value\)"/);
 assert.match(script, /value="white-gold"/);
 assert.match(script, /target.id === "settingsTheme" && target.closest\("#page-settings"\)/);
-assert.match(html, /themes.css\?v=25/);
+assert.match(html, /themes.css\?v=26/);
 assert.match(fs.readFileSync("sw.js", "utf8"), /"\.\/themes.css"/);
 // First paint restores theme without needing the data store or an auth session.
 const boot = html.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -68,5 +68,7 @@ assert.equal(bootMeta.content, "#63342d");
 assert.match(script, /value="copper-cocoa"/);
 const css = fs.readFileSync("themes.css", "utf8");
 assert.match(css, /--personal-accent: #9a6449/);
-assert.match(css, /--cyan: #63342d/);
+assert.match(css, /--bg: #63342d/);
+assert.match(css, /--text: #fff7ed/);
+assert.match(css, /linear-gradient\(135deg, #9a6449 0%, #63342d 100%\)/);
 console.log("Theme switching, reload/cloud refresh persistence, storage fallback, member controls and data preservation passed.");
