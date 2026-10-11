@@ -65,6 +65,13 @@ assert.equal(values.get("aurora_device_theme_v1"), "slate-serenity");
 assert.deepEqual(db, original);
 assert.equal(writes, 0);
 vm.runInContext('setAuroraTheme("white-gold")', context);
+vm.runInContext('setAuroraTheme("plum-orchid")', context);
+assert.equal(root.dataset.theme, "plum-orchid");
+assert.equal(meta.content, "#330033");
+assert.equal(values.get("aurora_device_theme_v1"), "plum-orchid");
+assert.deepEqual(db, original);
+assert.equal(writes, 0);
+vm.runInContext('setAuroraTheme("white-gold")', context);
 // A cloud refresh and reapplication cannot overwrite this device's preference.
 db.settings.personalization.theme = "midnight";
 vm.runInContext("applyAuroraPersonalization()", context);
@@ -86,7 +93,7 @@ assert.equal(root.dataset.theme, "white-gold");
 assert.match(script, /id="settingsTheme"\s+onchange="setAuroraTheme\(this.value\)"/);
 assert.match(script, /value="white-gold"/);
 assert.match(script, /target.id === "settingsTheme" && target.closest\("#page-settings"\)/);
-assert.match(html, /themes.css\?v=32/);
+assert.match(html, /themes.css\?v=33/);
 assert.match(fs.readFileSync("sw.js", "utf8"), /"\.\/themes.css"/);
 // First paint restores theme without needing the data store or an auth session.
 const boot = html.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -131,4 +138,9 @@ vm.runInNewContext(boot, {localStorage: {getItem: () => "slate-serenity"},
 assert.equal(bootRoot.dataset.theme, "slate-serenity");
 assert.equal(bootMeta.content, "#2b2539");
 for (const color of ["#2b2539", "#ebe9e4", "#efc8c8", "#bed3cc", "#7b6767"]) assert.ok(css.includes(color));
+vm.runInNewContext(boot, {localStorage: {getItem: () => "plum-orchid"},
+  document: {documentElement: bootRoot, querySelector: () => bootMeta}});
+assert.equal(bootRoot.dataset.theme, "plum-orchid");
+assert.equal(bootMeta.content, "#330033");
+for (const color of ["#330033", "#47165d", "#982062", "#9d529b", "#cb77cc"]) assert.ok(css.includes(color));
 console.log("Theme switching, reload/cloud refresh persistence, storage fallback, member controls and data preservation passed.");
