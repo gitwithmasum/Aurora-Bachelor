@@ -1023,3 +1023,11 @@ html[data-theme="afads-special"] :is(.sidebar,.card,.stat-card,.settings-card,.h
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* Thor's Special — full-screen thunderstorm photograph, crisp unobscured lightning. */
+html[data-theme="thors-special"]{color-scheme:dark;--bg:#07182c;--panel:#0b223c;--panel-2:#183653;--line:#4387c4;--text:#f2faff;--muted:#bfd5eb;--cyan:#7bdfff;--blue:#48a9ff;--violet:#aeacff;--green:#83e9bc;--red:#ff9cb1;--amber:#ffe6a8;--personal-accent:#59c9ff;--shadow:0 12px 34px #010915b0;--skin-0:#19598c;--skin-1:#7bdfff;--skin-2:#347bbe30;--skin-3:#0b223c;--skin-4:#152f4d;--skin-5:#203f60;--skin-6:#7bdfff;--skin-7:#4daeff55;--skin-8:#1e446c;--skin-9:#163350;--skin-10:#1c405f;--aurora-shadow:var(--shadow)}
+html[data-theme="thors-special"] body,html[data-theme="thors-special"][data-background] body{background-color:#07182c!important;background-image:url("./Assets/themes/Three-Tier%20Thunderstorm.png")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;background-attachment:fixed!important;filter:none!important;color:var(--text)!important}
+html[data-theme="thors-special"] :is(.stars,.aurora){display:none!important}
+html[data-theme="thors-special"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
+html[data-theme="thors-special"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(5,18,36,.87)!important;border-color:rgba(113,193,255,.4)!important;color:var(--text)!important;box-shadow:0 12px 32px #02091699!important}
+@media(max-width:720px){html[data-theme="thors-special"] body{background-position:center center!important}}
