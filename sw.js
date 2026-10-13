@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v42";
+    "aurora-bachelor-v43";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -27,7 +27,8 @@ const CORE_FILES = [
     "./Assets/themes/ocean-wave-neon.svg",
     "./Assets/themes/violet-neon-stripes.svg",
     "./Assets/themes/sky-blue-waves.svg",
-    "./Assets/themes/neon-circuit-blue.svg"
+    "./Assets/themes/neon-circuit-blue.svg",
+    "./Assets/themes/afads-special.jpg"
 ];
 
 

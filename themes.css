@@ -986,3 +986,10 @@ html[data-theme="neon-circuit-blue"] body,html[data-theme="neon-circuit-blue"][d
 html[data-theme="neon-circuit-blue"] :is(.stars,.aurora){display:none!important}
 html[data-theme="neon-circuit-blue"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
 html[data-theme="neon-circuit-blue"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(5,23,80,.9)!important;border-color:#238ed880!important;color:var(--text)!important;box-shadow:0 12px 32px #020b3e88!important}
+
+/* Afad's Special: scenic supercar sunset background. */
+html[data-theme="afads-special"]{color-scheme:dark;--bg:#162b40;--panel:#1a3045;--panel-2:#284660;--line:#79b5bf;--text:#fff9f0;--muted:#d7dfe6;--cyan:#6edcf5;--blue:#80cdec;--violet:#e7a1bb;--green:#85e5ba;--red:#ffb4a9;--amber:#ffd497;--personal-accent:#68d8ec;--shadow:0 12px 34px #071626a8;--skin-0:#ffbd80;--skin-1:#6edcf5;--skin-2:#39678235;--skin-3:#1a3045;--skin-4:#203e55;--skin-5:#294b61;--skin-6:#6edcf5;--skin-7:#53c4e555;--skin-8:#325b70;--skin-9:#243f53;--skin-10:#294a60;--aurora-shadow:var(--shadow)}
+html[data-theme="afads-special"] body,html[data-theme="afads-special"][data-background] body{background:#162b40 url("./Assets/themes/afads-special.jpg") center center/cover fixed no-repeat!important;color:var(--text)!important}
+html[data-theme="afads-special"] :is(.stars,.aurora){display:none!important}
+html[data-theme="afads-special"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
+html[data-theme="afads-special"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(14,31,45,.87)!important;border-color:rgba(126,205,225,.40)!important;color:var(--text)!important;box-shadow:0 12px 34px #07162699!important}

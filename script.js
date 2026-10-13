@@ -25462,6 +25462,7 @@ function renderSettings() {
               </option>
               <option value="sky-blue-waves" ${personalization.theme === "sky-blue-waves" ? "selected" : ""}>Sky Blue &amp; White Waves</option>
               <option value="neon-circuit-blue" ${personalization.theme === "neon-circuit-blue" ? "selected" : ""}>Neon Circuit Blue</option>
+              <option value="afads-special" ${personalization.theme === "afads-special" ? "selected" : ""}>Afad&#39;s Special</option>
 
             </select>
 
@@ -26980,11 +26981,11 @@ function getAuroraTheme(fallback = "aurora") {
   let saved;
   try { saved = localStorage.getItem("aurora_device_theme_v1"); } catch (_) {}
   const theme = saved || fallback;
-  return ["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves", "neon-circuit-blue"].includes(theme) ? theme : "aurora";
+  return ["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves", "neon-circuit-blue", "afads-special"].includes(theme) ? theme : "aurora";
 }
 
 function setAuroraTheme(theme) {
-  if (!["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves", "neon-circuit-blue"].includes(theme)) return;
+  if (!["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves", "neon-circuit-blue", "afads-special"].includes(theme)) return;
   try { localStorage.setItem("aurora_device_theme_v1", theme); } catch (_) {}
   applyAuroraPersonalization(theme);
   toast("Theme applied to this device.");
@@ -27011,7 +27012,7 @@ function applyAuroraPersonalization(themeOverride) {
     themeOverride || getAuroraTheme(personalization.theme);
 
   document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
-    meta.content = root.dataset.theme === "neon-circuit-blue" ? "#061b77" : root.dataset.theme === "sky-blue-waves" ? "#a9dcff" : root.dataset.theme === "violet-neon-stripes" ? "#170a68" : root.dataset.theme === "ocean-wave-neon" ? "#081b9f" : root.dataset.theme === "pink-purple-waves" ? "#fffafd" : root.dataset.theme === "plum-orchid" ? "#330033" : root.dataset.theme === "slate-serenity" ? "#2b2539" : root.dataset.theme === "arctic-teal" ? "#0f282f" : root.dataset.theme === "bay-olivine" ? "#465c8d" : root.dataset.theme === "mirage-sky" ? "#1a262c" : root.dataset.theme === "sea-olive" ? "#0a5045" : root.dataset.theme === "copper-cocoa" ? "#63342d" : root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
+    meta.content = root.dataset.theme === "afads-special" ? "#20334b" : root.dataset.theme === "neon-circuit-blue" ? "#061b77" : root.dataset.theme === "sky-blue-waves" ? "#a9dcff" : root.dataset.theme === "violet-neon-stripes" ? "#170a68" : root.dataset.theme === "ocean-wave-neon" ? "#081b9f" : root.dataset.theme === "pink-purple-waves" ? "#fffafd" : root.dataset.theme === "plum-orchid" ? "#330033" : root.dataset.theme === "slate-serenity" ? "#2b2539" : root.dataset.theme === "arctic-teal" ? "#0f282f" : root.dataset.theme === "bay-olivine" ? "#465c8d" : root.dataset.theme === "mirage-sky" ? "#1a262c" : root.dataset.theme === "sea-olive" ? "#0a5045" : root.dataset.theme === "copper-cocoa" ? "#63342d" : root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
   });
 
 
