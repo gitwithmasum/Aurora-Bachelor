@@ -993,3 +993,12 @@ html[data-theme="afads-special"] body,html[data-theme="afads-special"][data-back
 html[data-theme="afads-special"] :is(.stars,.aurora){display:none!important}
 html[data-theme="afads-special"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
 html[data-theme="afads-special"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(14,31,45,.87)!important;border-color:rgba(126,205,225,.40)!important;color:var(--text)!important;box-shadow:0 12px 34px #07162699!important}
+
+/* Aurora's Special: full-resolution neon-blue hypercar photograph; no blur or backdrop-filter on the photo. */
+html[data-theme="auroras-special"]{color-scheme:dark;--bg:#02060d;--panel:#061528;--panel-2:#0a2443;--line:#1579c4;--text:#effbff;--muted:#bed8ed;--cyan:#11d9fc;--blue:#219dff;--violet:#6e85f9;--green:#81efc5;--red:#ff9baa;--amber:#ffe3a1;--personal-accent:#19cfff;--shadow:0 12px 35px #000b;--skin-0:#0055b3;--skin-1:#11d9fc;--skin-2:#037acc33;--skin-3:#061528;--skin-4:#0b2540;--skin-5:#0c2746;--skin-6:#11d9fc;--skin-7:#19d4f755;--skin-8:#07345a;--skin-9:#092744;--skin-10:#0a3051;--aurora-shadow:var(--shadow)}
+html[data-theme="auroras-special"] body,html[data-theme="auroras-special"][data-background] body{background-color:#02060d!important;background-image:url("./Assets/themes/auroras-special.jpg")!important;background-size:cover!important;background-position:center 55%!important;background-repeat:no-repeat!important;background-attachment:fixed!important;filter:none!important;color:var(--text)!important}
+html[data-theme="auroras-special"] :is(.stars,.aurora){display:none!important}
+html[data-theme="auroras-special"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
+html[data-theme="auroras-special"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(3,14,32,.85)!important;border-color:rgba(23,192,251,.38)!important;color:var(--text)!important;box-shadow:0 10px 32px #0008!important}
+html[data-theme="auroras-special"] body::before,html[data-theme="auroras-special"] body::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:720px){html[data-theme="auroras-special"] body{background-position:52% 55%!important}}
