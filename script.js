@@ -25457,7 +25457,7 @@ function renderSettings() {
               <option value="ocean-wave-neon" ${personalization.theme === "ocean-wave-neon" ? "selected" : ""}>
                 Ocean Neon Waves
               </option>
-              <option value="violet-neon-stripes", "sky-blue-waves" ${personalization.theme === "violet-neon-stripes", "sky-blue-waves" ? "selected" : ""}>
+              <option value="violet-neon-stripes" ${personalization.theme === "violet-neon-stripes" ? "selected" : ""}>
                 Violet Neon Stripes
               </option>
               <option value="sky-blue-waves" ${personalization.theme === "sky-blue-waves" ? "selected" : ""}>Sky Blue &amp; White Waves</option>
@@ -27010,7 +27010,7 @@ function applyAuroraPersonalization(themeOverride) {
     themeOverride || getAuroraTheme(personalization.theme);
 
   document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
-    meta.content = root.dataset.theme === "violet-neon-stripes", "sky-blue-waves" ? "#170a68" : root.dataset.theme === "ocean-wave-neon" ? "#081b9f" : root.dataset.theme === "pink-purple-waves" ? "#fffafd" : root.dataset.theme === "plum-orchid" ? "#330033" : root.dataset.theme === "slate-serenity" ? "#2b2539" : root.dataset.theme === "arctic-teal" ? "#0f282f" : root.dataset.theme === "bay-olivine" ? "#465c8d" : root.dataset.theme === "mirage-sky" ? "#1a262c" : root.dataset.theme === "sea-olive" ? "#0a5045" : root.dataset.theme === "copper-cocoa" ? "#63342d" : root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
+    meta.content = root.dataset.theme === "sky-blue-waves" ? "#a9dcff" : root.dataset.theme === "violet-neon-stripes" ? "#170a68" : root.dataset.theme === "ocean-wave-neon" ? "#081b9f" : root.dataset.theme === "pink-purple-waves" ? "#fffafd" : root.dataset.theme === "plum-orchid" ? "#330033" : root.dataset.theme === "slate-serenity" ? "#2b2539" : root.dataset.theme === "arctic-teal" ? "#0f282f" : root.dataset.theme === "bay-olivine" ? "#465c8d" : root.dataset.theme === "mirage-sky" ? "#1a262c" : root.dataset.theme === "sea-olive" ? "#0a5045" : root.dataset.theme === "copper-cocoa" ? "#63342d" : root.dataset.theme === "white-gold" ? "#faf7ef" : "#07111f";
   });
 
 

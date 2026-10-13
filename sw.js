@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v39";
+    "aurora-bachelor-v40";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
