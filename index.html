@@ -9,9 +9,9 @@
     // Restore the device theme before the first paint; never write household data.
     try {
       const theme = localStorage.getItem("aurora_device_theme_v1");
-      if (["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid"].includes(theme)) {
+      if (["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves"].includes(theme)) {
         document.documentElement.dataset.theme = theme;
-        document.querySelector('meta[name="theme-color"]').content = theme === "plum-orchid" ? "#330033" : theme === "slate-serenity" ? "#2b2539" : theme === "arctic-teal" ? "#0f282f" : theme === "bay-olivine" ? "#465c8d" : theme === "mirage-sky" ? "#1a262c" : theme === "sea-olive" ? "#0a5045" : theme === "copper-cocoa" ? "#63342d" : theme === "white-gold" ? "#faf7ef" : "#07111f";
+        document.querySelector('meta[name="theme-color"]').content = theme === "pink-purple-waves" ? "#fffafd" : theme === "plum-orchid" ? "#330033" : theme === "slate-serenity" ? "#2b2539" : theme === "arctic-teal" ? "#0f282f" : theme === "bay-olivine" ? "#465c8d" : theme === "mirage-sky" ? "#1a262c" : theme === "sea-olive" ? "#0a5045" : theme === "copper-cocoa" ? "#63342d" : theme === "white-gold" ? "#faf7ef" : "#07111f";
       }
     } catch (_) {}
   </script>
@@ -28,7 +28,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
   <link rel="stylesheet" href="./style_v3.css?v=15">
-  <link rel="stylesheet" href="./themes.css?v=33">
+  <link rel="stylesheet" href="./themes.css?v=35">
 
 </head>
 
@@ -2284,7 +2284,7 @@
   </script>
 
 
-  <script src="./script.js?v=30" defer></script>
+  <script src="./script.js?v=31" defer></script>
 
 </body>
 
