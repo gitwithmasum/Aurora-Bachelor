@@ -4222,7 +4222,7 @@ const AuroraCloudSync = (() => {
                 Polling is safety fallback.
               */
 
-              startFallbackPolling();
+              // Realtime handles cloud changes; disable five-second background fetching.
 
 
               /*
@@ -36969,6 +36969,8 @@ const AuroraUXState = (() => {
      STATUS BANNER
   ========================================================== */
 
+  let initialSyncDisplayFinished = false;
+
   function setStatus(
     state,
     title,
@@ -37020,6 +37022,16 @@ const AuroraUXState = (() => {
     text.textContent =
       message;
 
+
+    // Show sync on initial load only. Subsequent saves and realtime
+    // updates remain quiet, but offline/error/conflict alerts stay visible.
+    if (state === "synced" && !initialSyncDisplayFinished) {
+      initialSyncDisplayFinished = true;
+    } else if (initialSyncDisplayFinished &&
+      (state === "synced" || state === "syncing" || state === "connecting")) {
+      box.classList.remove("visible");
+      return;
+    }
 
     /* --------------------------------------------------------
        SYNCED = TRANSIENT ONLY
