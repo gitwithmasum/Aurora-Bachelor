@@ -961,3 +961,11 @@ html[data-theme="pink-purple-waves"] body::after { background-image: none !impor
 html[data-theme="pink-purple-waves"] :is(.app-shell, .main-content, main, .page, .content, .dashboard, .settings-page) { background: transparent !important; }
 html[data-theme="pink-purple-waves"] :is(.stars, .aurora) { display: none !important; }
 @media(max-width:720px) { html[data-theme="pink-purple-waves"] body { background-size: auto 100vh !important; background-position: center center !important; } }
+
+/* Ocean Neon Waves — theme inspired by the supplied blue/cyan ribbon reference. */
+html[data-theme="ocean-wave-neon"]{color-scheme:dark;--bg:#061069;--panel:#081b61;--panel-2:#092e87;--line:#27c1e7;--text:#f0fcff;--muted:#c3e3f7;--cyan:#12e8f0;--blue:#5bbcf9;--violet:#e090fc;--green:#79e6ba;--red:#ff9ebe;--amber:#ffe096;--personal-accent:#17e5e9;--shadow:0 8px 32px #020d4788;--skin-0:#082bba;--skin-1:#1ce7ed;--skin-2:#27d4e522;--skin-3:#091953;--skin-4:#102e7e;--skin-5:#0a3075;--skin-6:#14d7ef;--skin-7:#35ecf555;--skin-8:#133998;--skin-9:#0c2670;--skin-10:#103184;--aurora-shadow:var(--shadow)}
+html[data-theme="ocean-wave-neon"] body,html[data-theme="ocean-wave-neon"][data-background] body{background:#061069 url("./Assets/themes/ocean-wave-neon.svg") center center/cover fixed no-repeat !important;color:var(--text)!important}
+html[data-theme="ocean-wave-neon"] :is(.stars,.aurora){display:none!important}
+html[data-theme="ocean-wave-neon"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
+html[data-theme="ocean-wave-neon"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(6,22,85,.89)!important;border-color:rgba(53,224,249,.45)!important;color:var(--text)!important;box-shadow:0 12px 32px #000a4280!important}
+html[data-theme="ocean-wave-neon"] :is(.modal-backdrop,.aurora-modal-backdrop,.ledger-overlay,.profile-overlay,.aurora-invite-overlay,.aurora-confirm-backdrop,.aurora-install-backdrop,.aurora-update-backdrop,.aurora-restore-backdrop){background:rgba(2,10,45,.8)!important}
