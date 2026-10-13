@@ -26984,7 +26984,7 @@ function getAuroraTheme(fallback = "aurora") {
 }
 
 function setAuroraTheme(theme) {
-  if (!["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves"].includes(theme)) return;
+  if (!["aurora", "midnight", "white-gold", "copper-cocoa", "sea-olive", "mirage-sky", "bay-olivine", "arctic-teal", "slate-serenity", "plum-orchid", "pink-purple-waves", "ocean-wave-neon", "violet-neon-stripes", "sky-blue-waves", "neon-circuit-blue"].includes(theme)) return;
   try { localStorage.setItem("aurora_device_theme_v1", theme); } catch (_) {}
   applyAuroraPersonalization(theme);
   toast("Theme applied to this device.");
