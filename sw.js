@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v35";
+    "aurora-bachelor-v36";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -22,7 +22,8 @@ const CORE_FILES = [
     "./script.js",
     "./manifest.json",
     "./style_v3.css",
-    "./themes.css"
+    "./themes.css",
+    "./Assets/themes/pink-purple-waves-bg.svg"
 ];
 
 

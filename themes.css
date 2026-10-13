@@ -946,3 +946,18 @@ html[data-theme="pink-purple-waves"] :is(.modal-backdrop, .aurora-modal-backdrop
   html[data-theme="pink-purple-waves"] body,
   html[data-theme="pink-purple-waves"][data-background] body { background-size: auto 100% !important; background-position: center center !important; }
 }
+
+/* Reference-inspired flowing ribbon image: always visible behind application surfaces. */
+html[data-theme="pink-purple-waves"],
+html[data-theme="pink-purple-waves"] body { min-height: 100%; }
+html[data-theme="pink-purple-waves"] body,
+html[data-theme="pink-purple-waves"][data-background="aurora"] body,
+html[data-theme="pink-purple-waves"][data-background="grid"] body,
+html[data-theme="pink-purple-waves"][data-background="minimal"] body {
+  background: #fff url("./Assets/themes/pink-purple-waves-bg.svg") center center / cover fixed no-repeat !important;
+}
+html[data-theme="pink-purple-waves"] body::before,
+html[data-theme="pink-purple-waves"] body::after { background-image: none !important; pointer-events: none; }
+html[data-theme="pink-purple-waves"] :is(.app-shell, .main-content, main, .page, .content, .dashboard, .settings-page) { background: transparent !important; }
+html[data-theme="pink-purple-waves"] :is(.stars, .aurora) { display: none !important; }
+@media(max-width:720px) { html[data-theme="pink-purple-waves"] body { background-size: auto 100vh !important; background-position: center center !important; } }
