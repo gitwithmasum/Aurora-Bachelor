@@ -37881,7 +37881,7 @@ const AuroraWeeklyPlanner = (() => {
     root.append(stats);
     const period=node("div",{className:"weekly-period"});
     const periodLabel=node("div");periodLabel.append(node("strong",{},week[0].label+" — "+week[6].label),node("small",{},"Saturday to Friday"));
-    period.append(button("←",()=>shift(-1)),periodLabel,button("→",()=>shift(1)),button("This Week",()=>{offset=0;render();}));root.append(period);
+    period.append(button("←",()=>shift(-1)),periodLabel,button("→",()=>shift(1)),button("This Week",()=>{offset=0;window.renderWeeklyPlanner();}));root.append(period);
     const grid=node("div",{className:"weekly-grid"});
     const members=AuroraDataStore.get()?.members||[];
     for(const day of week){
@@ -37904,7 +37904,7 @@ const AuroraWeeklyPlanner = (() => {
     }
     root.append(grid,node("div",{id:"weeklyEditor"}));
   }
-  function shift(v){offset+=v;render();}
+  function shift(v){offset+=v;window.renderWeeklyPlanner();}
   function field(form,name,label,type,value,options){
     const wrap=node("label",{},label);
     let control;
@@ -37948,12 +37948,12 @@ const AuroraWeeklyPlanner = (() => {
     if(!canWrite())return false;
     const db=AuroraDataStore.get();const snapshot=JSON.stringify(db.weeklyPlanner||{tasks:[]});
     fn(tasks());
-    if(!AuroraDataStore.save()){db.weeklyPlanner=JSON.parse(snapshot);render();return false;}
-    render();return true;
+    if(!AuroraDataStore.save()){db.weeklyPlanner=JSON.parse(snapshot);window.renderWeeklyPlanner();return false;}
+    window.renderWeeklyPlanner();return true;
   }
   function updateStatus(id,status){if(!statuses.includes(status))return;commit(items=>{const t=items.find(x=>x.id===id);if(t){t.status=status;t.updatedAt=new Date().toISOString();}});}
   function remove(id){if(!canWrite()||!confirm("Delete this weekly task?"))return;commit(items=>{const i=items.findIndex(x=>x.id===id);if(i>=0)items.splice(i,1);});}
   return {render,shift,edit,close,updateStatus,remove,days};
 })();
 window.AuroraWeeklyPlanner=AuroraWeeklyPlanner;
-function renderWeeklyPlanner(){AuroraWeeklyPlanner.render();}
+function renderWeeklyPlanner(){AuroraWeeklyPlanner.window.renderWeeklyPlanner();}
