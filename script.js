@@ -6980,7 +6980,7 @@ function render() {
 
 
       case "weekly":
-        renderWeeklyPlanner();
+        window.renderWeeklyPlanner();
         break;
 
       case "meals":
