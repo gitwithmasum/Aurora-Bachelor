@@ -5337,7 +5337,6 @@ const AuroraApp = (() => {
   const pages = {
     dashboard: "Command Center",
     meals: "Daily Meals",
-  weekly: "Weekly Planner",
     weekly: "Weekly Planner",
     members: "Members",
     expenses: "Meal Expenses",
