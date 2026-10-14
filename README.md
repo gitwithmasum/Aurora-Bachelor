@@ -270,3 +270,8 @@ Weekly Planner includes shopping plans with scheduled date, assigned house membe
 ## Weekly Meal Planner — Phase 3
 
 Weekly Planner includes a seven-day Saturday–Friday day/night meal schedule. Each meal and optional estimated daily cost can be edited, with weekly overview, next/previous week navigation, copyable menu, and a copy-previous-week action. Weekly menus use `weeklyPlanner.mealMenus` inside the existing household data store; the app saves changes through its normal local/cloud persistence. Empty weeks display example dishes until edited; no actual meal counts, expense entries or settlement values are changed. Read-only household members can view plans but cannot edit. Bazaar Planner and the weekly task board remain separate.
+
+
+## Weekly Planner v1.5 — Reliability & Mobile
+
+Mobile and narrow-screen layouts have improved focus visibility, touch sizing, horizontal task-board scrolling, budget/checklist responsiveness and reduced-motion behaviour. The task renderer now refreshes all four planner modules after edits rather than leaving sibling modules hidden. `tests/weekly-planner.cjs` contains Node regression checks for module registration, JavaScript syntax, PWA precache, duty rotation order, manual overrides and data separation. Run locally with `node tests/weekly-planner.cjs`. These source tests do **not** substitute for Android/PWA interaction checks or authenticated multi-device Supabase persistence tests. Service-worker cache version: `aurora-bachelor-v53`.
