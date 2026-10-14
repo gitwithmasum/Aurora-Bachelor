@@ -37964,7 +37964,22 @@ const AuroraWeeklyPlanner = (() => {
     window.renderWeeklyPlanner();return true;
   }
   function updateStatus(id,status){if(!statuses.includes(status))return;commit(items=>{const t=items.find(x=>x.id===id);if(t){t.status=status;t.updatedAt=new Date().toISOString();}});}
-  function remove(id){if(!canWrite()||!confirm("Delete this weekly task?"))return;commit(items=>{const i=items.findIndex(x=>x.id===id);if(i>=0)items.splice(i,1);});}
+  async function remove(id){
+    if(!canWrite() || !tasks().some(task => task.id === id)) return;
+    const confirmed = await auroraConfirm({
+      eyebrow: "AURORA // WEEKLY PLANNER",
+      title: "Delete This Weekly Task?",
+      message: "Are you sure you want to delete this task from your weekly planner? This action cannot be undone.",
+      confirmText: "DELETE TASK",
+      cancelText: "CANCEL",
+      danger: true
+    });
+    if(!confirmed || !canWrite()) return;
+    commit(items => {
+      const i = items.findIndex(task => task.id === id);
+      if(i >= 0) items.splice(i, 1);
+    });
+  }
   return {render,shift,edit,close,updateStatus,remove,days};
 })();
 window.AuroraWeeklyPlanner=AuroraWeeklyPlanner;
