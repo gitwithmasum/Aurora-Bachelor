@@ -5337,6 +5337,8 @@ const AuroraApp = (() => {
   const pages = {
     dashboard: "Command Center",
     meals: "Daily Meals",
+  weekly: "Weekly Planner",
+    weekly: "Weekly Planner",
     members: "Members",
     expenses: "Meal Expenses",
     payments: "Payments",
@@ -6977,6 +6979,10 @@ function render() {
 
         break;
 
+
+      case "weekly":
+        renderWeeklyPlanner();
+        break;
 
       case "meals":
 
@@ -37826,3 +37832,129 @@ const AuroraUXState = (() => {
   };
 
 })();
+
+
+/* WEEKLY PLANNER PHASE 1 — isolated household task board */
+const AuroraWeeklyPlanner = (() => {
+  let offset=0;
+  const weekdays=["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
+  const categories=["Cleaning","Cooking","Bazaar","Bills","Household","Other"];
+  const priorities=["Low","Medium","High"];
+  const statuses=["Pending","In Progress","Completed"];
+  const e=esc;
+  function tasks(){
+    const db=AuroraDataStore.get();
+    if(!db)return [];
+    if(!db.weeklyPlanner || typeof db.weeklyPlanner!=="object")db.weeklyPlanner={tasks:[]};
+    if(!Array.isArray(db.weeklyPlanner.tasks))db.weeklyPlanner.tasks=[];
+    return db.weeklyPlanner.tasks;
+  }
+  function canWrite(){
+    const s=window.AuroraCloudSync?.status?.();
+    return !(s?.ready===true && s?.canWrite===false);
+  }
+  function dateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
+  function days(){
+    const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+1)%7)+offset*7);
+    return weekdays.map((name,i)=>{const x=new Date(d);x.setDate(x.getDate()+i);return {name,key:dateKey(x),label:x.toLocaleDateString("en-GB",{day:"numeric",month:"short"})};});
+  }
+  function node(tag,attributes={},text){
+    const el=document.createElement(tag);
+    for(const [k,v] of Object.entries(attributes)){if(k==="className")el.className=v;else el.setAttribute(k,v);}
+    if(text!==undefined)el.textContent=String(text);
+    return el;
+  }
+  function button(text,action,disabled=false){const b=node("button",{type:"button",className:"btn"},text);b.disabled=disabled;b.addEventListener("click",action);return b;}
+  function render(){
+    const root=document.getElementById("page-weekly");if(!root)return;
+    root.replaceChildren();
+    const all=tasks(),week=days(),keys=new Set(week.map(x=>x.key));
+    const visible=all.filter(t=>keys.has(t.date));
+    const readonly=!canWrite();
+    const top=node("div",{className:"weekly-top"});
+    const intro=node("div");intro.append(node("div",{className:"weekly-eyebrow"},"AURORA // HOUSE OPERATIONS"),node("h2",{},"Weekly Planner"),node("p",{className:"muted"},"Household tasks, assignments and progress • Saturday to Friday"));
+    top.append(intro,button("＋ New Task",()=>edit(),readonly));root.append(top);
+    if(readonly)root.append(node("div",{className:"weekly-notice"},"Member access: view only."));
+    const stats=node("div",{className:"weekly-stats"});
+    for(const [label,count] of [["TASKS",visible.length],["COMPLETED",visible.filter(t=>t.status==="Completed").length],["IN PROGRESS",visible.filter(t=>t.status==="In Progress").length],["PENDING",visible.filter(t=>t.status==="Pending").length]]){
+      const card=node("div",{className:"card"});card.append(node("small",{},label),node("strong",{},count));stats.append(card);
+    }
+    root.append(stats);
+    const period=node("div",{className:"weekly-period"});
+    const periodLabel=node("div");periodLabel.append(node("strong",{},week[0].label+" — "+week[6].label),node("small",{},"Saturday to Friday"));
+    period.append(button("←",()=>shift(-1)),periodLabel,button("→",()=>shift(1)),button("This Week",()=>{offset=0;render();}));root.append(period);
+    const grid=node("div",{className:"weekly-grid"});
+    const members=AuroraDataStore.get()?.members||[];
+    for(const day of week){
+      const col=node("section",{className:"weekly-day"});
+      const head=node("div",{className:"weekly-day-head"});head.append(node("strong",{},day.name),node("small",{},day.label));col.append(head);
+      const dayTasks=visible.filter(t=>t.date===day.key).sort((a,b)=>priorities.indexOf(b.priority)-priorities.indexOf(a.priority));
+      if(!dayTasks.length)col.append(node("p",{className:"weekly-empty"},"No tasks scheduled"));
+      for(const t of dayTasks){
+        const card=node("article",{className:"weekly-task"});
+        const meta=node("div",{className:"weekly-task-top"});
+        meta.append(node("span",{className:"weekly-category"},t.category),node("span",{className:"weekly-priority "+String(t.priority||"Low").toLowerCase()},t.priority));
+        card.append(meta,node("strong",{},t.title),node("small",{},members.find(m=>String(m.id)===String(t.assignee))?.name||"Unassigned"));
+        const actions=node("div",{className:"weekly-task-actions"});
+        const select=node("select",{"aria-label":"Task status"});select.disabled=readonly;
+        for(const s of statuses){const o=node("option",{value:s},s);o.selected=s===t.status;select.append(o);}
+        select.addEventListener("change",()=>updateStatus(t.id,select.value));
+        actions.append(select,button("✎",()=>edit(t.id),readonly),button("×",()=>remove(t.id),readonly));card.append(actions);col.append(card);
+      }
+      col.append(button("＋ Add task",()=>edit("",day.key),readonly));grid.append(col);
+    }
+    root.append(grid,node("div",{id:"weeklyEditor"}));
+  }
+  function shift(v){offset+=v;render();}
+  function field(form,name,label,type,value,options){
+    const wrap=node("label",{},label);
+    let control;
+    if(options){control=node("select",{name});for(const [key,title] of options){const o=node("option",{value:key},title);o.selected=String(value||"")===String(key);control.append(o);}}
+    else {control=node(type==="textarea"?"textarea":"input",{name});if(type!=="textarea")control.type=type;control.value=value||"";}
+    control.required=["title","date"].includes(name);
+    if(name==="title")control.maxLength=120;
+    if(name==="notes")control.maxLength=500;
+    wrap.append(control);form.append(wrap);return control;
+  }
+  function edit(id="",date=""){
+    if(!canWrite())return;
+    const current=tasks().find(t=>t.id===id);
+    const root=document.getElementById("weeklyEditor");if(!root)return;
+    const overlay=node("div",{className:"weekly-overlay"});
+    const form=node("form",{className:"weekly-form card"});
+    const head=node("div",{className:"weekly-form-head"});
+    head.append(node("h3",{},current?"Edit Weekly Task":"Create Weekly Task"),button("×",close));
+    form.append(head);
+    const title=field(form,"title","Task title","text",current?.title||"");
+    field(form,"date","Scheduled date","date",current?.date||date||days()[0].key);
+    field(form,"category","Category",null,current?.category||"Cleaning",categories.map(x=>[x,x]));
+    const members=(AuroraDataStore.get()?.members||[]).filter(m=>m.status!=="inactive").map(m=>[m.id,m.name]);
+    field(form,"assignee","Assign member",null,current?.assignee||"",[["","Unassigned"],...members]);
+    field(form,"priority","Priority",null,current?.priority||"Medium",priorities.map(x=>[x,x]));
+    field(form,"status","Status",null,current?.status||"Pending",statuses.map(x=>[x,x]));
+    field(form,"notes","Notes (optional)","textarea",current?.notes||"");
+    const actions=node("div",{className:"weekly-form-actions"});actions.append(button("Cancel",close));
+    const submit=node("button",{type:"submit",className:"btn primary"},"Save Task");actions.append(submit);form.append(actions);
+    form.addEventListener("submit",evt=>{
+      evt.preventDefault();const f=new FormData(form),value=String(f.get("title")||"").trim(),when=String(f.get("date")||"");
+      if(!value || !/^\d{4}-\d{2}-\d{2}$/.test(when))return;
+      const assignee=String(f.get("assignee")||"");
+      const obj={id:id||uid("wt"),title:value.slice(0,120),date:when,category:categories.includes(f.get("category"))?f.get("category"):"Other",assignee:members.some(x=>String(x[0])===assignee)?assignee:"",priority:priorities.includes(f.get("priority"))?f.get("priority"):"Medium",status:statuses.includes(f.get("status"))?f.get("status"):"Pending",notes:String(f.get("notes")||"").slice(0,500),updatedAt:new Date().toISOString()};
+      commit(items=>{const i=items.findIndex(t=>t.id===id);if(i<0)items.push(obj);else items[i]={...items[i],...obj};});
+    });
+    overlay.append(form);root.replaceChildren(overlay);title.focus();
+  }
+  function close(){document.getElementById("weeklyEditor")?.replaceChildren();}
+  function commit(fn){
+    if(!canWrite())return false;
+    const db=AuroraDataStore.get();const snapshot=JSON.stringify(db.weeklyPlanner||{tasks:[]});
+    fn(tasks());
+    if(!AuroraDataStore.save()){db.weeklyPlanner=JSON.parse(snapshot);render();return false;}
+    render();return true;
+  }
+  function updateStatus(id,status){if(!statuses.includes(status))return;commit(items=>{const t=items.find(x=>x.id===id);if(t){t.status=status;t.updatedAt=new Date().toISOString();}});}
+  function remove(id){if(!canWrite()||!confirm("Delete this weekly task?"))return;commit(items=>{const i=items.findIndex(x=>x.id===id);if(i>=0)items.splice(i,1);});}
+  return {render,shift,edit,close,updateStatus,remove,days};
+})();
+window.AuroraWeeklyPlanner=AuroraWeeklyPlanner;
+function renderWeeklyPlanner(){AuroraWeeklyPlanner.render();}
