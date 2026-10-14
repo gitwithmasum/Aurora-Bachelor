@@ -24678,3 +24678,37 @@ body.aurora-invite-gate-open {
 .duty-member.dragging{opacity:.45}
 .duty-order-btn.btn{padding:3px 6px;font-size:12px;min-width:26px;min-height:26px}
 .duty-order-btn:disabled{opacity:.3}
+
+/* WEEKLY PLANNER v1.5 — MOBILE & ACCESSIBILITY QA */
+#page-weekly{min-width:0}
+#page-weekly button,#page-weekly input,#page-weekly select,#page-weekly textarea{font:inherit}
+#page-weekly button:focus-visible,#page-weekly input:focus-visible,#page-weekly select:focus-visible,#page-weekly textarea:focus-visible{outline:2px solid var(--cyan,#54eaff);outline-offset:2px}
+.weekly-grid{scrollbar-width:thin;scrollbar-color:var(--cyan) transparent;overscroll-behavior-x:contain}
+.weekly-grid .weekly-day{min-width:0}
+.weekly-task-actions select{max-width:100%}
+.weekly-form,.bazaar-form{overscroll-behavior:contain}
+.weekly-day,.weekly-task,.bazaar-planner,.weekly-meal-planner,.weekly-duty-rotation{min-width:0}
+.bazaar-checklist-items,.meal-plan-overview{min-width:0}
+.bazaar-check-row input,.duty-row select{font-size:16px}
+.duty-member-selected{touch-action:pan-y}
+@media(max-width:760px){
+  .weekly-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .weekly-grid{grid-template-columns:repeat(7,minmax(240px,1fr));max-width:100%;-webkit-overflow-scrolling:touch}
+  .weekly-top{align-items:stretch}
+  .weekly-form{width:100%;max-height:calc(100dvh - 32px)}
+  .bazaar-controls{grid-template-columns:minmax(0,1fr)}
+  .meal-plan-actions{justify-content:center}
+  .meal-plan-days{overflow-x:auto;grid-template-columns:repeat(7,minmax(44px,1fr));padding-bottom:6px}
+  .duty-roster{gap:7px}
+  .duty-member{max-width:100%;flex-wrap:wrap}
+}
+@media(max-width:380px){
+  .weekly-stats{gap:7px}
+  .weekly-stats .card{padding:11px}
+  .weekly-period{gap:6px}
+  .bazaar-summary-card strong{font-size:17px}
+  .bazaar-check-row{grid-template-columns:16px minmax(65px,1fr) 48px 56px 20px;gap:4px}
+  .bazaar-check-row input[type=number]{width:48px}
+  .meal-plan-stat strong{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){#page-weekly *,#page-weekly *::before,#page-weekly *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
