@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v51";
+    "aurora-bachelor-v52";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -22,6 +22,7 @@ const CORE_FILES = [
     "./script.js",
     "./bazaar-planner.js",
     "./weekly-meal-planner.js",
+    "./duty-rotation.js",
     "./manifest.json",
     "./style_v3.css",
     "./themes.css",
