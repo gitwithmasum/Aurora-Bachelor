@@ -34,6 +34,7 @@ The project is built with HTML, CSS and vanilla JavaScript. It uses browser-loca
 | Module | Purpose |
 |:--|:--|
 | **Dashboard** | At-a-glance monthly household overview and key figures |
+| **Weekly Planner** | 7-day task planning, assignments, priorities and status |
 | **Daily Meals / Meal Matrix** | Record members' daily meals and track meal totals |
 | **Members** | Maintain the list of people sharing the household |
 | **Expenses** | Track meal-related or other recorded spending |
@@ -131,7 +132,7 @@ Theme availability and exact labels are defined in `script.js` and `themes.css`.
 - Home-screen installation where supported by the browser
 - Locally stored app data and backup/export capabilities
 
-**PWA cache version in the inspected source:** `aurora-bachelor-v48`. This value describes the checked revision, not a guaranteed application release number.
+**PWA cache version in the inspected source:** `aurora-bachelor-v49`. This value describes the checked revision, not a guaranteed application release number.
 
 ## 06 / Stack
 
@@ -254,3 +255,8 @@ The README describes capabilities found in the repository at review time. Refer 
 **Built for organized shared living.**
 
 </div>
+
+
+## Weekly Planner — Phase 1
+
+Saturday-to-Friday task board with week navigation, task create/edit/delete, status, category, priority and assignment to active household members. Uses the existing `weeklyPlanner.tasks` household JSON store and standard local/cloud save pathway. This planner does not change meal counts or accounting. Bazaar Planner, Weekly Meal Planner and Duty Rotation are planned separately.
