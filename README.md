@@ -259,4 +259,9 @@ The README describes capabilities found in the repository at review time. Refer 
 
 ## Weekly Planner — Phase 1
 
-Saturday-to-Friday task board with week navigation, task create/edit/delete, status, category, priority and assignment to active household members. Uses the existing `weeklyPlanner.tasks` household JSON store and standard local/cloud save pathway. This planner does not change meal counts or accounting. Bazaar Planner, Weekly Meal Planner and Duty Rotation are planned separately.
+Saturday-to-Friday task board with week navigation, task create/edit/delete, status, category, priority and assignment to active household members. Uses the existing `weeklyPlanner.tasks` household JSON store and standard local/cloud save pathway. This planner does not change meal counts or accounting. Bazaar Planner has been added in Phase 2. Weekly Meal Planner and Duty Rotation remain planned.
+
+
+## Bazaar Planner — Phase 2
+
+Weekly Planner includes shopping plans with scheduled date, assigned house member, budget, notes, item list, quantities, units, estimated prices, purchased checkboxes and optional actual unit prices. Shopping records are saved in `weeklyPlanner.bazaars` alongside existing household data. Bazaar plans are not automatically posted to meal expenses or house bills; this avoids altering financial records without explicit confirmation.
