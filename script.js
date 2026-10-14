@@ -37956,4 +37956,4 @@ const AuroraWeeklyPlanner = (() => {
   return {render,shift,edit,close,updateStatus,remove,days};
 })();
 window.AuroraWeeklyPlanner=AuroraWeeklyPlanner;
-function renderWeeklyPlanner(){AuroraWeeklyPlanner.window.renderWeeklyPlanner();}
+function renderWeeklyPlanner(){AuroraWeeklyPlanner.render();}
