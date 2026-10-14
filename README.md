@@ -265,3 +265,8 @@ Saturday-to-Friday task board with week navigation, task create/edit/delete, sta
 ## Bazaar Planner — Phase 2
 
 Weekly Planner includes shopping plans with scheduled date, assigned house member, budget, notes, item list, quantities, units, estimated prices, purchased checkboxes and optional actual unit prices. Shopping records are saved in `weeklyPlanner.bazaars` alongside existing household data. Bazaar plans are not automatically posted to meal expenses or house bills; this avoids altering financial records without explicit confirmation.
+
+
+## Weekly Meal Planner — Phase 3
+
+Weekly Planner includes a seven-day Saturday–Friday day/night meal schedule. Each meal and optional estimated daily cost can be edited, with weekly overview, next/previous week navigation, copyable menu, and a copy-previous-week action. Weekly menus use `weeklyPlanner.mealMenus` inside the existing household data store; the app saves changes through its normal local/cloud persistence. Empty weeks display example dishes until edited; no actual meal counts, expense entries or settlement values are changed. Read-only household members can view plans but cannot edit. Bazaar Planner and the weekly task board remain separate.
