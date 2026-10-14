@@ -1,3 +1,5 @@
+![Aurora Bachelor — House Management OS](./Assets/Aurora%20House%20Management%20Dashboard.png)
+
 # Aurora Bachelor
 
 A local-first bachelor house management web app built with plain HTML, CSS and JavaScript.
