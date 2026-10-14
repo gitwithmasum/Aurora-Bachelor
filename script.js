@@ -37918,8 +37918,13 @@ const AuroraWeeklyPlanner = (() => {
   function edit(id="",date=""){
     if(!canWrite())return;
     const current=tasks().find(t=>t.id===id);
-    const root=document.getElementById("weeklyEditor");if(!root)return;
-    const overlay=node("div",{className:"weekly-overlay"});
+    close();
+    const root=document.body;
+    const previouslyFocused=document.activeElement;
+    document.documentElement.dataset.weeklyModalOpen="true";
+    window.AuroraWeeklyModalFocus=previouslyFocused;
+    const overlay=node("div",{className:"weekly-overlay",id:"weeklyTaskOverlay",role:"presentation"});
+    overlay.addEventListener("click",event=>{if(event.target===overlay)close();});
     const form=node("form",{className:"weekly-form card"});
     const head=node("div",{className:"weekly-form-head"});
     head.append(node("h3",{},current?"Edit Weekly Task":"Create Weekly Task"),button("×",close));
@@ -37941,9 +37946,16 @@ const AuroraWeeklyPlanner = (() => {
       const obj={id:id||uid("wt"),title:value.slice(0,120),date:when,category:categories.includes(f.get("category"))?f.get("category"):"Other",assignee:members.some(x=>String(x[0])===assignee)?assignee:"",priority:priorities.includes(f.get("priority"))?f.get("priority"):"Medium",status:statuses.includes(f.get("status"))?f.get("status"):"Pending",notes:String(f.get("notes")||"").slice(0,500),updatedAt:new Date().toISOString()};
       commit(items=>{const i=items.findIndex(t=>t.id===id);if(i<0)items.push(obj);else items[i]={...items[i],...obj};});
     });
-    overlay.append(form);root.replaceChildren(overlay);title.focus();
+    overlay.append(form);root.append(overlay);
+    title.focus({preventScroll:true});
   }
-  function close(){document.getElementById("weeklyEditor")?.replaceChildren();}
+  function close(){
+    document.getElementById("weeklyTaskOverlay")?.remove();
+    delete document.documentElement.dataset.weeklyModalOpen;
+    const focus=window.AuroraWeeklyModalFocus;
+    window.AuroraWeeklyModalFocus=null;
+    if(focus?.isConnected)focus.focus({preventScroll:true});
+  }
   function commit(fn){
     if(!canWrite())return false;
     const db=AuroraDataStore.get();const snapshot=JSON.stringify(db.weeklyPlanner||{tasks:[]});
