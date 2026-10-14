@@ -37944,7 +37944,7 @@ const AuroraWeeklyPlanner = (() => {
       if(!value || !/^\d{4}-\d{2}-\d{2}$/.test(when))return;
       const assignee=String(f.get("assignee")||"");
       const obj={id:id||uid("wt"),title:value.slice(0,120),date:when,category:categories.includes(f.get("category"))?f.get("category"):"Other",assignee:members.some(x=>String(x[0])===assignee)?assignee:"",priority:priorities.includes(f.get("priority"))?f.get("priority"):"Medium",status:statuses.includes(f.get("status"))?f.get("status"):"Pending",notes:String(f.get("notes")||"").slice(0,500),updatedAt:new Date().toISOString()};
-      commit(items=>{const i=items.findIndex(t=>t.id===id);if(i<0)items.push(obj);else items[i]={...items[i],...obj};});
+      if(commit(items=>{const i=items.findIndex(t=>t.id===id);if(i<0)items.push(obj);else items[i]={...items[i],...obj};})){close();}
     });
     overlay.append(form);root.append(overlay);
     title.focus({preventScroll:true});
