@@ -57,14 +57,46 @@ function draw(){
  const sub=mk("div",undefined,"duty-members");
  sub.append(mk("strong","Members in rotation (in order)"));
  const roster=mk("div",undefined,"duty-roster");
- for(const m of members){
-   const label=mk("label",undefined,"duty-member");
-   const input=mk("input");input.type="checkbox";input.checked=r.members.some(id=>String(id)===String(m.id));input.disabled=!writable();
+ let dragged=null;
+ const ordered=[...r.members.map(id=>members.find(m=>String(m.id)===String(id))).filter(Boolean),...members.filter(m=>!r.members.some(id=>String(id)===String(m.id)))];
+ function moveMember(id,target){
+   if(!writable()||id===target)return;
+   commit(s=>{
+     const current=s.members.map(String),from=current.indexOf(String(id)),to=current.indexOf(String(target));
+     if(from<0||to<0)return;
+     current.splice(from,1);current.splice(to,0,String(id));
+     s.members=current;
+   });
+ }
+ for(const m of ordered){
+   const activeOrder=r.members.map(String),position=activeOrder.indexOf(String(m.id)),selected=position>=0;
+   const item=mk("div",undefined,"duty-member"+(selected?" duty-member-selected":""));
+   item.draggable=selected&&writable();item.dataset.memberId=String(m.id);
+   const label=mk("label",undefined,"duty-member-label");
+   const input=mk("input");input.type="checkbox";input.checked=selected;input.disabled=!writable();
    input.addEventListener("change",()=>commit(s=>{
      s.members=s.members.filter(id=>String(id)!==String(m.id));
      if(input.checked)s.members.push(m.id);
    }));
-   label.append(input,mk("span",m.name));roster.append(label);
+   label.append(input,mk("span",m.name));item.append(label);
+   if(selected){
+     const handle=mk("span","⠿","duty-drag-handle");handle.title="Drag to reorder";item.append(handle);
+     for(const [delta,symbol] of [[-1,"←"],[1,"→"]]){
+       const control=btn(symbol,()=>{
+         const ids=state().members.map(String),i=ids.indexOf(String(m.id)),j=i+delta;
+         if(!writable()||i<0||j<0||j>=ids.length)return;
+         commit(s=>{const next=s.members.slice();[next[i],next[j]]=[next[j],next[i]];s.members=next;});
+       });
+       control.classList.add("duty-order-btn");control.disabled=!writable()||position+delta<0||position+delta>=r.members.length;
+       control.setAttribute("aria-label",(delta<0?"Move left ":"Move right ")+m.name);
+       item.append(control);
+     }
+     item.addEventListener("dragstart",event=>{if(!writable())return;dragged=String(m.id);event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",dragged);item.classList.add("dragging");});
+     item.addEventListener("dragover",event=>{if(!dragged)return;event.preventDefault();event.dataTransfer.dropEffect="move";});
+     item.addEventListener("drop",event=>{event.preventDefault();const from=dragged;dragged=null;moveMember(from,String(m.id));});
+     item.addEventListener("dragend",()=>{dragged=null;item.classList.remove("dragging");});
+   }
+   roster.append(item);
  }
  sub.append(roster);config.append(sub);
  const start=mk("label","Rotation starts from Saturday");
