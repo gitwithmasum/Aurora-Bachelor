@@ -24712,3 +24712,8 @@ body.aurora-invite-gate-open {
   .meal-plan-stat strong{font-size:15px}
 }
 @media(prefers-reduced-motion:reduce){#page-weekly *,#page-weekly *::before,#page-weekly *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Weekly Task dialog viewport fix — keep overlay outside scrolled planner */
+html[data-weekly-modal-open],html[data-weekly-modal-open] body{overflow:hidden!important}
+body>.weekly-overlay{position:fixed!important;inset:0!important;z-index:2147483000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;overflow-y:auto!important;overscroll-behavior:contain;backdrop-filter:none!important;background:rgba(1,8,21,.80)!important}
+body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!important;max-height:calc(100dvh - 30px)!important;overflow-y:auto!important;overscroll-behavior:contain;isolation:isolate;box-shadow:0 24px 90px rgba(0,0,0,.45)}
