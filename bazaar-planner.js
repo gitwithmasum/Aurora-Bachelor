@@ -79,39 +79,79 @@
   function draw(){
     const holder=document.getElementById("bazaarPlanner");if(!holder)return;
     holder.replaceChildren();
-    const heading=el("div",undefined,"bazaar-heading");heading.append(el("h3","Bazaar Planner"),btn("＋ New Bazaar",()=>editPlan()));holder.append(heading);
-    holder.append(el("p","Shopping plans and checklists are separate from Meal Expenses and House Bills.","muted"));
-    if(!allowed())holder.append(el("p","View-only household member access.","weekly-notice"));
-    const list=plans();if(!list.length){holder.append(el("p","No bazaar plans yet. Create one to start your shopping list.","muted"));holder.append(el("div",undefined,"bazaar-editor").cloneNode());}
+    const heading=el("div",undefined,"bazaar-heading");
+    const title=el("div");title.append(el("h3","Bazaar Planner"),el("small","Weekly grocery command center","muted"));
+    heading.append(title,btn("＋ New Bazaar",()=>editPlan()));holder.append(heading);
+    const list=plans();
     const tabs=el("div",undefined,"bazaar-tabs");
-    for(const p of [...list].sort((a,b)=>String(b.date).localeCompare(String(a.date)))){
-      const b=btn(p.title+" · "+p.date,()=>{selected=p.id;draw();});if(selected===p.id)b.classList.add("primary");tabs.append(b);
-    }holder.append(tabs);
-    let p=list.find(x=>x.id===selected)||list.at(-1);
-    if(p){selected=p.id;
-      const card=el("div",undefined,"card bazaar-detail");
-      const head=el("div",undefined,"bazaar-heading");head.append(el("h3",p.title));
-      const person=(db().members||[]).find(m=>String(m.id)===String(p.memberId))?.name||"Unassigned";
-      head.append(el("span",p.date+" · "+person));card.append(head);
-      const expected=(p.items||[]).reduce((n,x)=>n+x.qty*x.price,0);
-      const actual=(p.items||[]).filter(x=>x.purchased).reduce((n,x)=>n+x.qty*(x.actualPrice??x.price),0);
-      card.append(el("p","Budget ৳"+p.budget.toFixed(2)+" · Estimate ৳"+expected.toFixed(2)+" · Purchased subtotal ৳"+actual.toFixed(2),"bazaar-totals"));
-      if(expected>p.budget)card.append(el("p","Estimated amount exceeds budget.","weekly-notice"));
-      const actions=el("div",undefined,"bazaar-actions");
-      actions.append(btn("＋ Add Item",()=>addItem(p.id)),btn("Edit Plan",()=>editPlan(p.id)));
-      const del=btn("Delete Plan",()=>{if(allowed()&&confirm("Delete this shopping plan?")){commit(a=>{const i=a.findIndex(x=>x.id===p.id);if(i>=0)a.splice(i,1);});selected="";draw();}});
-      actions.append(del);card.append(actions);
-      if(!allowed())actions.querySelectorAll("button").forEach(b=>b.disabled=true);
-      const table=el("div",undefined,"bazaar-items");
-      for(const item of p.items||[]){
-        const row=el("div",undefined,"bazaar-item");
-        const check=el("input");check.type="checkbox";check.checked=!!item.purchased;check.disabled=!allowed();check.addEventListener("change",()=>commit(a=>{const i=a.find(x=>x.id===p.id)?.items.find(x=>x.id===item.id);if(i)i.purchased=check.checked;}));row.append(check);
-        row.append(el("span",item.name+" · "+item.qty+" "+item.unit+" · ৳"+(item.qty*item.price).toFixed(2)));
-        const price=el("input");price.type="number";price.min="0";price.step="0.01";price.placeholder="Actual unit ৳";price.value=item.actualPrice??"";price.disabled=!allowed();price.setAttribute("aria-label","Actual unit price for "+item.name);
-        price.addEventListener("change",()=>{const n=price.value===""?null:Number(price.value);if(n!==null&&(!Number.isFinite(n)||n<0)){draw();return;}commit(a=>{const i=a.find(x=>x.id===p.id)?.items.find(x=>x.id===item.id);if(i)i.actualPrice=n;});});row.append(price);
-        const remove=btn("×",()=>commit(a=>{const items=a.find(x=>x.id===p.id)?.items;const i=items?.findIndex(x=>x.id===item.id);if(i>=0)items.splice(i,1);}));remove.disabled=!allowed();row.append(remove);table.append(row);
+    for(const entry of [...list].sort((a,b)=>String(b.date).localeCompare(String(a.date)))){
+      const button=btn(entry.title+" · "+entry.date,()=>{selected=entry.id;draw();});
+      if(selected===entry.id)button.classList.add("primary");
+      tabs.append(button);
+    }
+    holder.append(tabs);
+    const p=list.find(x=>x.id===selected)||list.at(-1);
+    if(!p){
+      holder.append(el("p","No bazaar plan yet. Select + New Bazaar to create a real shopping list.","weekly-empty"));
+    } else {
+      selected=p.id;
+      const items=Array.isArray(p.items)?p.items:[];
+      const expected=items.reduce((sum,item)=>sum+(Number(item.qty)||0)*(Number(item.price)||0),0);
+      const purchased=items.filter(x=>x.purchased);
+      const spent=purchased.reduce((sum,item)=>sum+(Number(item.qty)||0)*Number(item.actualPrice??item.price??0),0);
+      const summary=el("div",undefined,"bazaar-summary");
+      for(const [label,value,extra] of [["Estimated Cost",expected,""],["Budget Remaining",(Number(p.budget)||0)-expected,"remaining"]]){
+        const card=el("div",undefined,"bazaar-summary-card");
+        card.append(el("small",label),el("strong","৳"+value.toLocaleString("en-BD",{maximumFractionDigits:2}),extra));
+        summary.append(card);
       }
-      card.append(table);holder.append(card);
+      holder.append(summary);
+      const controls=el("div",undefined,"bazaar-controls");
+      const memberField=el("label","Assigned Member");
+      const member=el("select");
+      for(const option of [{id:"",name:"Unassigned"},...(db().members||[]).filter(x=>x.status!=="inactive")]){
+        const op=el("option",option.name);op.value=option.id;op.selected=String(option.id)===String(p.memberId||"");member.append(op);
+      }
+      member.disabled=!allowed();
+      member.addEventListener("change",()=>commit(list=>{const record=list.find(x=>x.id===p.id);if(record)record.memberId=member.value;}));
+      memberField.append(member);
+      const budgetField=el("label","Weekly Budget (৳)");
+      const budget=el("input");budget.type="number";budget.min="0";budget.step="0.01";budget.value=String(p.budget??0);budget.disabled=!allowed();
+      budget.addEventListener("change",()=>{const n=Number(budget.value);if(Number.isFinite(n)&&n>=0)commit(list=>{const record=list.find(x=>x.id===p.id);if(record)record.budget=n;});else draw();});
+      budgetField.append(budget);controls.append(memberField,budgetField);holder.append(controls);
+      const panel=el("div",undefined,"bazaar-checklist card");
+      const header=el("div",undefined,"bazaar-heading");
+      header.append(el("h4","Shopping Checklist"),el("span",purchased.length+"/"+items.length+" purchased","bazaar-count"));
+      panel.append(header);
+      const lines=el("div",undefined,"bazaar-checklist-items");
+      for(const item of items){
+        const row=el("div",undefined,"bazaar-check-row");
+        const check=el("input");check.type="checkbox";check.checked=!!item.purchased;check.disabled=!allowed();
+        check.setAttribute("aria-label","Purchased "+item.name);
+        check.addEventListener("change",()=>commit(a=>{const x=a.find(x=>x.id===p.id)?.items.find(x=>x.id===item.id);if(x)x.purchased=check.checked;}));
+        const detail=el("div",undefined,"bazaar-check-detail");
+        detail.append(el("strong",item.name),el("small","৳"+item.price+" / "+item.unit));
+        const qty=el("input");qty.type="number";qty.min="0.01";qty.step="any";qty.value=String(item.qty);qty.disabled=!allowed();qty.setAttribute("aria-label","Quantity for "+item.name);
+        qty.addEventListener("change",()=>{const n=Number(qty.value);if(!Number.isFinite(n)||n<=0){draw();return;}commit(a=>{const x=a.find(x=>x.id===p.id)?.items.find(x=>x.id===item.id);if(x)x.qty=n;});});
+        const subtotal=el("strong","৳"+(item.qty*item.price).toLocaleString("en-BD"),"bazaar-line-total");
+        const deleteItem=btn("×",()=>{if(!allowed())return;commit(a=>{const x=a.find(x=>x.id===p.id);if(x)x.items=x.items.filter(i=>i.id!==item.id);});});
+        deleteItem.disabled=!allowed();deleteItem.setAttribute("aria-label","Remove "+item.name);
+        row.append(check,detail,qty,subtotal,deleteItem);
+        lines.append(row);
+      }
+      if(!items.length)lines.append(el("p","Shopping list is empty. Add your first item.","weekly-empty"));
+      panel.append(lines);
+      const totals=el("div",undefined,"bazaar-total-row");
+      totals.append(el("strong","Total Estimated"),el("strong","৳"+expected.toLocaleString("en-BD",{maximumFractionDigits:2})));
+      panel.append(totals);
+      panel.append(el("p","Purchased subtotal: ৳"+spent.toLocaleString("en-BD",{maximumFractionDigits:2})+". This planner does not post financial expenses automatically.","bazaar-footnote"));
+      const actions=el("div",undefined,"bazaar-actions");
+      const add=btn("＋ Add Item",()=>addItem(p.id));const edit=btn("Edit Plan",()=>editPlan(p.id));const del=btn("Delete Plan",()=>{if(allowed()&&confirm("Delete this shopping plan?")){commit(a=>{const i=a.findIndex(x=>x.id===p.id);if(i>=0)a.splice(i,1);});selected="";draw();}});
+      for(const x of [add,edit,del])x.disabled=!allowed();
+      actions.append(add,edit,del);panel.append(actions);
+      holder.append(panel);
+      if(expected>Number(p.budget||0))holder.append(el("p","Estimated cost exceeds the current budget.","weekly-notice"));
+      if(!allowed())holder.append(el("p","Member access: view only.","weekly-notice"));
     }
     const editor=el("div",undefined,"bazaar-editor");editor.id="bazaarEditor";holder.append(editor);
   }
