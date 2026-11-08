@@ -247,82 +247,234 @@
     </section>
 
     <!-- ==============================================================
-         SECTION 2: KEY FEATURES
+         SECTION 2: KEY FEATURES & COMMAND MODULES
          ============================================================== -->
     <section id="features" class="space-y-12">
       <div class="text-center max-w-3xl mx-auto">
-        <div class="text-cyan-400 font-mono text-xs tracking-widest uppercase mb-2">// 02. CAPABILITY ARCHITECTURE</div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">Engineered for Flawless House Finances</h2>
-        <p class="text-slate-400 text-sm mt-3">দৈনিক মিল এন্ট্রি থেকে শুরু করে মাসের শেষ পাই-পয়সার ব্যালেন্স পর্যন্ত সবকিছু অটোমেটিক।</p>
+        <div class="text-cyan-400 font-mono text-xs tracking-widest uppercase mb-2">// 02. SYSTEM MODULES & CAPABILITIES</div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">All-in-One Command Center Modules</h2>
+        <p class="text-slate-400 text-sm mt-3">মেসের যাবতীয় ব্যবস্থাপনা—ড্যাশবোর্ড, প্ল্যানার, মিল, খরচ, বিল ও সেটেলমেন্ট—১৩টি কোর মডিউলে সাজানো।</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Feature 1 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-2xl text-cyan-400 mb-5">
-            🍚
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        
+        <!-- 1. Dashboard -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-xl text-cyan-400">
+                ⌂
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">01 // HUD</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Dashboard</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              এক নজরে চলতি মাসের মোট মিল, মিল রেট, বর্তমান বাজার খরচ, মোট কালেকশন ও বকেয়া টাকার রিয়েল-টাইম সামারি।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Daily Meal Matrix</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            মেম্বারদের ব্রেকফাস্ট, লাঞ্চ ও ডিনারের সিঙ্গেল ট্যাপ ইনপুট। অতিথি মিল ও মিল লক করার স্বয়ংক্রিয় ব্যবস্থা।
-          </p>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-400/30 flex items-center justify-center text-2xl text-purple-400 mb-5">
-            ⚡
+        <!-- 2. Weekly Planner -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between border-purple-500/20">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/30 flex items-center justify-center text-xl text-purple-400">
+                ▦
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">02 // PLANNER</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Weekly Planner</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              ৭ দিনের বাজার প্ল্যানার (Bazaar Planner), সাপ্তাহিক খাবারের মেনু তালিকা এবং মেম্বারদের ঘরোয়া কাজের দায়িত্ব বণ্টন।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Automatic Meal Rate Engine</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            <code>মোট বাজার খরচ ÷ মোট খাওয়া মিল</code>। কোনো ম্যানুয়াল ক্যালকুলেটর দরকার নেই, প্রতি ভাউচারের সাথে সাথে রেট আপডেট হয়।
-          </p>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/30 flex items-center justify-center text-2xl text-blue-400 mb-5">
-            🏠
+        <!-- 3. Daily Meals -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-400/30 flex items-center justify-center text-xl text-rose-400">
+                🍚
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">03 // TRACKER</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Daily Meals</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              মেম্বারদের ব্রেকফাস্ট, লাঞ্চ ও ডিনারের (B/L/D) ১-ট্যাপে এন্ট্রি। গেস্ট মিল কাউন্টিং ও মিল এন্ট্রি লক করার অটোমেটেড সিস্টেম।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Dual Account Architecture</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            খাবারের বাজার খরচ এবং ফিক্সড হাউস বিল (বাড়িভাড়া, বিদ্যুৎ, পানি, গ্যাস, ওয়াইফাই, বুয়া) সম্পূর্ণ আলাদা লেজারে সংরক্ষিত।
-          </p>
         </div>
 
-        <!-- Feature 4 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center text-2xl text-emerald-400 mb-5">
-            ⇄
+        <!-- 4. Members -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-400/30 flex items-center justify-center text-xl text-blue-400">
+                ◉
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20">04 // USERS</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Members</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              মেসের মেম্বারদের তালিকা, জয়েনিং তারিখ, মেম্বার ব্যালেন্স স্ট্যাটাস এবং নির্দিষ্ট মেম্বারের ব্যক্তিগত লেজার প্রোফাইল।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Smart Settlement Engine</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            অহেতুক লেনদেন কমানোর অপ্টিমাইজড অ্যালগরিদম। সরাসরি ডিরেকশন: "রহিম পাবে Masum-এর থেকে ৳৮৫০", কোনো ভুল বোঝাবুঝি নেই।
-          </p>
         </div>
 
-        <!-- Feature 5 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-2xl text-amber-400 mb-5">
-            ☁️
+        <!-- 5. Expenses -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-xl text-amber-400">
+                ◈
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">05 // EXPENSES</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Expenses</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              চাল, ডাল, মাছ, মাংস ও শাকসবজির বাজার ভাউচার এন্ট্রি। কে বাজার করেছে এবং পেমেন্ট মেথড কী ছিল তার সম্পূর্ণ ট্র্যাকিং।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Local-First + Supabase Sync</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            অফলাইনেও ১০০% কাজ করে (IndexedDB)। ইন্টারনেট পেলে সুপাবেজ ক্লাউডে গুগল অথেন্টিকেশন ও আরএলএস সুরক্ষায় অটো সিঙ্ক।
-          </p>
         </div>
 
-        <!-- Feature 6 -->
-        <div class="glass-panel p-7 rounded-2xl glass-card-hover relative group">
-          <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-400/30 flex items-center justify-center text-2xl text-rose-400 mb-5">
-            📊
+        <!-- 6. Payments -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center text-xl text-emerald-400">
+                ৳
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">06 // INFLOW</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Payments</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              মেম্বারদের অগ্রিম বা রানিং মাসের টাকা জমার ডিজিটাল ক্যাশবুক এবং টাইমস্ট্যাম্পড রিসিট ট্রানজ্যাকশন হিস্ট্রি।
+            </p>
           </div>
-          <h3 class="text-lg font-bold font-orbitron text-white mb-2">Audit Logs & Excel Export</h3>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-            কে কখন কত টাকা জমা দিয়েছে তার টাইমস্ট্যাম্পড অডিট ট্রেইল। ১-ক্লিকে ফুল মাস রিপোর্ট এক্সেল (.xlsx) বা CSV তে ডাউনলোড।
-          </p>
         </div>
+
+        <!-- 7. House Bills -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/30 flex items-center justify-center text-xl text-indigo-400">
+                ▣
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">07 // BILLS</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">House Bills</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              বাড়িভাড়া, বিদ্যুৎ, পানি, গ্যাস, ওয়াইফাই ও কাজের বুয়ার বিল মেম্বারদের মাঝে সমান বা কাস্টম নিয়মে স্বচ্ছ বিভাজন।
+            </p>
+          </div>
+        </div>
+
+        <!-- 8. Monthly Report -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/30 flex items-center justify-center text-xl text-teal-400">
+                ↺
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">08 // REPORTS</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Monthly Report</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              মাস শেষে সম্পূর্ণ হিসাবের গ্রাফিক্যাল অ্যানালিটিক্স এবং ১-ক্লিকে ফুল মাস রিপোর্ট এক্সেল (.xlsx) বা CSV তে ডাউনলোড।
+            </p>
+          </div>
+        </div>
+
+        <!-- 9. Settlement -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between border-cyan-500/30">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-xl text-cyan-400">
+                ⇄
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">09 // SETTLEMENT</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Settlement Engine</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              অহেতুক লেনদেন কমানোর অপ্টিমাইজড অ্যালগরিদম। সরাসরি ডিরেকশন: "কে কাকে কত টাকা দেবে"—ক্লিক করলেই অটো-ব্যালেন্স সমাধান।
+            </p>
+          </div>
+        </div>
+
+        <!-- 10. Activity -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-400/30 flex items-center justify-center text-xl text-violet-400">
+                ◇
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20">10 // AUDIT</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Activity Timeline</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              প্রতি মিল মার্ক, পেমেন্ট ও খরচের এন্ট্রির রিয়েল-টাইম টাইমস্ট্যাম্পড অডিট ট্রেইল, যা মেসের হিসাবে কোনো অস্বচ্ছতা রাখে না।
+            </p>
+          </div>
+        </div>
+
+        <!-- 11. Version History -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-xl text-sky-400">
+                ↻
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">11 // SYSTEM</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Version History</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              অ্যাপের নতুন ফিচার, রিলিজ নোট এবং প্রগ্রেসিভ ওয়েব অ্যাপের (PWA) লাইভ ক্যাশ আপডেট ট্র্যাকিং।
+            </p>
+          </div>
+        </div>
+
+        <!-- 12. Settings -->
+        <div class="glass-panel p-6 rounded-2xl glass-card-hover relative group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 border border-fuchsia-400/30 flex items-center justify-center text-xl text-fuchsia-400">
+                ⚙
+              </div>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20">12 // CONFIG</span>
+            </div>
+            <h3 class="text-base font-bold font-orbitron text-white mb-2">Settings & Themes</h3>
+            <p class="text-slate-400 text-xs leading-relaxed font-bangla">
+              ক্লাউড ব্যাকআপ, JSON রিস্টোর এবং ডার্ক গ্যালাক্সি, নিয়ন স্ট্রাইপস সহ একাধিক কাস্টম থিম পার্সোনালাইজেশন।
+            </p>
+          </div>
+        </div>
+
       </div>
+
+      <!-- 13. Profile // Identity Highlight Banner -->
+      <div class="glass-panel p-6 sm:p-7 rounded-3xl border border-cyan-400/30 flex flex-col sm:flex-row items-center justify-between gap-6 glow-box-cyan">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-400 via-blue-600 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/20 shrink-0">
+            <div class="w-full h-full bg-[#040816] rounded-2xl flex items-center justify-center text-2xl">
+              👤
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-bold font-orbitron text-white">Profile // Identity</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-300 border border-cyan-400/30">SECURITY CORE</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 font-bangla">
+              গুগল অথেন্টিকেশন, রোল-বেসড এক্সেস (Owner / Admin / Member) এবং সিকিউর হাউসহোল্ড ইনভাইটেশন লিঙ্ক ম্যানেজমেন্ট।
+            </p>
+          </div>
+        </div>
+        <a href="./index.html" class="shrink-0 px-6 py-3 rounded-xl font-orbitron text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:shadow-lg hover:shadow-cyan-400/30 transition transform hover:-translate-y-0.5">
+          OPEN PROFILE ⚡
+        </a>
+      </div>
+
     </section>
 
     <!-- ==============================================================
