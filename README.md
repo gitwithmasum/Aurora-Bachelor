@@ -5,6 +5,14 @@
 # AURORA BACHELOR
 ### MEAL & HOUSE MANAGEMENT OS
 
+## ?? Live Links
+- **Landing Page (Live)**: [https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html) · *(or [GitHub Pages](https://gitwithmasum.github.io/Aurora-Bachelor/landing.html))*
+- **Web App (Live)**: [https://aurora-bachelor-masumtheinvincible.vercel.app](https://aurora-bachelor-masumtheinvincible.vercel.app)
+
+## ?? Run Locally
+- **Landing Page**: Open landing.html in a modern browser.
+- **Web App**: Open index.html in a modern browser.
+
 **A local-first command center for shared bachelor living.**
 
 [![GitHub](https://img.shields.io/badge/Source-GitHub-181717?logo=github)](https://github.com/gitwithmasum/Aurora-Bachelor)
