@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Aurora Bachelor — Futuristic House & Meal Management OS</title>
   <meta name="description" content="Your House. Your Meals. Your Money. One Intelligent System. The ultimate bachelor house management OS.">
-  <meta name="theme-color" content="#030711">
+  <meta name="theme-color" content="#030712">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="./Assets/icons/icon-192.png">
@@ -20,7 +20,7 @@
 
   <style>
     :root {
-      --bg-base: #030711;
+      --bg-base: #030712;
       --cyan: #54eaff;
       --violet: #b77cff;
       --blue: #2d5bff;
@@ -36,10 +36,68 @@
       color: #edf7ff;
       background-color: var(--bg-base);
       overflow-x: hidden;
-      transition: background 0.5s ease;
+      min-height: 100vh;
+      position: relative;
     }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-bangla { font-family: 'Hind Siliguri', 'Inter', sans-serif; }
+
+    /* ==============================================================
+       FLUID MESH BACKGROUND ARCHITECTURE
+       ============================================================== */
+    .fluid-mesh-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 55%), 
+        radial-gradient(at 50% 0%, rgba(45, 91, 255, 0.3) 0, transparent 55%), 
+        radial-gradient(at 100% 0%, rgba(183, 124, 255, 0.28) 0, transparent 50%), 
+        radial-gradient(at 0% 50%, rgba(84, 234, 255, 0.24) 0, transparent 50%), 
+        radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.38) 0, transparent 55%),
+        #030712;
+      overflow: hidden;
+    }
+
+    /* Floating Animated Mesh Orbs */
+    .mesh-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.42;
+      pointer-events: none;
+      will-change: transform;
+      animation: floatMesh 24s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 720px;
+      height: 540px;
+      background: radial-gradient(circle, #2d5bff 0%, rgba(45, 91, 255, 0) 70%);
+      top: -120px;
+      left: 10%;
+    }
+    .orb-2 {
+      width: 640px;
+      height: 580px;
+      background: radial-gradient(circle, #b77cff 0%, rgba(183, 124, 255, 0) 70%);
+      top: 35%;
+      right: -8%;
+      animation-delay: -8s;
+    }
+    .orb-3 {
+      width: 700px;
+      height: 640px;
+      background: radial-gradient(circle, #54eaff 0%, rgba(84, 234, 255, 0) 70%);
+      bottom: 5%;
+      left: 8%;
+      animation-delay: -16s;
+    }
+    @keyframes floatMesh {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(60px, 45px) scale(1.12) rotate(10deg); }
+      100% { transform: translate(-45px, 75px) scale(0.96) rotate(-8deg); }
+    }
 
     /* Glassmorphism panels */
     .glass-panel {
@@ -66,121 +124,6 @@
       box-shadow: 0 0 35px rgba(84, 234, 255, 0.2);
     }
 
-    /* ==============================================================
-       BACKGROUND PRESETS (LIVE SWITCHABLE)
-       ============================================================== */
-    
-    /* 1. Aurora Borealis Glow (Default) */
-    .bg-theme-aurora {
-      background: #030711;
-      position: relative;
-    }
-    .bg-theme-aurora .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .aurora-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.35;
-      animation: floatAurora 20s ease-in-out infinite alternate;
-    }
-    .blob-1 {
-      width: 650px;
-      height: 480px;
-      background: radial-gradient(circle, #54eaff 0%, rgba(84,234,255,0) 70%);
-      top: -120px;
-      left: 12%;
-    }
-    .blob-2 {
-      width: 580px;
-      height: 520px;
-      background: radial-gradient(circle, #b77cff 0%, rgba(183,124,255,0) 70%);
-      top: 35%;
-      right: -8%;
-      animation-delay: -6s;
-    }
-    .blob-3 {
-      width: 750px;
-      height: 650px;
-      background: radial-gradient(circle, #2d5bff 0%, rgba(45,91,255,0) 70%);
-      bottom: 5%;
-      left: 10%;
-      animation-delay: -12s;
-    }
-    @keyframes floatAurora {
-      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-      50% { transform: translate(70px, 50px) scale(1.15) rotate(18deg); }
-      100% { transform: translate(-50px, 90px) scale(0.95) rotate(-12deg); }
-    }
-
-    /* 2. Cyber Grid & Spotlight */
-    .bg-theme-cyber .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-color: #030611;
-      background-image: 
-        linear-gradient(rgba(84, 234, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(84, 234, 255, 0.08) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
-    .bg-theme-cyber .spotlight {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle 550px at var(--mouse-x, 50%) var(--mouse-y, 30%), rgba(84, 234, 255, 0.16), transparent 80%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* 3. Deep Space Starfield */
-    .bg-theme-space .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background: #02040a;
-      background-image: 
-        radial-gradient(1.2px 1.2px at 25px 35px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(1.8px 1.8px at 110px 160px, #8cecff, rgba(0,0,0,0)),
-        radial-gradient(1.2px 1.2px at 260px 85px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 420px 300px, #b77cff, rgba(0,0,0,0)),
-        radial-gradient(1.2px 1.2px at 570px 130px, #54eaff, rgba(0,0,0,0));
-      background-repeat: repeat;
-      background-size: 380px 380px;
-    }
-
-    /* 4. Fluid Iridescent Mesh */
-    .bg-theme-mesh .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,89%,30%,0.32) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(280,69%,35%,0.28) 0, transparent 50%), 
-        radial-gradient(at 0% 50%, hsla(187,85%,30%,0.28) 0, transparent 50%), 
-        radial-gradient(at 100% 100%, hsla(240,65%,20%,0.42) 0, transparent 50%),
-        #040714;
-    }
-
-    /* 5. Dot Matrix */
-    .bg-theme-hex .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-color: #030814;
-      background-image: radial-gradient(rgba(84, 234, 255, 0.22) 1.5px, transparent 1.5px);
-      background-size: 28px 28px;
-    }
-
     /* Badges */
     .badge-cyan {
       background: rgba(84, 234, 255, 0.12);
@@ -190,36 +133,22 @@
   </style>
 </head>
 
-<body class="bg-theme-aurora text-slate-100" id="bodyRoot">
+<body class="text-slate-100">
 
-  <!-- Dynamic Background Rendering Layer -->
-  <div class="bg-layer" id="bgLayer">
-    <div class="aurora-blob blob-1"></div>
-    <div class="aurora-blob blob-2"></div>
-    <div class="aurora-blob blob-3"></div>
-  </div>
-  <div class="spotlight hidden" id="spotlightLayer"></div>
-
-  <!-- FLOATING LIVE BACKGROUND THEME SELECTOR -->
-  <div class="fixed top-4 right-4 z-50 glass-panel rounded-2xl p-2.5 px-4 flex flex-wrap items-center gap-2 max-w-xl shadow-2xl">
-    <div class="flex items-center gap-2 mr-2">
-      <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-      <span class="text-xs font-semibold uppercase tracking-wider text-cyan-300 font-mono">Live BG Switcher</span>
-    </div>
-    <div class="flex flex-wrap gap-1.5" id="bgButtons">
-      <button onclick="switchBg('aurora')" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 hover:bg-cyan-500/30 transition">1. Aurora Glow</button>
-      <button onclick="switchBg('cyber')" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800/80 text-slate-300 border border-slate-700 hover:text-cyan-300 transition">2. Cyber Grid</button>
-      <button onclick="switchBg('space')" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800/80 text-slate-300 border border-slate-700 hover:text-cyan-300 transition">3. Starfield</button>
-      <button onclick="switchBg('mesh')" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800/80 text-slate-300 border border-slate-700 hover:text-cyan-300 transition">4. Fluid Mesh</button>
-      <button onclick="switchBg('hex')" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800/80 text-slate-300 border border-slate-700 hover:text-cyan-300 transition">5. Dot Matrix</button>
-    </div>
+  <!-- Dedicated Fluid Mesh Background -->
+  <div class="fluid-mesh-bg">
+    <div class="mesh-orb orb-1"></div>
+    <div class="mesh-orb orb-2"></div>
+    <div class="mesh-orb orb-3"></div>
   </div>
 
-  <!-- STICKY NAVIGATION HEADER -->
-  <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#030711]/85 border-b border-cyan-500/10">
+  <!-- STICKY NAVIGATION HEADER (SPACIOUS, BALANCED & NON-OVERLAPPING) -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#030712]/85 border-b border-cyan-500/10">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="#overview" class="flex items-center gap-3 group">
-        <img src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(84,234,255,0.4)] group-hover:scale-105 transition transform">
+      
+      <!-- Brand Identity -->
+      <a href="#overview" class="flex items-center gap-3 group shrink-0">
+        <img src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(84,234,255,0.4)] group-hover:scale-105 transition transform">
         <div>
           <span class="font-orbitron font-bold tracking-widest text-lg text-white">AURORA</span>
           <span class="font-orbitron text-xs text-cyan-400 ml-1 tracking-wider">BACHELOR</span>
@@ -227,23 +156,41 @@
         </div>
       </a>
 
+      <!-- Desktop Nav Links -->
       <nav class="hidden lg:flex items-center gap-7 text-xs font-mono uppercase tracking-wider text-slate-300">
-        <a href="#overview" class="hover:text-cyan-400 transition">1. Overview</a>
-        <a href="#features" class="hover:text-cyan-400 transition">2. Features</a>
-        <a href="#demo" class="hover:text-cyan-400 transition">3. Live Demo</a>
-        <a href="#media" class="hover:text-cyan-400 transition">4. Screenshots</a>
-        <a href="#pricing" class="hover:text-cyan-400 transition">5. Pricing</a>
-        <a href="#technical" class="hover:text-cyan-400 transition">6. Tech Specs</a>
-        <a href="#docs" class="hover:text-cyan-400 transition">7. Docs</a>
-        <a href="#faq" class="hover:text-cyan-400 transition">8. FAQ</a>
-        <a href="#purchase" class="hover:text-cyan-400 transition">9. Buy</a>
+        <a href="#overview" class="hover:text-cyan-400 transition">Overview</a>
+        <a href="#features" class="hover:text-cyan-400 transition">Features</a>
+        <a href="#demo" class="hover:text-cyan-400 transition">Live Demo</a>
+        <a href="#media" class="hover:text-cyan-400 transition">Screenshots</a>
+        <a href="#pricing" class="hover:text-cyan-400 transition">Pricing</a>
+        <a href="#technical" class="hover:text-cyan-400 transition">Tech Specs</a>
+        <a href="#docs" class="hover:text-cyan-400 transition">Docs</a>
+        <a href="#faq" class="hover:text-cyan-400 transition">FAQ</a>
       </nav>
 
-      <div class="flex items-center gap-3">
-        <a href="./index.html" class="px-5 py-2.5 rounded-xl font-orbitron text-xs tracking-wider font-semibold text-slate-900 bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-400 hover:shadow-lg hover:shadow-cyan-400/35 transition transform hover:-translate-y-0.5">
+      <!-- Action Button & Mobile Menu Toggle -->
+      <div class="flex items-center gap-4 shrink-0">
+        <a href="./index.html" class="px-5 py-2.5 rounded-xl font-orbitron text-xs tracking-wider font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-400 hover:shadow-lg hover:shadow-cyan-400/40 transition transform hover:-translate-y-0.5">
           LAUNCH APP ⚡
         </a>
+        <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="lg:hidden text-slate-300 hover:text-cyan-400 p-2 focus:outline-none" aria-label="Toggle Navigation">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+          </svg>
+        </button>
       </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="hidden lg:hidden border-t border-cyan-500/10 bg-[#030712]/95 backdrop-blur-2xl px-6 py-4 space-y-3 font-mono text-xs uppercase tracking-wider">
+      <a href="#overview" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Overview</a>
+      <a href="#features" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Features</a>
+      <a href="#demo" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Live Demo</a>
+      <a href="#media" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Screenshots</a>
+      <a href="#pricing" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Pricing</a>
+      <a href="#technical" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Tech Specs</a>
+      <a href="#docs" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">Docs</a>
+      <a href="#faq" onclick="toggleMobileMenu()" class="block text-slate-300 hover:text-cyan-400 py-1.5">FAQ</a>
     </div>
   </header>
 
@@ -451,7 +398,7 @@
           </div>
           <div class="rounded-2xl overflow-hidden border border-cyan-500/20 group relative">
             <img src="./Assets/Aurora House Management Dashboard.png" alt="Aurora House Management Dashboard" class="w-full h-auto object-cover rounded-2xl group-hover:scale-[1.01] transition duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#030711] via-transparent to-transparent opacity-30"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-30"></div>
           </div>
         </div>
 
@@ -719,7 +666,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT FOR LIVE SIMULATOR & BACKGROUND SWITCHER -->
+  <!-- SCRIPT FOR LIVE DEMO SIMULATOR & MOBILE MENU -->
   <script>
     // Live Simulator Data
     const membersData = [
@@ -768,48 +715,11 @@
     // Run simulator on load
     updateSimulator();
 
-    // Background Switcher Engine
-    function switchBg(theme) {
-      const body = document.getElementById('bodyRoot');
-      const bgLayer = document.getElementById('bgLayer');
-      const spotlight = document.getElementById('spotlightLayer');
-
-      // Clear existing classes
-      body.className = body.className.replace(/bg-theme-\w+/g, '');
-      body.classList.add('bg-theme-' + theme);
-
-      // Reconfigure layers
-      if (theme === 'aurora') {
-        bgLayer.innerHTML = `
-          <div class="aurora-blob blob-1"></div>
-          <div class="aurora-blob blob-2"></div>
-          <div class="aurora-blob blob-3"></div>
-        `;
-        spotlight.classList.add('hidden');
-      } else if (theme === 'cyber') {
-        bgLayer.innerHTML = '';
-        spotlight.classList.remove('hidden');
-      } else {
-        bgLayer.innerHTML = '';
-        spotlight.classList.add('hidden');
-      }
-
-      // Update button styling
-      document.querySelectorAll('#bgButtons button').forEach(btn => {
-        btn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-400/40');
-        btn.classList.add('bg-slate-800/80', 'text-slate-300', 'border-slate-700');
-      });
-      if (event && event.target) {
-        event.target.classList.remove('bg-slate-800/80', 'text-slate-300', 'border-slate-700');
-        event.target.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-400/40');
-      }
+    // Mobile Navigation Toggle
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
     }
-
-    // Cursor tracking for Cyber spotlight mode
-    window.addEventListener('mousemove', e => {
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
-    });
   </script>
 </body>
 </html>
