@@ -5,14 +5,6 @@
 # AURORA BACHELOR
 ### MEAL & HOUSE MANAGEMENT OS
 
-## ?? Live Links
-- **Landing Page (Live)**: [https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html) � *(or [GitHub Pages](https://gitwithmasum.github.io/Aurora-Bachelor/landing.html))*
-- **Web App (Live)**: [https://aurora-bachelor-masumtheinvincible.vercel.app](https://aurora-bachelor-masumtheinvincible.vercel.app)
-
-## ?? Run Locally
-- **Landing Page**: Open landing.html in a modern browser.
-- **Web App**: Open index.html in a modern browser.
-
 **A local-first command center for shared bachelor living.**
 
 [![GitHub](https://img.shields.io/badge/Source-GitHub-181717?logo=github)](https://github.com/gitwithmasum/Aurora-Bachelor)
@@ -25,6 +17,14 @@
 **[Launch Aurora Bachelor](https://aurora-bachelor-masumtheinvincible.vercel.app)** · **[Repository](https://github.com/gitwithmasum/Aurora-Bachelor)** · **[Product specification](./Assets/Aurora%20Bachelor%20Product%20Specification.pdf)**
 
 </div>
+
+---
+
+## 🌐 Live Links
+
+1. **Vercel লাইভ ল্যান্ডিং পেজ**: [https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html)
+2. **GitHub Pages লাইভ ল্যান্ডিং পেজ**: [https://gitwithmasum.github.io/Aurora-Bachelor/landing.html](https://gitwithmasum.github.io/Aurora-Bachelor/landing.html)
+3. **লাইভ ওয়েব অ্যাপ্লিকেশন লিঙ্ক**: [https://aurora-bachelor-masumtheinvincible.vercel.app](https://aurora-bachelor-masumtheinvincible.vercel.app)
 
 ---
 
