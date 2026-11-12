@@ -6312,53 +6312,27 @@ const AuroraMonthLock = (() => {
 
 
     control.innerHTML = `
-
-    <div
-      class="aurora-month-lock-stack"
-    >
-
+    <div class="aurora-month-lock-stack">
       ${manager
-
         ? `
             <button
               type="button"
               class="aurora-month-lock-action"
               id="auroraMonthLockButton"
             >
-              ${locked
-          ? "🔓 UNLOCK MONTH"
-          : "🔒 LOCK MONTH"
-        }
+              <span>${locked ? "🔓 UNLOCK" : "🔒 LOCK"}</span>
             </button>
           `
-
         : `
-            <span
-              class="aurora-month-lock-view"
-            >
+            <span class="aurora-month-lock-view">
               VIEW ONLY
             </span>
           `
       }
-
-
-      <span
-        class="
-          aurora-month-lock-state
-          ${locked
-        ? "locked"
-        : "open"
-      }
-        "
-      >
-        ${locked
-        ? "● LOCKED"
-        : "● OPEN"
-      }
+      <span class="aurora-month-lock-state ${locked ? "locked" : "open"}">
+        ${locked ? "● LOCKED" : "● OPEN"}
       </span>
-
     </div>
-
   `;
 
 

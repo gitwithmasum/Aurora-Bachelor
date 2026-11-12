@@ -18069,18 +18069,44 @@ html[data-accent] .title-cursor {
    AURORA // MONTH LOCK CONTROL — FINAL
 ============================================================ */
 
+/* ============================================================
+   AURORA // MONTH LOCK CONTROL (FUTURISTIC HUD CAPSULE)
+============================================================ */
+
 .aurora-month-lock-control,
 #auroraMonthLockControl {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  min-width: 145px !important;
+  min-height: 44px !important;
+  padding: 6px 12px !important;
+  margin-left: 9px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, rgba(8, 22, 40, .97), rgba(3, 10, 21, .99)) !important;
+  border: 1px solid rgba(84, 234, 255, .20) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), inset 0 0 18px rgba(84, 234, 255, .04) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  user-select: none !important;
+  transition: transform .14s cubic-bezier(0, 0, 0.2, 1), border-color .14s ease, box-shadow .14s ease !important;
+}
 
-  min-width: 125px !important;
+#auroraMonthLockControl::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  width: 76%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(84, 234, 255, .6), transparent);
+  pointer-events: none;
+}
 
-  margin-left: 9px;
-
-  background: transparent !important;
-  border: none !important;
+#auroraMonthLockControl:hover {
+  transform: translateY(-1px);
+  border-color: rgba(84, 234, 255, .45) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .55), 0 0 18px rgba(84, 234, 255, .12), inset 0 0 20px rgba(84, 234, 255, .06) !important;
 }
 
 
@@ -18090,101 +18116,49 @@ html[data-accent] .title-cursor {
 
 #auroraMonthLockControl .aurora-month-lock-stack {
   width: 100% !important;
-
   display: flex !important;
   flex-direction: column !important;
-
   align-items: center !important;
   justify-content: center !important;
-
-  gap: 15px !important;
+  gap: 3px !important;
 }
 
 
 /* ============================================================
-   LOCK / UNLOCK BUTTON
+   LOCK / UNLOCK BUTTON (ADMIN)
 ============================================================ */
 
 #auroraMonthLockControl .aurora-month-lock-action {
   appearance: none !important;
-
-  min-width: 112px !important;
-  height: 25px !important;
-
-  display: flex !important;
+  min-width: 116px !important;
+  height: 22px !important;
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-
+  gap: 5px !important;
   margin: 0 !important;
-  padding: 0 10px !important;
-
-  border:
-    1px solid rgba(94, 222, 255, .24) !important;
-
-  border-radius:
-    7px !important;
-
-  background:
-    linear-gradient(135deg,
-      rgba(46, 189, 226, .08),
-      rgba(119, 82, 215, .08)),
-    rgba(7, 16, 31, .92) !important;
-
-  color:
-    #dff8ff !important;
-
-  font-size:
-    8px !important;
-
-  font-weight:
-    900 !important;
-
-  letter-spacing:
-    .08em !important;
-
-  line-height:
-    1 !important;
-
-  white-space:
-    nowrap !important;
-
-  cursor:
-    pointer !important;
-
-  opacity:
-    1 !important;
-
-  filter:
-    none !important;
-
-  box-shadow:
-    inset 0 0 12px rgba(73, 217, 255, .03),
-
-    0 0 12px rgba(73, 217, 255, .04) !important;
-
-  transition:
-    border-color .18s ease,
-    background .18s ease,
-    box-shadow .18s ease,
-    transform .18s ease;
+  padding: 0 9px !important;
+  border: 1px solid rgba(84, 234, 255, .32) !important;
+  border-radius: 6px !important;
+  background: linear-gradient(135deg, rgba(84, 234, 255, .14), rgba(109, 141, 255, .12)), rgba(5, 14, 28, .96) !important;
+  color: #edf7ff !important;
+  font-family: 'Orbitron', -apple-system, sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 12px rgba(84, 234, 255, .10), inset 0 0 8px rgba(84, 234, 255, .05) !important;
+  transition: all .12s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
-
 #auroraMonthLockControl .aurora-month-lock-action:hover {
-  transform:
-    translateY(-1px);
-
-  border-color:
-    rgba(96, 228, 255, .48) !important;
-
-  background:
-    linear-gradient(135deg,
-      rgba(46, 189, 226, .13),
-      rgba(119, 82, 215, .13)),
-    rgba(7, 16, 31, .96) !important;
-
-  box-shadow:
-    0 0 16px rgba(75, 221, 255, .09) !important;
+  transform: translateY(-1px);
+  border-color: rgba(84, 234, 255, .6) !important;
+  background: linear-gradient(135deg, rgba(84, 234, 255, .24), rgba(109, 141, 255, .20)), rgba(8, 20, 38, .98) !important;
+  box-shadow: 0 0 18px rgba(84, 234, 255, .25) !important;
 }
 
 
@@ -18194,93 +18168,64 @@ html[data-accent] .title-cursor {
 
 #auroraMonthLockControl .aurora-month-lock-state {
   width: auto !important;
-
   display: inline-flex !important;
-
   align-items: center !important;
   justify-content: center !important;
-
+  gap: 4px !important;
   margin: 0 !important;
   padding: 0 !important;
-
   border: none !important;
-
-  background:
-    transparent !important;
-
-  font-size:
-    7px !important;
-
-  font-weight:
-    900 !important;
-
-  line-height:
-    1 !important;
-
-  letter-spacing:
-    .12em !important;
-
-  white-space:
-    nowrap;
+  background: transparent !important;
+  font-family: 'SF Mono', Consolas, monospace !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: .12em !important;
+  white-space: nowrap !important;
+  text-transform: uppercase !important;
 }
 
 
 /* OPEN */
 
 #auroraMonthLockControl .aurora-month-lock-state.open {
-  color:
-    #58f0ba !important;
-
-  text-shadow:
-    0 0 8px rgba(88, 240, 186, .45);
+  color: #57e39b !important;
+  text-shadow: 0 0 8px rgba(87, 227, 155, .6) !important;
 }
 
 
 /* LOCKED */
 
 #auroraMonthLockControl .aurora-month-lock-state.locked {
-  color:
-    #ffc368 !important;
-
-  text-shadow:
-    0 0 8px rgba(255, 195, 104, .40);
+  color: #ffc86b !important;
+  text-shadow: 0 0 8px rgba(255, 200, 107, .55) !important;
 }
 
 
 /* ============================================================
-   MEMBER // VIEW ONLY
+   MEMBER // VIEW ONLY (HOLOGRAPHIC SECURITY CHIP)
 ============================================================ */
 
 #auroraMonthLockControl .aurora-month-lock-view {
-  min-width: 112px;
-  min-height: 25px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 10px;
-
-  border:
-    1px solid rgba(255, 255, 255, .07);
-
-  border-radius:
-    7px;
-
-  background:
-    rgba(255, 255, 255, .025);
-
-  color:
-    rgba(190, 204, 222, .48);
-
-  font-size:
-    8px;
-
-  font-weight:
-    800;
-
-  letter-spacing:
-    .08em;
+  min-width: 108px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(84, 234, 255, .24) !important;
+  border-radius: 6px !important;
+  background: linear-gradient(135deg, rgba(84, 234, 255, .10), rgba(183, 124, 255, .08)), rgba(5, 14, 28, .92) !important;
+  box-shadow: 0 0 12px rgba(84, 234, 255, .08), inset 0 0 8px rgba(84, 234, 255, .05) !important;
+  color: #54eaff !important;
+  font-family: 'Orbitron', -apple-system, sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-shadow: 0 0 8px rgba(84, 234, 255, .5) !important;
+  white-space: nowrap !important;
+  text-transform: uppercase !important;
 }
 
 
@@ -18483,288 +18428,269 @@ button.aurora-lock-disabled::after {
 
 
 /* ============================================================
-   AURORA // CLOUD SYNC HUD
+   AURORA // CLOUD SYNC HUD (FUTURISTIC REACTOR CAPSULE)
 ============================================================ */
 
 .aurora-sync-hud {
-  min-width: 158px;
-
+  min-width: 165px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-
-  gap: 9px;
-
-  padding: 7px 11px;
-
+  gap: 10px;
+  padding: 6px 12px;
   cursor: pointer;
-
   user-select: none;
-
-  border-radius: 12px;
-
-  transition:
-    border-color .25s ease,
-    background .25s ease,
-    box-shadow .25s ease,
-    transform .25s ease;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(8, 22, 40, .97), rgba(3, 10, 21, .99));
+  border: 1px solid rgba(84, 234, 255, .20);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), inset 0 0 18px rgba(84, 234, 255, .04);
+  position: relative;
+  overflow: hidden;
+  transition: transform .14s cubic-bezier(0, 0, 0.2, 1), border-color .14s ease, box-shadow .14s ease;
 }
 
+.aurora-sync-hud::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  width: 76%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(84, 234, 255, .6), transparent);
+  pointer-events: none;
+}
 
 .aurora-sync-hud:hover {
-  transform:
-    translateY(-1px);
+  transform: translateY(-1px);
+  border-color: rgba(84, 234, 255, .45);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .55), 0 0 18px rgba(84, 234, 255, .12), inset 0 0 20px rgba(84, 234, 255, .06);
 }
 
+.aurora-sync-orb {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  background: #a583ff;
+  box-shadow: 0 0 8px #a583ff, 0 0 16px rgba(165, 131, 255, 0.65);
+  transition: all .2s ease;
+}
+
+.aurora-sync-orb::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px dashed rgba(84, 234, 255, 0.4);
+  animation: coreRotate 6s linear infinite;
+}
 
 .aurora-sync-info {
   min-width: 0;
-
   flex: 1;
-
   display: flex;
   flex-direction: column;
-
   gap: 2px;
 }
-
 
 .aurora-sync-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 8px;
+  line-height: 1;
 }
 
+.aurora-sync-head .status-label {
+  font-family: 'Orbitron', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #54eaff;
+  text-shadow: 0 0 8px rgba(84, 234, 255, 0.4);
+}
 
 .aurora-sync-revision {
-  color:
-    rgba(172, 197, 218, .45);
-
-  font-size: 7px;
-  font-weight: 900;
-
-  letter-spacing: .08em;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #8cecff;
+  background: rgba(84, 234, 255, 0.08);
+  border: 1px solid rgba(84, 234, 255, 0.22);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.2;
 }
-
 
 .aurora-sync-info strong {
-  font-size: 9px;
-  font-weight: 900;
-
-  letter-spacing: .08em;
-
-  transition:
-    color .25s ease;
+  font-family: 'Orbitron', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #edf7ff;
+  line-height: 1.2;
+  transition: color .2s ease;
 }
-
 
 .aurora-sync-meta {
   max-width: 145px;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
-  color:
-    rgba(172, 196, 216, .48);
-
-  font-size: 7px;
-
+  color: #8397ad;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 7.5px;
   letter-spacing: .03em;
 }
-
 
 /* ============================================================
    SYNCED
 ============================================================ */
 
 .aurora-sync-hud.sync-synced {
-  border-color:
-    rgba(77, 244, 177, .18);
-
-  background:
-    rgba(57, 220, 156, .045);
-
-  box-shadow:
-    inset 0 0 16px rgba(57, 220, 156, .025);
+  border-color: rgba(87, 227, 155, .32);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), 0 0 15px rgba(87, 227, 155, .08), inset 0 0 16px rgba(87, 227, 155, .04);
 }
 
+.aurora-sync-hud.sync-synced::before {
+  background: linear-gradient(90deg, transparent, rgba(87, 227, 155, .7), transparent);
+}
 
 .aurora-sync-hud.sync-synced .aurora-sync-orb {
-  background:
-    #62f5bd;
-
-  box-shadow:
-    0 0 6px #62f5bd,
-    0 0 15px rgba(98, 245, 189, .55);
+  background: #57e39b;
+  box-shadow: 0 0 7px #57e39b, 0 0 18px rgba(87, 227, 155, .7);
 }
 
+.aurora-sync-hud.sync-synced .aurora-sync-orb::after {
+  border-color: rgba(87, 227, 155, .5);
+}
 
 .aurora-sync-hud.sync-synced .aurora-sync-info strong {
-  color:
-    #65efbd;
+  color: #57e39b;
+  text-shadow: 0 0 10px rgba(87, 227, 155, .6);
 }
-
 
 /* ============================================================
    SYNCING
 ============================================================ */
 
 .aurora-sync-hud.sync-syncing {
-  border-color:
-    rgba(81, 217, 255, .26);
-
-  background:
-    rgba(65, 193, 255, .055);
-
-  box-shadow:
-    0 0 20px rgba(59, 203, 255, .055);
+  border-color: rgba(84, 234, 255, .38);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), 0 0 18px rgba(84, 234, 255, .12), inset 0 0 16px rgba(84, 234, 255, .05);
 }
 
+.aurora-sync-hud.sync-syncing::before {
+  background: linear-gradient(90deg, transparent, rgba(84, 234, 255, .8), transparent);
+}
 
 .aurora-sync-hud.sync-syncing .aurora-sync-orb {
-  background:
-    #65dfff;
-
-  box-shadow:
-    0 0 7px #65dfff,
-    0 0 18px rgba(75, 213, 255, .7);
-
-  animation:
-    auroraSyncPulse .8s ease-in-out infinite;
+  background: #54eaff;
+  box-shadow: 0 0 8px #54eaff, 0 0 20px rgba(84, 234, 255, .8);
+  animation: auroraSyncPulse .8s ease-in-out infinite;
 }
 
+.aurora-sync-hud.sync-syncing .aurora-sync-orb::after {
+  border-color: rgba(84, 234, 255, .6);
+}
 
 .aurora-sync-hud.sync-syncing .aurora-sync-info strong {
-  color:
-    #74e5ff;
+  color: #54eaff;
+  text-shadow: 0 0 10px rgba(84, 234, 255, .65);
 }
-
 
 /* ============================================================
    CONNECTING
 ============================================================ */
 
 .aurora-sync-hud.sync-connecting {
-  border-color:
-    rgba(157, 123, 255, .22);
-
-  background:
-    rgba(121, 91, 255, .045);
+  border-color: rgba(183, 124, 255, .32);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), 0 0 16px rgba(183, 124, 255, .10), inset 0 0 16px rgba(183, 124, 255, .04);
 }
 
+.aurora-sync-hud.sync-connecting::before {
+  background: linear-gradient(90deg, transparent, rgba(183, 124, 255, .7), transparent);
+}
 
 .aurora-sync-hud.sync-connecting .aurora-sync-orb {
-  background:
-    #a583ff;
-
-  box-shadow:
-    0 0 15px rgba(159, 128, 255, .65);
-
-  animation:
-    auroraSyncPulse 1.2s ease-in-out infinite;
+  background: #b77cff;
+  box-shadow: 0 0 8px #b77cff, 0 0 18px rgba(183, 124, 255, .7);
+  animation: auroraSyncPulse 1.2s ease-in-out infinite;
 }
 
+.aurora-sync-hud.sync-connecting .aurora-sync-orb::after {
+  border-color: rgba(183, 124, 255, .5);
+}
 
 .aurora-sync-hud.sync-connecting .aurora-sync-info strong {
-  color:
-    #b69aff;
+  color: #b77cff;
+  text-shadow: 0 0 10px rgba(183, 124, 255, .65);
 }
-
 
 /* ============================================================
    OFFLINE
 ============================================================ */
 
 .aurora-sync-hud.sync-offline {
-  border-color:
-    rgba(160, 170, 184, .14);
-
-  background:
-    rgba(100, 110, 125, .045);
+  border-color: rgba(160, 170, 184, .18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
 }
-
 
 .aurora-sync-hud.sync-offline .aurora-sync-orb {
-  background:
-    #788694;
-
-  box-shadow:
-    none;
-
-  animation:
-    none;
+  background: #788694;
+  box-shadow: none;
+  animation: none;
 }
-
 
 .aurora-sync-hud.sync-offline .aurora-sync-info strong {
-  color:
-    #9aa8b5;
+  color: #94a3b8;
 }
-
 
 /* ============================================================
    CONFLICT
 ============================================================ */
 
 .aurora-sync-hud.sync-conflict {
-  border-color:
-    rgba(255, 177, 63, .32);
-
-  background:
-    rgba(255, 165, 47, .065);
-
-  box-shadow:
-    0 0 22px rgba(255, 167, 55, .08);
+  border-color: rgba(255, 200, 107, .38);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), 0 0 20px rgba(255, 200, 107, .12);
 }
 
+.aurora-sync-hud.sync-conflict::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 200, 107, .75), transparent);
+}
 
 .aurora-sync-hud.sync-conflict .aurora-sync-orb {
-  background:
-    #ffb24d;
-
-  box-shadow:
-    0 0 7px #ffb24d,
-    0 0 20px rgba(255, 178, 77, .65);
+  background: #ffc86b;
+  box-shadow: 0 0 8px #ffc86b, 0 0 20px rgba(255, 200, 107, .7);
 }
-
 
 .aurora-sync-hud.sync-conflict .aurora-sync-info strong {
-  color:
-    #ffc269;
+  color: #ffc86b;
+  text-shadow: 0 0 10px rgba(255, 200, 107, .6);
 }
-
 
 /* ============================================================
    ERROR
 ============================================================ */
 
 .aurora-sync-hud.sync-error {
-  border-color:
-    rgba(255, 76, 111, .30);
-
-  background:
-    rgba(255, 61, 100, .055);
-
-  box-shadow:
-    0 0 22px rgba(255, 61, 100, .07);
+  border-color: rgba(255, 111, 145, .38);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .45), 0 0 20px rgba(255, 111, 145, .12);
 }
 
+.aurora-sync-hud.sync-error::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 111, 145, .75), transparent);
+}
 
 .aurora-sync-hud.sync-error .aurora-sync-orb {
-  background:
-    #ff5978;
-
-  box-shadow:
-    0 0 7px #ff5978,
-    0 0 20px rgba(255, 79, 116, .65);
+  background: #ff6f91;
+  box-shadow: 0 0 8px #ff6f91, 0 0 20px rgba(255, 111, 145, .7);
 }
 
-
 .aurora-sync-hud.sync-error .aurora-sync-info strong {
-  color:
-    #ff7892;
+  color: #ff6f91;
+  text-shadow: 0 0 10px rgba(255, 111, 145, .6);
 }
 
 
@@ -18829,8 +18755,9 @@ button.aurora-lock-disabled::after {
    AURORA // NOTIFICATION CENTER
 ============================================================ */
 
-.aurora-notification {
-  position: relative;
+.aurora-notification,
+#auroraNotification {
+  display: none !important;
 }
 
 
