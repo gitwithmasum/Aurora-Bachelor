@@ -42,6 +42,41 @@
 
   <div class="app-shell">
 
+    <!-- =========================================================
+         AURORA // ANDROID MOBILE TOP BAR
+    ========================================================== -->
+    <header class="mobile-top-bar" id="mobileTopBar">
+      <!-- 1. Brand Logo & Cloud Sync Status -->
+      <div class="mobile-brand-box">
+        <div class="mobile-logo-badge">
+          <img src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Logo" class="mobile-logo-img">
+        </div>
+        <div class="mobile-brand-meta">
+          <span class="mobile-brand-title">AURORA</span>
+          <div class="mobile-sync-chip" id="mobileSyncChip">
+            <span class="mobile-sync-dot synced" id="mobileSyncDot"></span>
+            <span class="mobile-sync-text" id="mobileSyncText">SYNCED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Month Switcher Capsule -->
+      <div class="mobile-month-pill" id="mobileMonthPill">
+        <button type="button" class="mobile-pill-arrow" id="mobileMonthPrev" title="Previous Month" aria-label="Previous Month">◀</button>
+        <button type="button" class="mobile-pill-display" id="mobileMonthTrigger" title="Select Month">
+          <span id="mobileMonthLabel">AUG '26</span>
+        </button>
+        <button type="button" class="mobile-pill-arrow" id="mobileMonthNext" title="Next Month" aria-label="Next Month">▶</button>
+      </div>
+
+      <!-- 3. User Avatar -->
+      <div class="mobile-profile-wrap">
+        <button type="button" class="mobile-avatar-btn" id="mobileProfileBtn" title="Open User Profile" aria-label="Open User Profile">
+          <span class="mobile-avatar-icon">👤</span>
+        </button>
+      </div>
+    </header>
+
     <!-- Part-1: Sidebar -->
     <aside class="sidebar">
 
@@ -2085,6 +2120,123 @@
     </main>
   </div>
 
+  <!-- =========================================================
+       AURORA // ANDROID MOBILE BOTTOM NAVIGATION (5 TABS)
+  ========================================================== -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <button type="button" class="mobile-tab active" data-tab="dashboard" onclick="selectMobileTab('dashboard')" aria-label="Dashboard">
+      <span class="mobile-tab-icon">⌂</span>
+      <span class="mobile-tab-label">Home</span>
+    </button>
+    <button type="button" class="mobile-tab" data-tab="meals" onclick="selectMobileTab('meals')" aria-label="Daily Meals">
+      <span class="mobile-tab-icon">🍚</span>
+      <span class="mobile-tab-label">Meals</span>
+    </button>
+    <button type="button" class="mobile-tab" data-tab="expenses" onclick="selectMobileTab('expenses')" aria-label="Bazaar Expenses">
+      <span class="mobile-tab-icon">◈</span>
+      <span class="mobile-tab-label">Bazaar</span>
+    </button>
+    <button type="button" class="mobile-tab" data-tab="settlement" onclick="selectMobileTab('settlement')" aria-label="Settlement">
+      <span class="mobile-tab-icon">⇄</span>
+      <span class="mobile-tab-label">Settle</span>
+    </button>
+    <button type="button" class="mobile-tab" data-tab="more" id="mobileMoreBtn" onclick="toggleMobileMoreDrawer()" aria-label="More Modules">
+      <span class="mobile-tab-icon">☰</span>
+      <span class="mobile-tab-label">More</span>
+    </button>
+  </nav>
+
+  <!-- =========================================================
+       AURORA // MOBILE MORE MODULES DRAWER
+  ========================================================== -->
+  <div class="mobile-drawer-backdrop" id="mobileMoreDrawerBackdrop" onclick="toggleMobileMoreDrawer(false)"></div>
+  <aside class="mobile-drawer" id="mobileMoreDrawer" aria-hidden="true">
+    <div class="mobile-drawer-handle" onclick="toggleMobileMoreDrawer(false)"></div>
+    <div class="mobile-drawer-header">
+      <div>
+        <div class="mobile-drawer-eyebrow">AURORA // SYSTEM MODULES</div>
+        <h3 class="mobile-drawer-title">All Management Modules</h3>
+      </div>
+      <button type="button" class="mobile-drawer-close" onclick="toggleMobileMoreDrawer(false)" aria-label="Close">✕</button>
+    </div>
+    <div class="mobile-drawer-grid">
+      <button type="button" class="drawer-module-card" data-drawer-page="weekly" onclick="selectDrawerModule('weekly')">
+        <span class="drawer-module-icon">▦</span>
+        <div class="drawer-module-info">
+          <strong>Weekly Planner</strong>
+          <span>Meal schedule & rotation</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="members" onclick="selectDrawerModule('members')">
+        <span class="drawer-module-icon">◉</span>
+        <div class="drawer-module-info">
+          <strong>Members</strong>
+          <span>Mess residents & roles</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="payments" onclick="selectDrawerModule('payments')">
+        <span class="drawer-module-icon">৳</span>
+        <div class="drawer-module-info">
+          <strong>Payments</strong>
+          <span>Deposits & member dues</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="bills" onclick="selectDrawerModule('bills')">
+        <span class="drawer-module-icon">▣</span>
+        <div class="drawer-module-info">
+          <strong>House Bills</strong>
+          <span>WiFi, gas, maid & rent</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="reports" onclick="selectDrawerModule('reports')">
+        <span class="drawer-module-icon">◌</span>
+        <div class="drawer-module-info">
+          <strong>Monthly Report</strong>
+          <span>Summary, stats & print</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="activity" onclick="selectDrawerModule('activity')">
+        <span class="drawer-module-icon">◇</span>
+        <div class="drawer-module-info">
+          <strong>Activity Log</strong>
+          <span>Real-time event signals</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="versions" onclick="selectDrawerModule('versions')">
+        <span class="drawer-module-icon">⟳</span>
+        <div class="drawer-module-info">
+          <strong>Version History</strong>
+          <span>Releases & changelogs</span>
+        </div>
+      </button>
+      <button type="button" class="drawer-module-card" data-drawer-page="settings" onclick="selectDrawerModule('settings')">
+        <span class="drawer-module-icon">⚙</span>
+        <div class="drawer-module-info">
+          <strong>Settings</strong>
+          <span>Cloud, backup & config</span>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================
+       AURORA // MOBILE MONTH SELECTOR SHEET
+  ========================================================== -->
+  <div class="mobile-drawer-backdrop" id="mobileMonthSheetBackdrop" onclick="toggleMobileMonthSheet(false)"></div>
+  <aside class="mobile-drawer" id="mobileMonthSheet" aria-hidden="true">
+    <div class="mobile-drawer-handle" onclick="toggleMobileMonthSheet(false)"></div>
+    <div class="mobile-drawer-header">
+      <div>
+        <div class="mobile-drawer-eyebrow">SELECT ACTIVE CYCLE</div>
+        <h3 class="mobile-drawer-title" id="mobileMonthSheetYear">CYCLES</h3>
+      </div>
+      <button type="button" class="mobile-drawer-close" onclick="toggleMobileMonthSheet(false)" aria-label="Close">✕</button>
+    </div>
+    <div class="mobile-month-grid" id="mobileMonthList">
+      <!-- Populated dynamically via JavaScript -->
+    </div>
+  </aside>
+
   <div id="modalRoot"></div>
   <div id="toast"></div>
 
@@ -2291,6 +2443,248 @@
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>
   <script src="./duty-rotation.js?v=2" defer></script>
+
+  <!-- =========================================================
+       AURORA // ANDROID MOBILE RESPONSIVE NAVIGATION CONTROLLER
+  ========================================================== -->
+  <script>
+    function selectMobileTab(page) {
+      if (page === 'more') {
+        toggleMobileMoreDrawer(true);
+        return;
+      }
+      toggleMobileMoreDrawer(false);
+      toggleMobileMonthSheet(false);
+      if (typeof go === 'function') {
+        go(page);
+      } else if (window.AuroraApp && AuroraApp.navigate) {
+        AuroraApp.navigate(page);
+      }
+      updateMobileNavState(page);
+    }
+
+    function selectDrawerModule(page) {
+      toggleMobileMoreDrawer(false);
+      if (typeof go === 'function') {
+        go(page);
+      } else if (window.AuroraApp && AuroraApp.navigate) {
+        AuroraApp.navigate(page);
+      }
+      updateMobileNavState(page);
+    }
+
+    function updateMobileNavState(activePage) {
+      const bottomTabs = document.querySelectorAll('#mobileBottomNav .mobile-tab');
+      const drawerItems = document.querySelectorAll('#mobileMoreDrawer .drawer-module-card');
+      const primaryPages = ['dashboard', 'meals', 'expenses', 'settlement'];
+      
+      bottomTabs.forEach(tab => {
+        const tabName = tab.getAttribute('data-tab');
+        if (tabName === activePage) {
+          tab.classList.add('active');
+        } else if (tabName === 'more' && !primaryPages.includes(activePage)) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      drawerItems.forEach(item => {
+        const page = item.getAttribute('data-drawer-page');
+        if (page === activePage) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    function toggleMobileMoreDrawer(forceState) {
+      const drawer = document.getElementById('mobileMoreDrawer');
+      const backdrop = document.getElementById('mobileMoreDrawerBackdrop');
+      if (!drawer || !backdrop) return;
+      
+      const isOpen = drawer.classList.contains('open');
+      const willOpen = typeof forceState === 'boolean' ? forceState : !isOpen;
+      
+      if (willOpen) {
+        toggleMobileMonthSheet(false);
+        drawer.classList.add('open');
+        backdrop.classList.add('open');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('open');
+      }
+    }
+
+    function toggleMobileMonthSheet(forceState) {
+      const sheet = document.getElementById('mobileMonthSheet');
+      const backdrop = document.getElementById('mobileMonthSheetBackdrop');
+      if (!sheet || !backdrop) return;
+      
+      const isOpen = sheet.classList.contains('open');
+      const willOpen = typeof forceState === 'boolean' ? forceState : !isOpen;
+      
+      if (willOpen) {
+        toggleMobileMoreDrawer(false);
+        renderMobileMonthList();
+        sheet.classList.add('open');
+        backdrop.classList.add('open');
+      } else {
+        sheet.classList.remove('open');
+        backdrop.classList.remove('open');
+      }
+    }
+
+    function formatMobileMonthLabel(key) {
+      if (!key || typeof key !== 'string' || !/^\d{4}-\d{2}$/.test(key)) {
+        return "CYCLE";
+      }
+      const [year, month] = key.split('-').map(Number);
+      const date = new Date(year, month - 1, 1);
+      const shortMonth = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+      const shortYear = String(year).slice(-2);
+      return `${shortMonth} '${shortYear}`;
+    }
+
+    function updateMobileMonthDisplay() {
+      const current = typeof AuroraApp !== 'undefined' && AuroraApp.getCurrentMonth ? AuroraApp.getCurrentMonth() : null;
+      const labelEl = document.getElementById('mobileMonthLabel');
+      if (labelEl && current) {
+        labelEl.textContent = formatMobileMonthLabel(current);
+      }
+    }
+
+    function shiftMobileMonth(delta) {
+      if (typeof AuroraApp === 'undefined' || !AuroraApp.getCurrentMonth || !AuroraApp.setMonth) return;
+      const current = AuroraApp.getCurrentMonth();
+      const [y, m] = current.split('-').map(Number);
+      const target = new Date(y, m - 1 + delta, 1);
+      const nextKey = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`;
+      AuroraApp.setMonth(nextKey);
+      updateMobileMonthDisplay();
+      renderMobileMonthList();
+    }
+
+    function renderMobileMonthList() {
+      const container = document.getElementById('mobileMonthList');
+      const yearEl = document.getElementById('mobileMonthSheetYear');
+      if (!container) return;
+      
+      const current = typeof AuroraApp !== 'undefined' && AuroraApp.getCurrentMonth ? AuroraApp.getCurrentMonth() : '2026-08';
+      const [year] = current.split('-').map(Number);
+      if (yearEl) yearEl.textContent = `${year} CYCLES`;
+      
+      const database = typeof AuroraDataStore !== 'undefined' && AuroraDataStore.get ? AuroraDataStore.get() : {};
+      const months = new Set();
+      for (let m = 1; m <= 12; m++) {
+        months.add(`${year}-${String(m).padStart(2, '0')}`);
+      }
+      Object.keys(database?.months || {}).forEach(k => months.add(k));
+      
+      const sorted = [...months].sort().reverse();
+      container.innerHTML = sorted.map(m => {
+        const isActive = m === current;
+        const [y, mon] = m.split('-').map(Number);
+        const d = new Date(y, mon - 1, 1);
+        const full = d.toLocaleString('en-US', { month: 'long' });
+        return `
+          <button type="button" class="month-sheet-btn ${isActive ? 'active' : ''}" onclick="pickMobileMonth('${m}')">
+            <span class="month-sheet-name">${full}</span>
+            <span class="month-sheet-year">${y}</span>
+            ${isActive ? '<span class="month-sheet-tag">ACTIVE</span>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function pickMobileMonth(month) {
+      if (typeof AuroraApp !== 'undefined' && AuroraApp.setMonth) {
+        AuroraApp.setMonth(month);
+        updateMobileMonthDisplay();
+      }
+      toggleMobileMonthSheet(false);
+    }
+
+    function initMobileNavSystem() {
+      // Bind profile button
+      const mobileProfileBtn = document.getElementById('mobileProfileBtn');
+      if (mobileProfileBtn) {
+        mobileProfileBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('profileBtn')?.click();
+        });
+      }
+
+      // Bind Month buttons
+      document.getElementById('mobileMonthPrev')?.addEventListener('click', () => shiftMobileMonth(-1));
+      document.getElementById('mobileMonthNext')?.addEventListener('click', () => shiftMobileMonth(1));
+      document.getElementById('mobileMonthTrigger')?.addEventListener('click', () => toggleMobileMonthSheet());
+
+      // Cloud sync observer
+      const syncHud = document.getElementById('auroraSyncHud');
+      const syncDot = document.getElementById('mobileSyncDot');
+      const syncText = document.getElementById('mobileSyncText');
+      
+      function syncMobileHud() {
+        if (!syncHud || !syncDot || !syncText) return;
+        const isSynced = syncHud.classList.contains('sync-synced');
+        const isSyncing = syncHud.classList.contains('sync-syncing');
+        const isError = syncHud.classList.contains('sync-error') || syncHud.classList.contains('sync-conflict');
+        const isOffline = syncHud.classList.contains('sync-offline');
+        
+        syncDot.className = 'mobile-sync-dot';
+        if (isSynced) {
+          syncDot.classList.add('synced');
+          syncText.textContent = 'SYNCED';
+        } else if (isSyncing) {
+          syncDot.classList.add('syncing');
+          syncText.textContent = 'SYNCING';
+        } else if (isError) {
+          syncDot.classList.add('error');
+          syncText.textContent = 'ERROR';
+        } else if (isOffline) {
+          syncDot.classList.add('offline');
+          syncText.textContent = 'OFFLINE';
+        } else {
+          syncDot.classList.add('connecting');
+          syncText.textContent = 'LINK';
+        }
+      }
+
+      if (syncHud) {
+        const observer = new MutationObserver(syncMobileHud);
+        observer.observe(syncHud, { attributes: true, attributeFilter: ['class'] });
+        syncMobileHud();
+      }
+
+      // Hook navigation
+      const origNavigate = typeof AuroraApp !== 'undefined' ? AuroraApp.navigate : null;
+      if (origNavigate) {
+        AuroraApp.navigate = function(page) {
+          origNavigate(page);
+          updateMobileNavState(page);
+        };
+      }
+
+      // Initialize initial states
+      setTimeout(() => {
+        updateMobileMonthDisplay();
+        syncMobileHud();
+        if (typeof AuroraApp !== 'undefined' && AuroraApp.getCurrentPage) {
+          updateMobileNavState(AuroraApp.getCurrentPage());
+        } else {
+          updateMobileNavState('dashboard');
+        }
+      }, 400);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileNavSystem);
+    } else {
+      initMobileNavSystem();
+    }
+  </script>
 </body>
 
 </html>

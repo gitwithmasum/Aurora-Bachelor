@@ -1,0 +1,8 @@
+# Video & Audio media (Local only, never push to GitHub)
+*.mp4
+*.wav
+*.webm
+*.avi
+*.mov
+temp_video/
+scratch/
