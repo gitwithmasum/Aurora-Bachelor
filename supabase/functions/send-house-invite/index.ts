@@ -466,15 +466,28 @@ export default {
 
 
       /* ======================================================
-         INVITATION URL
+         INVITATION URL (DYNAMIC ORIGIN SUPPORT)
       ====================================================== */
 
+      let baseUrl = "https://aurora-bachelor-masumtheinvincible.vercel.app/";
+
+      const requestedAppUrl = String(body?.appUrl || "").trim();
+
+      if (requestedAppUrl.startsWith("http://") || requestedAppUrl.startsWith("https://")) {
+        try {
+          const parsed = new URL(requestedAppUrl);
+          baseUrl = parsed.origin + parsed.pathname;
+          if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
+          }
+        } catch (_) {
+          // fallback to default
+        }
+      }
+
       const inviteUrl =
-
-        "https://gitwithmasum.github.io/Aurora-Bachelor/" +
-
+        baseUrl +
         "?invite=" +
-
         encodeURIComponent(
           invitation.invite_token
         );
@@ -1195,6 +1208,9 @@ export default {
             brevoResult
               ?.messageId ||
             null,
+
+          inviteUrl:
+            inviteUrl,
 
         },
 

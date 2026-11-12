@@ -12001,6 +12001,69 @@ function openMemberModal() {
 
 
 /* ==========================================================
+   AURORA // INVITATION SHARE MODAL
+========================================================== */
+
+function showInviteShareModal({ email, name, inviteUrl }) {
+  modal(
+    "Invitation Dispatched",
+    `
+      <p class="muted" style="margin-top:0;font-size:13px;line-height:1.6;">
+        An official invitation email was queued via Brevo for <strong style="color:#54eaff;">${esc(email)}</strong>.
+      </p>
+
+      <div style="margin:16px 0;padding:14px;border-radius:12px;background:rgba(84,234,255,0.04);border:1px solid rgba(84,234,255,0.18);">
+        <div style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.2px;color:#54eaff;margin-bottom:8px;">
+          DIRECT ACCESS LINK
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input
+            id="auroraDirectInviteUrl"
+            type="text"
+            readonly
+            value="${esc(inviteUrl)}"
+            style="flex:1;font-size:11px;padding:8px 10px;background:rgba(5,15,30,0.9);border:1px solid rgba(84,234,255,0.22);border-radius:8px;color:#edf7ff;font-family:monospace;"
+          >
+          <button
+            type="button"
+            class="btn primary"
+            id="auroraCopyInviteLinkBtn"
+            style="white-space:nowrap;font-size:11px;padding:8px 14px;"
+          >
+            Copy Link
+          </button>
+        </div>
+        <small class="muted" style="display:block;margin-top:8px;font-size:11px;">
+          You can copy and send this link directly to <strong>${esc(name || email)}</strong> via WhatsApp, Messenger, or SMS.
+        </small>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" onclick="closeModal()">
+          Done
+        </button>
+      </div>
+    `
+  );
+
+  document
+    .getElementById("auroraCopyInviteLinkBtn")
+    ?.addEventListener("click", () => {
+      navigator.clipboard.writeText(inviteUrl).then(() => {
+        toast("Invitation link copied to clipboard!");
+        const btn = document.getElementById("auroraCopyInviteLinkBtn");
+        if (btn) btn.textContent = "Copied! ✓";
+      }).catch(() => {
+        const input = document.getElementById("auroraDirectInviteUrl");
+        input?.select();
+        document.execCommand("copy");
+        toast("Invitation link copied!");
+      });
+    });
+}
+
+
+/* ==========================================================
    ADD MEMBER
 ========================================================== */
 
@@ -12240,7 +12303,11 @@ async function addMember(event) {
                 phone,
 
               room:
-                room
+                room,
+
+              appUrl:
+                window.location.origin +
+                window.location.pathname
 
             }
 
@@ -12333,6 +12400,11 @@ async function addMember(event) {
           .invitationId ||
         null,
 
+      inviteUrl:
+        inviteResult
+          .inviteUrl ||
+        null,
+
       createdAt:
         new Date()
           .toISOString()
@@ -12347,11 +12419,20 @@ async function addMember(event) {
 
 
     toast(
-      `Invitation queued for ${googleEmail}. Check email status in Access Control.`
+      `Invitation queued for ${googleEmail}.`
     );
 
 
     render();
+
+
+    if (inviteResult?.inviteUrl) {
+      showInviteShareModal({
+        email: googleEmail,
+        name,
+        inviteUrl: inviteResult.inviteUrl
+      });
+    }
 
 
     console.log(
@@ -14341,7 +14422,8 @@ async function resendAuroraInvitation(invitationId, householdId, button) {
           email: invitation.email,
           fullName: invitation.full_name || "",
           phone: invitation.phone || "",
-          room: invitation.room || ""
+          room: invitation.room || "",
+          appUrl: window.location.origin + window.location.pathname
         }
       }
     );
@@ -14358,8 +14440,16 @@ async function resendAuroraInvitation(invitationId, householdId, button) {
       throw new Error(data?.error || "Invitation email was not sent.");
     }
 
-    toast(`Invitation queued for ${invitation.email}. Check email status to confirm delivery.`);
+    toast(`Invitation queued for ${invitation.email}.`);
     await loadAuroraAccessControl();
+
+    if (data?.inviteUrl) {
+      showInviteShareModal({
+        email: invitation.email,
+        name: invitation.full_name || "",
+        inviteUrl: data.inviteUrl
+      });
+    }
   } catch (error) {
     console.error("Aurora resend invitation:", error);
     alert(error?.message || "Unable to resend invitation. Please try again.");
@@ -34061,6 +34151,14 @@ window.AuroraInviteInstallGate =
 
         </div>
 
+        <button
+          type="button"
+          class="aurora-invite-browser-btn"
+          id="auroraInviteBrowserBtn"
+        >
+          Continue in Web Browser Instead →
+        </button>
+
 
 
         <!-- ================================================
@@ -34099,19 +34197,26 @@ window.AuroraInviteInstallGate =
           id="auroraInviteManualHelp"
           hidden
         >
-          <span>INSTALL FROM YOUR BROWSER</span>
+          <span>BROWSER & GMAIL SETUP</span>
+
+          <p>
+            If this link opened inside the Gmail app or an in-app browser, tap below to open in Google Chrome or copy the link:
+          </p>
+
+          <div class="aurora-invite-help-tools">
+            <button type="button" class="aurora-invite-tool-btn" id="auroraInviteCopyLinkBtn">
+              📋 Copy Link
+            </button>
+            <button type="button" class="aurora-invite-tool-btn" id="auroraInviteOpenChromeBtn">
+              🚀 Open in Chrome
+            </button>
+          </div>
 
           <p>
             On Android Chrome, tap <strong>⋮</strong> →
             <strong>Install app</strong> or
-            <strong>Add to Home screen</strong> →
-            <strong>Install</strong>. Some Chrome versions show
-            <strong>Install and create shortcut</strong> instead.
-            If this opened inside Gmail or another app, reopen the
-            <strong>original invitation link</strong> in Chrome first.
+            <strong>Add to Home screen</strong>.
           </p>
-
-          <p>Only confirm after Aurora appears on your Home screen.</p>
 
           <button type="button" id="auroraInviteManualInstalled">
             ✓ I'VE INSTALLED AURORA
@@ -34197,6 +34302,78 @@ window.AuroraInviteInstallGate =
         ?.addEventListener(
           "click",
           confirmManualInstall
+        );
+
+      document
+        .getElementById(
+          "auroraInviteBrowserBtn"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+            confirmManualInstall();
+            continueInvitation();
+          }
+        );
+
+      document
+        .getElementById(
+          "auroraInviteCopyLinkBtn"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+            const token =
+              localStorage.getItem(PENDING_KEY) ||
+              state?.token ||
+              "";
+
+            const url =
+              new URL(window.location.href);
+
+            if (token) {
+              url.searchParams.set("invite", token);
+            }
+
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(url.href).then(() => {
+                if (typeof toast === "function") {
+                  toast("Invitation link copied to clipboard!");
+                }
+              }).catch(() => {
+                prompt("Copy this link:", url.href);
+              });
+            } else {
+              prompt("Copy this link:", url.href);
+            }
+          }
+        );
+
+      document
+        .getElementById(
+          "auroraInviteOpenChromeBtn"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+            const token =
+              localStorage.getItem(PENDING_KEY) ||
+              state?.token ||
+              "";
+
+            const url =
+              new URL(window.location.href);
+
+            if (token) {
+              url.searchParams.set("invite", token);
+            }
+
+            const chromeIntent =
+              `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=https;package=com.android.chrome;end;`;
+
+            window.location.href =
+              chromeIntent;
+          }
         );
 
 

@@ -24207,6 +24207,62 @@ body.aurora-invite-gate-open {
 }
 
 
+.aurora-invite-browser-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(84, 234, 255, 0.04);
+  border: 1px dashed rgba(84, 234, 255, 0.28);
+  border-radius: 11px;
+  color: #94a3b8;
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  text-align: center;
+}
+
+.aurora-invite-browser-btn:hover {
+  border-color: #54eaff;
+  color: #54eaff;
+  background: rgba(84, 234, 255, 0.1);
+  box-shadow: 0 0 15px rgba(84, 234, 255, 0.12);
+}
+
+.aurora-invite-help-tools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.aurora-invite-tool-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  background: rgba(84, 234, 255, 0.08);
+  border: 1px solid rgba(84, 234, 255, 0.25);
+  border-radius: 8px;
+  color: #54eaff;
+  font-family: 'Orbitron', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aurora-invite-tool-btn:hover {
+  background: rgba(84, 234, 255, 0.18);
+  border-color: #54eaff;
+  box-shadow: 0 0 12px rgba(84, 234, 255, 0.2);
+}
+
+
 /* MANUAL INSTALL HELP */
 
 .aurora-invite-ios-help,
