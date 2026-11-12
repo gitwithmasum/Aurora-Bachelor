@@ -25,6 +25,9 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -325,7 +328,9 @@ select:focus {
 
 .page {
   display: none;
-  animation: pageIn .25s ease;
+  animation: pageIn 0.14s cubic-bezier(0, 0, 0.2, 1);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .page.active {
@@ -335,12 +340,12 @@ select:focus {
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(5px)
+    transform: translateY(4px);
   }
 
   to {
     opacity: 1;
-    transform: none
+    transform: translateY(0);
   }
 }
 
@@ -1849,7 +1854,13 @@ td strong {
   padding: 4px 0 60px;
 
   animation:
-    pageMaterialize .45s ease both;
+    pageMaterialize 0.15s cubic-bezier(0, 0, 0.2, 1) both;
+
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
 
 }
 
@@ -1861,7 +1872,7 @@ td strong {
     opacity: 0;
 
     transform:
-      translateY(8px);
+      translateY(4px);
 
   }
 
@@ -6394,10 +6405,16 @@ td strong {
     inset 0 0 40px rgba(255, 255, 255, .015);
 
   transform:
-    translateY(15px) scale(.98);
+    translateY(6px);
+
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
 
   transition:
-    transform .25s ease;
+    transform 0.14s cubic-bezier(0, 0, 0.2, 1);
 
 }
 
@@ -6405,7 +6422,7 @@ td strong {
 .ledger-overlay.active .ledger-modal {
 
   transform:
-    translateY(0) scale(1);
+    translateY(0);
 
 }
 
@@ -7711,7 +7728,7 @@ tfoot th {
 .modal-backdrop {
 
   animation:
-    auroraFadeIn 0.18s ease;
+    auroraFadeIn 0.12s ease;
 
 }
 
@@ -7719,7 +7736,13 @@ tfoot th {
 .modal {
 
   animation:
-    auroraModalIn 0.22s ease;
+    auroraModalIn 0.14s cubic-bezier(0, 0, 0.2, 1);
+
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
 
 }
 
@@ -7745,7 +7768,7 @@ tfoot th {
       0;
 
     transform:
-      translateY(14px) scale(0.985);
+      translateY(6px);
 
   }
 
@@ -7755,7 +7778,7 @@ tfoot th {
       1;
 
     transform:
-      translateY(0) scale(1);
+      translateY(0);
 
   }
 
@@ -8029,10 +8052,16 @@ tfoot th {
     0 30px 90px rgba(0, 0, 0, 0.6);
 
   transform:
-    translateY(20px) scale(0.985);
+    translateY(6px);
+
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
 
   transition:
-    transform 0.22s ease;
+    transform 0.14s cubic-bezier(0, 0, 0.2, 1);
 
 }
 
@@ -8040,7 +8069,7 @@ tfoot th {
 .ledger-overlay.active .ledger-modal {
 
   transform:
-    translateY(0) scale(1);
+    translateY(0);
 
 }
 
@@ -8455,7 +8484,13 @@ tfoot th {
   position: relative;
 
   animation:
-    auroraPageIn 0.28s cubic-bezier(.2, .8, .2, 1);
+    auroraPageIn 0.15s cubic-bezier(0, 0, 0.2, 1);
+
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
 
 }
 
@@ -8467,7 +8502,7 @@ tfoot th {
     opacity: 0;
 
     transform:
-      translateY(10px) scale(.995);
+      translateY(4px);
 
   }
 
@@ -8476,7 +8511,7 @@ tfoot th {
     opacity: 1;
 
     transform:
-      translateY(0) scale(1);
+      translateY(0);
 
   }
 
@@ -8544,10 +8579,10 @@ main,
   overflow: hidden;
 
   transition:
-    transform .22s cubic-bezier(.2, .8, .2, 1),
-    border-color .22s ease,
-    box-shadow .22s ease,
-    background .22s ease;
+    transform .13s cubic-bezier(0, 0, 0.2, 1),
+    border-color .13s ease,
+    box-shadow .13s ease,
+    background .13s ease;
 
 }
 
@@ -9248,7 +9283,9 @@ tbody tr:hover {
   gap: 20px;
   position: relative;
   width: 100%;
-  animation: auroraFinalPageIn .28s cubic-bezier(.2, .8, .2, 1) both;
+  animation: auroraFinalPageIn 0.15s cubic-bezier(0, 0, 0.2, 1) both;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Every direct page child participates in the same vertical rhythm. */
@@ -9289,7 +9326,7 @@ tbody tr:hover {
 @keyframes auroraFinalPageIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(4px);
   }
 
   to {
@@ -9503,7 +9540,7 @@ tbody tr:hover {
 .btn:active,
 .icon-btn:active,
 .sheet-btn:active {
-  transform: translateY(0) scale(.98);
+  transform: translateY(1px);
 }
 
 .btn.primary:hover,
@@ -9592,11 +9629,10 @@ textarea:focus {
 }
 
 .meal-input:focus {
-  transform: scale(1.035);
   border-color: var(--cyan);
   box-shadow:
-    0 0 0 3px rgba(84, 234, 255, .08),
-    0 0 18px rgba(84, 234, 255, .10);
+    0 0 0 2px rgba(84, 234, 255, .18),
+    0 0 18px rgba(84, 234, 255, .12);
 }
 
 /* ============================================================
@@ -10111,15 +10147,15 @@ textarea:focus {
     none;
 
   transform:
-    translateY(-8px) scale(.985);
+    translateY(-4px);
 
   transform-origin:
     top center;
 
   transition:
-    opacity .2s ease,
-    visibility .2s ease,
-    transform .2s ease;
+    opacity .12s cubic-bezier(0, 0, 0.2, 1),
+    visibility .12s cubic-bezier(0, 0, 0.2, 1),
+    transform .12s cubic-bezier(0, 0, 0.2, 1);
 
 }
 
@@ -10136,7 +10172,7 @@ textarea:focus {
     auto;
 
   transform:
-    translateY(0) scale(1);
+    translateY(0);
 
 }
 
@@ -17614,7 +17650,9 @@ html[data-accent] .title-cursor {
     inset 0 0 0 1px rgba(255, 255, 255, 0.025);
 
   animation:
-    auroraConfirmEnter 0.25s ease;
+    auroraConfirmEnter 0.14s cubic-bezier(0, 0, 0.2, 1);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 
@@ -17970,14 +18008,14 @@ html[data-accent] .title-cursor {
     opacity: 0;
 
     transform:
-      translateY(15px) scale(0.97);
+      translateY(6px);
   }
 
   to {
     opacity: 1;
 
     transform:
-      translateY(0) scale(1);
+      translateY(0);
   }
 
 }
@@ -18939,7 +18977,7 @@ button.aurora-lock-disabled::after {
   visibility: hidden;
 
   transform:
-    translateY(-8px) scale(.985);
+    translateY(-4px);
 
   pointer-events: none;
 
@@ -18967,9 +19005,9 @@ button.aurora-lock-disabled::after {
     inset 0 0 0 1px rgba(255, 255, 255, .02);
 
   transition:
-    opacity .2s ease,
-    transform .2s ease,
-    visibility .2s ease;
+    opacity .12s cubic-bezier(0, 0, 0.2, 1),
+    transform .12s cubic-bezier(0, 0, 0.2, 1),
+    visibility .12s cubic-bezier(0, 0, 0.2, 1);
 }
 
 
@@ -18979,7 +19017,7 @@ button.aurora-lock-disabled::after {
   visibility: visible;
 
   transform:
-    translateY(0) scale(1);
+    translateY(0);
 
   pointer-events: auto;
 }
@@ -24895,7 +24933,7 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     color: #94a3b8;
     padding: 6px 2px;
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: all 0.1s cubic-bezier(0, 0, 0.2, 1);
     border-radius: 12px;
     position: relative;
     user-select: none;
@@ -24903,13 +24941,13 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
   }
 
   .mobile-tab:active {
-    transform: scale(0.92);
+    transform: translateY(1px);
   }
 
   .mobile-tab-icon {
     font-size: 19px;
     line-height: 1.1;
-    transition: all 0.18s ease;
+    transition: all 0.1s cubic-bezier(0, 0, 0.2, 1);
   }
 
   .mobile-tab-label {
@@ -24919,7 +24957,7 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     letter-spacing: 0.3px;
     margin-top: 3px;
     line-height: 1;
-    transition: all 0.18s ease;
+    transition: all 0.1s cubic-bezier(0, 0, 0.2, 1);
   }
 
   /* Active Tab Styling */
@@ -24961,7 +24999,7 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     z-index: 1050;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.14s ease;
   }
 
   .mobile-drawer-backdrop.open {
@@ -24985,7 +25023,10 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(84, 234, 255, 0.15);
     z-index: 1100;
     transform: translateY(105%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.16s cubic-bezier(0, 0, 0.2, 1);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     padding: 12px 16px calc(24px + env(safe-area-inset-bottom));
     overflow: hidden;
   }
