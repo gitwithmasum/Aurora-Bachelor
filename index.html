@@ -46,31 +46,35 @@
          AURORA // ANDROID MOBILE TOP BAR
     ========================================================== -->
     <header class="mobile-top-bar" id="mobileTopBar">
-      <!-- 1. Brand Logo & Cloud Sync Status -->
+      <!-- 1. Left: Brand Logo & Title (AURORA BACHELOR) -->
       <div class="mobile-brand-box">
         <div class="mobile-logo-badge">
           <img src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Logo" class="mobile-logo-img">
         </div>
         <div class="mobile-brand-meta">
           <span class="mobile-brand-title">AURORA</span>
-          <div class="mobile-sync-chip" id="mobileSyncChip">
-            <span class="mobile-sync-dot synced" id="mobileSyncDot"></span>
-            <span class="mobile-sync-text" id="mobileSyncText">SYNCED</span>
-          </div>
+          <span class="mobile-brand-subtitle">BACHELOR</span>
         </div>
       </div>
 
-      <!-- 2. Month Switcher Capsule -->
-      <div class="mobile-month-pill" id="mobileMonthPill">
-        <button type="button" class="mobile-pill-arrow" id="mobileMonthPrev" title="Previous Month" aria-label="Previous Month">◀</button>
-        <button type="button" class="mobile-pill-display" id="mobileMonthTrigger" title="Select Month">
-          <span id="mobileMonthLabel">AUG '26</span>
-        </button>
-        <button type="button" class="mobile-pill-arrow" id="mobileMonthNext" title="Next Month" aria-label="Next Month">▶</button>
-      </div>
+      <!-- 2. Right: Sync Dot + Month Switcher + Avatar (Grouped side-by-side) -->
+      <div class="mobile-header-right">
+        <!-- Cloud Sync Indicator -->
+        <div class="mobile-sync-chip" id="mobileSyncChip" title="Cloud Sync Status">
+          <span class="mobile-sync-dot synced" id="mobileSyncDot"></span>
+          <span class="mobile-sync-text" id="mobileSyncText">SYNCED</span>
+        </div>
 
-      <!-- 3. User Avatar -->
-      <div class="mobile-profile-wrap">
+        <!-- Month Switcher Capsule -->
+        <div class="mobile-month-pill" id="mobileMonthPill">
+          <button type="button" class="mobile-pill-arrow" id="mobileMonthPrev" title="Previous Month" aria-label="Previous Month">◀</button>
+          <button type="button" class="mobile-pill-display" id="mobileMonthTrigger" title="Select Month">
+            <span id="mobileMonthLabel">AUG '26</span>
+          </button>
+          <button type="button" class="mobile-pill-arrow" id="mobileMonthNext" title="Next Month" aria-label="Next Month">▶</button>
+        </div>
+
+        <!-- User Profile Avatar (right next to month switcher) -->
         <button type="button" class="mobile-avatar-btn" id="mobileProfileBtn" title="Open User Profile" aria-label="Open User Profile">
           <span class="mobile-avatar-icon">👤</span>
         </button>
@@ -2438,7 +2442,7 @@
   </script>
 
 
-  <script src="./script.js?v=57" defer></script>
+  <script src="./script.js?v=58" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>
