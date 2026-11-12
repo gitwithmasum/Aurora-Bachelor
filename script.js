@@ -36664,6 +36664,14 @@ const AuroraUXState = (() => {
 
       `;
 
+      status.style.cursor = "pointer";
+      status.title = "Tap to dismiss";
+      status.addEventListener(
+        "click",
+        () => {
+          status.classList.remove("visible");
+        }
+      );
 
       document.body
         .appendChild(
@@ -36975,6 +36983,7 @@ const AuroraUXState = (() => {
   ========================================================== */
 
   let initialSyncDisplayFinished = false;
+  let uxStatusTimer = null;
 
   function setStatus(
     state,
@@ -37027,6 +37036,8 @@ const AuroraUXState = (() => {
     text.textContent =
       message;
 
+    clearTimeout(uxStatusTimer);
+
 
     // Show sync on initial load only. Subsequent saves and realtime
     // updates remain quiet, but offline/error/conflict alerts stay visible.
@@ -37039,7 +37050,7 @@ const AuroraUXState = (() => {
     }
 
     /* --------------------------------------------------------
-       SYNCED = TRANSIENT ONLY
+       SYNCED = TRANSIENT ONLY (1.6s)
     -------------------------------------------------------- */
 
     if (
@@ -37053,7 +37064,7 @@ const AuroraUXState = (() => {
         );
 
 
-      setTimeout(
+      uxStatusTimer = setTimeout(
         () => {
 
           if (
@@ -37070,6 +37081,45 @@ const AuroraUXState = (() => {
 
         },
         1600
+      );
+
+
+      return;
+
+    }
+
+    /* --------------------------------------------------------
+       CONNECTING / SYNCING = AUTO HIDE AFTER 5 SECONDS
+    -------------------------------------------------------- */
+
+    if (
+      state === "connecting" ||
+      state === "syncing"
+    ) {
+
+      box.classList
+        .add(
+          "visible"
+        );
+
+
+      uxStatusTimer = setTimeout(
+        () => {
+
+          if (
+            currentState === "connecting" ||
+            currentState === "syncing"
+          ) {
+
+            box.classList
+              .remove(
+                "visible"
+              );
+
+          }
+
+        },
+        5000
       );
 
 

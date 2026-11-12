@@ -23257,6 +23257,10 @@ body.aurora-update-open {
 
   visibility: visible;
 
+  pointer-events: auto;
+
+  cursor: pointer;
+
   transform:
     translate(-50%,
       0);
@@ -24610,6 +24614,11 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
    AURORA // ANDROID MOBILE RESPONSIVE NAVIGATION SYSTEM
 ============================================================ */
 @media (max-width: 768px) {
+
+  /* Positioning for Cloud UX Status on Mobile */
+  .aurora-ux-status {
+    top: calc(64px + env(safe-area-inset-top)) !important;
+  }
 
   /* ----------------------------------------------------------
      1. FIXED MOBILE TOP BAR (NATIVE ANDROID APP HEADER)
