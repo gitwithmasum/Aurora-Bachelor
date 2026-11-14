@@ -25275,54 +25275,6 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
   to { transform: rotate(360deg); }
 }
 
-/* Futuristic Cybernetic Collapse Hint Badge */
-.brand-collapse-hint {
-  margin-left: auto;
-  font-family: 'SF Mono', Consolas, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: #94a3b8;
-  background: rgba(6, 18, 38, 0.85);
-  border: 1px solid rgba(84, 234, 255, 0.25);
-  border-radius: 8px;
-  padding: 3px 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset 0 0 6px rgba(84, 234, 255, 0.1);
-  transition: all 0.12s ease;
-  cursor: pointer;
-}
-
-.brand-collapse-hint .cyber-bracket {
-  color: #54eaff;
-  opacity: 0.7;
-  font-size: 10px;
-}
-
-.brand-collapse-hint .cyber-arrow {
-  color: #e2f1fd;
-  font-size: 9px;
-  transition: transform 0.12s ease, color 0.12s ease;
-}
-
-.brand:hover .brand-collapse-hint {
-  border-color: #54eaff;
-  background: rgba(10, 26, 52, 0.95);
-  box-shadow: 0 0 15px rgba(84, 234, 255, 0.45), inset 0 0 8px rgba(84, 234, 255, 0.25);
-}
-
-.brand:hover .brand-collapse-hint .cyber-bracket {
-  opacity: 1;
-  text-shadow: 0 0 6px #54eaff;
-}
-
-.brand:hover .brand-collapse-hint .cyber-arrow {
-  color: #54eaff;
-  transform: scale(1.15);
-  text-shadow: 0 0 6px #54eaff;
-}
-
 .brand-text {
   transition: opacity 0.12s ease, max-width 0.12s ease;
   max-width: 180px;
@@ -25344,10 +25296,9 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
   }
 
   body.sidebar-collapsed .sidebar .brand {
-    padding: 6px 0 18px !important;
+    padding: 8px 0 20px !important;
     justify-content: center !important;
-    flex-direction: column !important;
-    gap: 6px !important;
+    gap: 0 !important;
   }
 
   body.sidebar-collapsed .brand-logo-frame {
@@ -25365,20 +25316,6 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     opacity: 1 !important;
     border-color: rgba(84, 234, 255, 0.65) !important;
     box-shadow: 0 0 12px rgba(84, 234, 255, 0.45) !important;
-  }
-
-  body.sidebar-collapsed .brand-collapse-hint {
-    padding: 2px 4px !important;
-    font-size: 9px !important;
-    background: rgba(6, 18, 38, 0.9) !important;
-    border-color: rgba(84, 234, 255, 0.45) !important;
-    margin: 0 auto !important;
-    display: inline-flex !important;
-    opacity: 0.9 !important;
-  }
-
-  body.sidebar-collapsed .brand-collapse-hint .cyber-arrow {
-    transform: rotate(180deg);
   }
 
   body.sidebar-collapsed .brand-text {
