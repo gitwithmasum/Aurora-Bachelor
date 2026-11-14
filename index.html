@@ -27,7 +27,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=38">
+  <link rel="stylesheet" href="./style_v3.css?v=39">
   <link rel="stylesheet" href="./themes.css?v=54">
 
   <style id="aurora-hud-collapse-styles">
@@ -304,21 +304,21 @@
             modalImg.src = url;
             modalImg.referrerPolicy = 'no-referrer';
             modalImg.crossOrigin = 'anonymous';
-            modalImg.style.display = 'block';
-            if (modalFallback) modalFallback.style.display = 'none';
+            modalImg.style.setProperty('display', 'block', 'important');
+            if (modalFallback) modalFallback.style.setProperty('display', 'none', 'important');
             modalImg.onerror = function() {
-              this.style.display = 'none';
+              this.style.setProperty('display', 'none', 'important');
               if (modalFallback) {
                 modalFallback.innerHTML = initial ? `<span class="profile-initial-monogram">${initial}</span>` : SVG_FALLBACK_ICON;
-                modalFallback.style.display = 'flex';
+                modalFallback.style.setProperty('display', 'flex', 'important');
               }
             };
           } else {
             modalImg.removeAttribute('src');
-            modalImg.style.display = 'none';
+            modalImg.style.setProperty('display', 'none', 'important');
             if (modalFallback) {
               modalFallback.innerHTML = initial ? `<span class="profile-initial-monogram">${initial}</span>` : SVG_FALLBACK_ICON;
-              modalFallback.style.display = 'flex';
+              modalFallback.style.setProperty('display', 'flex', 'important');
             }
           }
         }
@@ -388,9 +388,12 @@
         // 4. Full Page Profile View (#page-profile)
         const pageProfileWrap = document.querySelector('#page-profile .profile-avatar-wrap');
         if (pageProfileWrap) {
-          let pageImg = pageProfileWrap.querySelector('img.profile-avatar');
-          let pageFallback = pageProfileWrap.querySelector('.profile-avatar-monogram, .profile-avatar-fallback');
+          const oldMonograms = pageProfileWrap.querySelectorAll('.profile-avatar-monogram, .profile-avatar-fallback');
+          const oldImgs = pageProfileWrap.querySelectorAll('img.profile-avatar');
+
           if (url) {
+            oldMonograms.forEach(el => el.remove());
+            let pageImg = oldImgs[0];
             if (!pageImg) {
               pageImg = document.createElement('img');
               pageImg.className = 'profile-avatar';
@@ -402,14 +405,18 @@
             }
             pageImg.src = url;
             pageImg.style.display = 'block';
-            if (pageFallback) pageFallback.style.display = 'none';
             pageImg.onerror = function() {
-              this.style.display = 'none';
-              if (pageFallback) pageFallback.style.display = 'flex';
+              this.outerHTML = `<div class="profile-avatar profile-avatar-monogram"><span class="profile-initial-monogram">${initial}</span></div>`;
             };
           } else {
-            if (pageImg) pageImg.style.display = 'none';
-            if (pageFallback) pageFallback.style.display = 'flex';
+            oldImgs.forEach(el => el.remove());
+            if (oldMonograms.length === 0) {
+              const fb = document.createElement('div');
+              fb.className = 'profile-avatar profile-avatar-monogram';
+              fb.id = 'profileAvatarFallbackNode';
+              fb.innerHTML = `<span class="profile-initial-monogram">${initial}</span>`;
+              pageProfileWrap.insertBefore(fb, pageProfileWrap.querySelector('.profile-online') || null);
+            }
           }
         }
         // 5. Update Remove button visibility
@@ -529,8 +536,9 @@
       max-width: 86px !important;
       max-height: 86px !important;
       flex: 0 0 86px !important;
-      display: grid !important;
-      place-items: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       border-radius: 50% !important;
       user-select: none !important;
       cursor: pointer !important;
@@ -590,7 +598,6 @@
       background: radial-gradient(circle at center, rgba(14, 32, 60, 0.96) 0%, rgba(5, 14, 28, 0.98) 100%) !important;
       box-shadow: 0 0 18px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.18) !important;
       z-index: 1 !important;
-      display: block !important;
       margin: 0 auto !important;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease !important;
     }
@@ -602,8 +609,10 @@
       height: 72px !important;
       min-width: 72px !important;
       min-height: 72px !important;
+      max-width: 72px !important;
+      max-height: 72px !important;
       border-radius: 50% !important;
-      display: flex !important;
+      display: flex;
       align-items: center !important;
       justify-content: center !important;
       text-align: center !important;
@@ -612,6 +621,12 @@
       box-shadow: 0 0 18px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.18) !important;
       z-index: 1 !important;
       user-select: none !important;
+    }
+
+    .profile-avatar-monogram[style*="display: none"],
+    .profile-avatar[style*="display: none"],
+    [hidden] {
+      display: none !important;
     }
 
     #page-profile .profile-avatar-wrap:hover .profile-avatar,
@@ -703,13 +718,6 @@
     .profile-avatar-upload-badge,
     .profile-avatar-hover-pill {
       display: none !important;
-    }
-      height: 14px !important;
-      border-radius: 50% !important;
-      background: #10b981 !important;
-      border: 2.5px solid #060e1c !important;
-      box-shadow: 0 0 12px #10b981, 0 0 4px #fff !important;
-      z-index: 4 !important;
     }
 
     .profile-avatar-sync-btn {
@@ -3357,7 +3365,7 @@
   </script>
 
 
-  <script src="./script.js?v=70" defer></script>
+  <script src="./script.js?v=71" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>

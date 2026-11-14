@@ -7651,15 +7651,8 @@ async function renderProfile() {
           alt="${esc(name)}"
           referrerpolicy="no-referrer"
           crossorigin="anonymous"
-          onerror="this.onerror=null; this.style.display='none'; const fb = document.getElementById('profileAvatarFallbackNode'); if(fb) fb.style.display='flex';"
+          onerror="this.onerror=null; this.outerHTML='<div class=\\'profile-avatar profile-avatar-monogram\\'><span class=\\'profile-initial-monogram\\'>${initial}</span></div>';"
         >
-        <div
-          class="profile-avatar profile-avatar-monogram"
-          id="profileAvatarFallbackNode"
-          style="display: none;"
-        >
-          <span class="profile-initial-monogram">${initial}</span>
-        </div>
       `;
     } else {
       avatarHTML = `

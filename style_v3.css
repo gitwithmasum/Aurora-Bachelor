@@ -14243,8 +14243,9 @@ html[data-accent] .title-cursor {
 
   flex: 0 0 86px;
 
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
