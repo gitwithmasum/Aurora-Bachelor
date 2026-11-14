@@ -27496,13 +27496,8 @@ function restoreSettingsDefaults() {
 
     try {
 
-      const isLocal =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
-
-      const redirectTo = isLocal
-        ? window.location.origin + window.location.pathname
-        : "https://gitwithmasum.github.io/Aurora-Bachelor/";
+      const redirectTo =
+        window.location.origin + window.location.pathname;
 
       console.log(
         "🔐 Aurora Google OAuth Redirect:",

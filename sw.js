@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v58";
+    "aurora-bachelor-v60";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -58,14 +58,8 @@ self.addEventListener(
                 )
         );
 
-        /*
-          IMPORTANT:
-          Do NOT call self.skipWaiting() here.
-    
-          Aurora Update System will send
-          AURORA_SKIP_WAITING when the user
-          presses UPDATE NOW.
-        */
+        // Force immediate activation so user receives fresh scripts and styles
+        self.skipWaiting();
 
     }
 );
