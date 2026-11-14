@@ -27,8 +27,8 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=34">
-  <link rel="stylesheet" href="./themes.css?v=53">
+  <link rel="stylesheet" href="./style_v3.css?v=35">
+  <link rel="stylesheet" href="./themes.css?v=54">
 
   <style id="aurora-hud-collapse-styles">
     .top-hud-container {
@@ -384,337 +384,69 @@
             if (mobIcon) mobIcon.style.display = 'inline-block';
           }
         }
-      };
-
-      // AVATAR STUDIO STATE
-      window._avatarStudioFitMode = 'cover';
-      let _isStudioDragging = false;
-      let _dragStartX = 0;
-      let _dragStartY = 0;
-      let _dragInitialX = 0;
-      let _dragInitialY = 0;
-
-      window.openAvatarStudio = function(e) {
-        if (e) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
-        const overlay = document.getElementById('avatarStudioOverlay');
-        if (!overlay) return;
-        overlay.style.display = 'flex';
-        overlay.setAttribute('aria-hidden', 'false');
-
-        // Initialize drag and file listeners if not already bound
-        initStudioListeners();
-
-        // Check if an existing avatar can be loaded for adjustment
-        const currentAvatar = localStorage.getItem('aurora_user_avatar') || document.getElementById('profileAvatar')?.src;
-        const img = document.getElementById('studioPreviewImg');
-        const empty = document.getElementById('studioEmptyPrompt');
-        if (currentAvatar && !currentAvatar.endsWith('.html') && !currentAvatar.includes(window.location.host + '/')) {
-          if (img) {
-            img.src = currentAvatar;
-            img.style.display = 'block';
-          }
-          if (empty) empty.style.display = 'none';
-        } else if (!img?.src || img.src === window.location.href) {
-          if (img) img.style.display = 'none';
-          if (empty) empty.style.display = 'flex';
-        }
-
-        updateStudioPreview();
-      };
-
-      window.closeAvatarStudio = function(e) {
-        if (e) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
-        const overlay = document.getElementById('avatarStudioOverlay');
-        if (overlay) {
-          overlay.style.display = 'none';
-          overlay.setAttribute('aria-hidden', 'true');
+        // 4. Update Remove button visibility
+        const removeBtn = document.getElementById('removePhotoBtn');
+        if (removeBtn) {
+          removeBtn.style.display = (url && (url.startsWith('data:') || url.startsWith('blob:') || localStorage.getItem('aurora_user_avatar'))) ? 'inline-flex' : 'none';
         }
       };
 
-      window.setAvatarFitMode = function(mode) {
-        window._avatarStudioFitMode = mode;
-        const coverBtn = document.getElementById('fitCoverBtn');
-        const containBtn = document.getElementById('fitContainBtn');
-        if (coverBtn) coverBtn.classList.toggle('active', mode === 'cover');
-        if (containBtn) containBtn.classList.toggle('active', mode === 'contain');
-        updateStudioPreview();
-      };
+      // Direct Photo Upload & Auto Center Square Crop
+      window.handleProfilePhotoSelect = function(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            try {
+              const canvas = document.createElement('canvas');
+              const size = 400; // Ultra crisp high-res square
+              canvas.width = size;
+              canvas.height = size;
+              const ctx = canvas.getContext('2d');
 
-      window.resetAvatarSlider = function(type) {
-        if (type === 'zoom') {
-          const slider = document.getElementById('studioZoomSlider');
-          if (slider) slider.value = 100;
-        } else if (type === 'posX') {
-          const slider = document.getElementById('studioPosXSlider');
-          if (slider) slider.value = 0;
-        } else if (type === 'posY') {
-          const slider = document.getElementById('studioPosYSlider');
-          if (slider) slider.value = 0;
-        }
-        updateStudioPreview();
-      };
+              const minDim = Math.min(img.width, img.height);
+              const sx = (img.width - minDim) / 2;
+              const sy = (img.height - minDim) / 2;
 
-      window.resetAllAvatarAdjustments = function() {
-        const zoomSlider = document.getElementById('studioZoomSlider');
-        const posXSlider = document.getElementById('studioPosXSlider');
-        const posYSlider = document.getElementById('studioPosYSlider');
-        if (zoomSlider) zoomSlider.value = 100;
-        if (posXSlider) posXSlider.value = 0;
-        if (posYSlider) posYSlider.value = 0;
-        window.setAvatarFitMode('cover');
-      };
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
 
-      function updateStudioPreview() {
-        const img = document.getElementById('studioPreviewImg');
-        const empty = document.getElementById('studioEmptyPrompt');
-        const zoomSlider = document.getElementById('studioZoomSlider');
-        const posXSlider = document.getElementById('studioPosXSlider');
-        const posYSlider = document.getElementById('studioPosYSlider');
-        const zoomVal = document.getElementById('studioZoomVal');
-        const posXVal = document.getElementById('studioPosXVal');
-        const posYVal = document.getElementById('studioPosYVal');
+              const dataUrl = canvas.toDataURL('image/webp', 0.94) || canvas.toDataURL('image/png');
+              localStorage.setItem('aurora_user_avatar', dataUrl);
 
-        if (!img || !img.src || img.src === window.location.href || img.style.display === 'none') {
-          if (empty) empty.style.display = 'flex';
-          return;
-        }
-
-        if (empty) empty.style.display = 'none';
-        img.style.display = 'block';
-
-        const zoom = parseFloat(zoomSlider?.value || 100);
-        const posX = parseFloat(posXSlider?.value || 0);
-        const posY = parseFloat(posYSlider?.value || 0);
-
-        if (zoomVal) zoomVal.textContent = zoom + '%';
-        if (posXVal) posXVal.textContent = (posX > 0 ? '+' : '') + posX + 'px';
-        if (posYVal) posYVal.textContent = (posY > 0 ? '+' : '') + posY + 'px';
-
-        const isContain = window._avatarStudioFitMode === 'contain';
-        img.style.objectFit = isContain ? 'contain' : 'cover';
-        img.style.width = isContain ? '86%' : '100%';
-        img.style.height = isContain ? '86%' : '100%';
-        img.style.transform = `translate(${posX}px, ${posY}px) scale(${zoom / 100})`;
-      }
-
-      function initStudioListeners() {
-        const aperture = document.getElementById('studioAperture');
-        if (aperture && !aperture._boundEvents) {
-          aperture._boundEvents = true;
-
-          const startDrag = (x, y) => {
-            const img = document.getElementById('studioPreviewImg');
-            if (!img || img.style.display === 'none' || !img.src) return;
-            _isStudioDragging = true;
-            _dragStartX = x;
-            _dragStartY = y;
-            _dragInitialX = parseFloat(document.getElementById('studioPosXSlider')?.value || 0);
-            _dragInitialY = parseFloat(document.getElementById('studioPosYSlider')?.value || 0);
-            aperture.style.cursor = 'grabbing';
-          };
-
-          const moveDrag = (x, y) => {
-            if (!_isStudioDragging) return;
-            const dx = x - _dragStartX;
-            const dy = y - _dragStartY;
-            const newX = Math.round(Math.max(-120, Math.min(120, _dragInitialX + dx)));
-            const newY = Math.round(Math.max(-120, Math.min(120, _dragInitialY + dy)));
-            const xSlider = document.getElementById('studioPosXSlider');
-            const ySlider = document.getElementById('studioPosYSlider');
-            if (xSlider) xSlider.value = newX;
-            if (ySlider) ySlider.value = newY;
-            updateStudioPreview();
-          };
-
-          const endDrag = () => {
-            if (!_isStudioDragging) return;
-            _isStudioDragging = false;
-            aperture.style.cursor = 'grab';
-          };
-
-          aperture.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
-          window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-          window.addEventListener('mouseup', endDrag);
-
-          aperture.addEventListener('touchstart', (e) => {
-            if (e.touches && e.touches[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY);
-          }, { passive: true });
-          window.addEventListener('touchmove', (e) => {
-            if (e.touches && e.touches[0]) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
-          }, { passive: true });
-          window.addEventListener('touchend', endDrag);
-        }
-
-        // Sliders input events
-        ['studioZoomSlider', 'studioPosXSlider', 'studioPosYSlider'].forEach(id => {
-          const slider = document.getElementById(id);
-          if (slider && !slider._bound) {
-            slider._bound = true;
-            slider.addEventListener('input', updateStudioPreview);
-          }
-        });
-
-        // File input
-        const fileInput = document.getElementById('studioHiddenFileInput');
-        if (fileInput && !fileInput._bound) {
-          fileInput._bound = true;
-          fileInput.addEventListener('change', function(e) {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const fileNameEl = document.getElementById('studioFileName');
-            if (fileNameEl) fileNameEl.textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-              const img = document.getElementById('studioPreviewImg');
-              if (img) {
-                img.src = ev.target.result;
-                img.onload = () => {
-                  window.resetAllAvatarAdjustments();
-                  updateStudioPreview();
-                };
+              const user = getStoredUser();
+              if (user?.id) {
+                localStorage.setItem('aurora_custom_avatar_' + user.id, dataUrl);
               }
-            };
-            reader.readAsDataURL(file);
-          });
-        }
-      }
 
-      window.saveAndApplyAvatarFromStudio = function(e) {
-        if (e) e.preventDefault();
-        const img = document.getElementById('studioPreviewImg');
-        if (!img || !img.src || img.style.display === 'none') {
-          alert("Please select a photo or logo file first!");
-          return;
-        }
-
-        try {
-          const canvas = document.createElement('canvas');
-          const size = 400; // Ultra crisp 400x400 export
-          canvas.width = size;
-          canvas.height = size;
-          const ctx = canvas.getContext('2d');
-
-          const aperture = document.getElementById('studioAperture');
-          const apSize = aperture ? aperture.clientWidth : 172;
-          const scaleFactor = size / apSize;
-
-          const zoom = parseFloat(document.getElementById('studioZoomSlider')?.value || 100) / 100;
-          const posX = parseFloat(document.getElementById('studioPosXSlider')?.value || 0) * scaleFactor;
-          const posY = parseFloat(document.getElementById('studioPosYSlider')?.value || 0) * scaleFactor;
-          const isContain = window._avatarStudioFitMode === 'contain';
-
-          // 1. High-tech sci-fi radial background
-          const grad = ctx.createRadialGradient(200, 200, 10, 200, 200, 200);
-          grad.addColorStop(0, '#102446');
-          grad.addColorStop(1, '#060e1c');
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(200, 200, 200, 0, Math.PI * 2);
-          ctx.fill();
-
-          // 2. Circular safe clipping mask
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(200, 200, 198, 0, Math.PI * 2);
-          ctx.clip();
-
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          const nw = img.naturalWidth || img.width || 300;
-          const nh = img.naturalHeight || img.height || 300;
-
-          let baseScale;
-          if (isContain) {
-            baseScale = Math.min((size * 0.86) / nw, (size * 0.86) / nh);
-          } else {
-            baseScale = Math.max(size / nw, size / nh);
-          }
-
-          const dw = nw * baseScale * zoom;
-          const dh = nh * baseScale * zoom;
-          const dx = (size / 2) - (dw / 2) + posX;
-          const dy = (size / 2) - (dh / 2) + posY;
-
-          ctx.drawImage(img, dx, dy, dw, dh);
-          ctx.restore();
-
-          // 3. Subtle glowing cyan border ring in the asset
-          ctx.strokeStyle = 'rgba(84, 234, 255, 0.45)';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(200, 200, 198, 0, Math.PI * 2);
-          ctx.stroke();
-
-          const dataUrl = canvas.toDataURL('image/webp', 0.95) || canvas.toDataURL('image/png');
-          localStorage.setItem('aurora_user_avatar', dataUrl);
-
-          const user = getStoredUser();
-          if (user?.id) {
-            localStorage.setItem('aurora_custom_avatar_' + user.id, dataUrl);
-          }
-
-          window.applyAuroraAvatarsEverywhere(dataUrl);
-          window.closeAvatarStudio();
-          showAuroraAvatarToast("⚡ PHOTO & LOGO SAVED & APPLIED!");
-
-        } catch (err) {
-          console.error("Save avatar error:", err);
-          alert("Could not process image: " + err.message);
-        }
+              window.applyAuroraAvatarsEverywhere(dataUrl);
+              showAuroraAvatarToast("✅ Profile photo updated!");
+            } catch (err) {
+              console.error("Photo crop error:", err);
+              localStorage.setItem('aurora_user_avatar', e.target.result);
+              window.applyAuroraAvatarsEverywhere(e.target.result);
+              showAuroraAvatarToast("✅ Profile photo updated!");
+            }
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
       };
 
-      window.syncGoogleAvatar = async function(e) {
-        if (e) e.preventDefault();
+      window.removeAuroraPhoto = function(e) {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        localStorage.removeItem('aurora_user_avatar');
         const user = getStoredUser();
-        if (!user) {
-          const doLogin = confirm("You are not signed in with Google. Would you like to sign in now?");
-          if (doLogin) {
-            const client = window.supabaseClient || (typeof createAuroraSupabaseClient === 'function' ? createAuroraSupabaseClient() : null);
-            if (client?.auth) {
-              client.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                  queryParams: { prompt: 'select_account' },
-                  redirectTo: window.location.origin + window.location.pathname
-                }
-              });
-            }
-          }
-          return;
-        }
-
-        const meta = user.user_metadata || {};
-        let gUrl = meta.avatar_url || meta.picture || "";
-        if (!gUrl && Array.isArray(user.identities)) {
-          for (const ident of user.identities) {
-            if (ident.identity_data) {
-              gUrl = ident.identity_data.avatar_url || ident.identity_data.picture || "";
-              if (gUrl) break;
-            }
-          }
-        }
-
-        if (gUrl) {
-          if (gUrl.includes('googleusercontent.com')) {
-            gUrl = gUrl.replace(/=s\d+(-c)?$/i, '=s384-c');
-          }
+        if (user?.id) {
           localStorage.removeItem('aurora_custom_avatar_' + user.id);
-          localStorage.setItem('aurora_user_avatar', gUrl);
-          window.applyAuroraAvatarsEverywhere(gUrl);
-          showAuroraAvatarToast("🔄 GOOGLE PROFILE PICTURE SYNCED!");
-        } else {
-          alert(
-            "Notice:\nYour Google account (" + (user.email || "") + ") does not have a Google profile picture attached.\n\n" +
-            "Please click [UPLOAD & ADJUST PHOTO] to choose any custom photo or logo from your device!"
-          );
         }
+        window.applyAuroraAvatarsEverywhere("");
+        showAuroraAvatarToast("🗑️ Profile photo removed");
       };
 
       function showAuroraAvatarToast(msg) {
@@ -728,11 +460,13 @@
         toast.textContent = msg;
         setTimeout(() => {
           toast.className = 'aurora-avatar-toast';
-        }, 3200);
+        }, 3000);
       }
 
       window.triggerProfileAvatarDialog = function(e) {
-        window.openAvatarStudio(e);
+        if (e) e.stopPropagation();
+        const input = document.getElementById('auroraPhotoFileInput');
+        if (input) input.click();
       };
 
       // Run immediately and on DOM load
@@ -937,7 +671,7 @@
       align-items: center !important;
       gap: 7px !important;
       padding: 7px 15px !important;
-      background: linear-gradient(135deg, rgba(84, 234, 255, 0.24) 0%, rgba(183, 124, 255, 0.2) 100%) !important;
+      background: linear-gradient(135deg, rgba(84, 234, 255, 0.25) 0%, rgba(183, 124, 255, 0.2) 100%) !important;
       border: 1.5px solid #54eaff !important;
       border-radius: 8px !important;
       color: #fff !important;
@@ -957,15 +691,15 @@
       transform: translateY(-1.5px) !important;
     }
 
-    .profile-avatar-google-sync-btn {
+    .profile-avatar-remove-btn {
       display: inline-flex !important;
       align-items: center !important;
       gap: 6px !important;
       padding: 7px 12px !important;
-      background: rgba(14, 28, 54, 0.75) !important;
-      border: 1px solid rgba(84, 234, 255, 0.4) !important;
+      background: rgba(40, 14, 24, 0.75) !important;
+      border: 1px solid rgba(255, 77, 106, 0.45) !important;
       border-radius: 8px !important;
-      color: #8beaff !important;
+      color: #ff8ca3 !important;
       font-family: 'Rajdhani', sans-serif !important;
       font-size: 12.5px !important;
       font-weight: 600 !important;
@@ -974,460 +708,10 @@
       transition: all 0.2s ease !important;
     }
 
-    .profile-avatar-google-sync-btn:hover {
-      background: rgba(22, 44, 84, 0.95) !important;
-      border-color: #54eaff !important;
-      color: #fff !important;
-    }
-
-    /* ============================================================
-       AVATAR & LOGO STUDIO MODAL STYLES
-    ============================================================ */
-    .avatar-studio-overlay {
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 10005 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background: rgba(3, 8, 20, 0.88) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-      padding: 16px !important;
-      animation: studioFadeIn 0.22s ease-out !important;
-    }
-
-    @keyframes studioFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .avatar-studio-panel {
-      width: 100% !important;
-      max-width: 460px !important;
-      max-height: 94vh !important;
-      overflow-y: auto !important;
-      background: radial-gradient(circle at top, rgba(16, 34, 68, 0.98) 0%, rgba(6, 14, 28, 0.99) 100%) !important;
-      border: 1.5px solid rgba(84, 234, 255, 0.45) !important;
-      border-radius: 18px !important;
-      box-shadow: 0 0 35px rgba(84, 234, 255, 0.25), 0 20px 50px rgba(0, 0, 0, 0.85) !important;
-      padding: 22px !important;
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 15px !important;
-      animation: studioSlideUp 0.24s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
-      scrollbar-width: thin !important;
-      scrollbar-color: rgba(84, 234, 255, 0.4) transparent !important;
-    }
-
-    @keyframes studioSlideUp {
-      from { transform: translateY(16px) scale(0.97); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    .avatar-studio-header {
-      display: flex !important;
-      align-items: flex-start !important;
-      justify-content: space-between !important;
-      border-bottom: 1px solid rgba(84, 234, 255, 0.2) !important;
-      padding-bottom: 12px !important;
-    }
-
-    .studio-eyebrow {
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      color: rgba(84, 234, 255, 0.8) !important;
-      letter-spacing: 1.5px !important;
-      text-transform: uppercase !important;
-      display: block !important;
-    }
-
-    #studioTitle {
-      font-family: 'Orbitron', monospace !important;
-      font-size: 17px !important;
-      font-weight: 800 !important;
-      color: #fff !important;
-      margin: 2px 0 3px 0 !important;
-      letter-spacing: 0.8px !important;
-      text-shadow: 0 0 10px rgba(84, 234, 255, 0.4) !important;
-    }
-
-    .studio-desc {
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 12.5px !important;
-      color: rgba(255, 255, 255, 0.65) !important;
-      margin: 0 !important;
-    }
-
-    .studio-close-btn {
-      width: 32px !important;
-      height: 32px !important;
-      border-radius: 50% !important;
-      background: rgba(84, 234, 255, 0.1) !important;
-      border: 1px solid rgba(84, 234, 255, 0.35) !important;
-      color: #8beaff !important;
-      font-size: 16px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-      flex-shrink: 0 !important;
-    }
-
-    .studio-close-btn:hover {
-      background: rgba(255, 77, 106, 0.25) !important;
+    .profile-avatar-remove-btn:hover {
+      background: rgba(60, 18, 32, 0.95) !important;
       border-color: #ff4d6a !important;
-      color: #ff4d6a !important;
-      transform: scale(1.1) !important;
-    }
-
-    .studio-viewport-wrap {
-      position: relative !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      margin: 4px 0 8px 0 !important;
-    }
-
-    .studio-hud-rings {
-      position: absolute !important;
-      width: 196px !important;
-      height: 196px !important;
-      pointer-events: none !important;
-      z-index: 2 !important;
-    }
-
-    .studio-hud-ring.outer-ring {
-      position: absolute !important;
-      inset: -6px !important;
-      border-radius: 50% !important;
-      border: 1.5px dashed rgba(84, 234, 255, 0.5) !important;
-      border-top: 2.5px solid #54eaff !important;
-      border-right: 2.5px solid #b77cff !important;
-      animation: auroraOrbit 9s linear infinite !important;
-    }
-
-    .studio-hud-ring.inner-ring {
-      position: absolute !important;
-      inset: -1px !important;
-      border-radius: 50% !important;
-      border: 1px solid rgba(84, 234, 255, 0.25) !important;
-    }
-
-    .studio-aperture {
-      position: relative !important;
-      width: 172px !important;
-      height: 172px !important;
-      border-radius: 50% !important;
-      overflow: hidden !important;
-      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(6, 14, 28, 0.98) 100%) !important;
-      border: 2px solid rgba(84, 234, 255, 0.65) !important;
-      box-shadow: 0 0 25px rgba(84, 234, 255, 0.35), inset 0 0 20px rgba(0, 0, 0, 0.7) !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: grab !important;
-      user-select: none !important;
-      touch-action: none !important;
-      z-index: 3 !important;
-    }
-
-    .studio-aperture:active {
-      cursor: grabbing !important;
-    }
-
-    #studioPreviewImg {
-      pointer-events: none !important;
-      user-select: none !important;
-      transform-origin: center center !important;
-      transition: transform 0.04s ease-out !important;
-    }
-
-    .studio-empty-prompt {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      text-align: center !important;
-      gap: 5px !important;
-      padding: 12px !important;
-      color: #54eaff !important;
-      pointer-events: none !important;
-    }
-
-    .studio-empty-prompt .empty-icon {
-      font-size: 26px !important;
-    }
-
-    .studio-empty-prompt .empty-title {
-      font-family: 'Orbitron', monospace !important;
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.6px !important;
       color: #fff !important;
-    }
-
-    .studio-empty-prompt .empty-sub {
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 11px !important;
-      color: rgba(84, 234, 255, 0.7) !important;
-    }
-
-    .studio-aperture-overlay-hint {
-      margin-top: 8px !important;
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 12px !important;
-      color: rgba(139, 234, 255, 0.75) !important;
-      letter-spacing: 0.6px !important;
-      text-align: center !important;
-    }
-
-    .studio-upload-section {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 6px !important;
-    }
-
-    .studio-choose-file-btn {
-      width: 100% !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 9px !important;
-      padding: 10px 16px !important;
-      background: linear-gradient(135deg, rgba(84, 234, 255, 0.25) 0%, rgba(183, 124, 255, 0.2) 100%) !important;
-      border: 1.5px solid #54eaff !important;
-      border-radius: 10px !important;
-      color: #fff !important;
-      font-family: 'Orbitron', monospace !important;
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.8px !important;
-      cursor: pointer !important;
-      box-shadow: 0 0 16px rgba(84, 234, 255, 0.3) !important;
-      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
-    }
-
-    .studio-choose-file-btn:hover {
-      background: linear-gradient(135deg, rgba(84, 234, 255, 0.42) 0%, rgba(183, 124, 255, 0.32) 100%) !important;
-      box-shadow: 0 0 24px rgba(84, 234, 255, 0.6) !important;
-      transform: translateY(-1px) !important;
-    }
-
-    .studio-file-name {
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 12px !important;
-      color: rgba(255, 255, 255, 0.5) !important;
-      max-width: 90% !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-    }
-
-    .studio-controls-card {
-      background: rgba(8, 20, 40, 0.6) !important;
-      border: 1px solid rgba(84, 234, 255, 0.25) !important;
-      border-radius: 12px !important;
-      padding: 12px 14px !important;
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 10px !important;
-    }
-
-    .studio-control-group {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 4px !important;
-    }
-
-    .studio-fit-toggle-group {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 8px !important;
-      margin-top: 2px !important;
-    }
-
-    .studio-fit-btn {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 7px !important;
-      padding: 7px 10px !important;
-      background: rgba(10, 22, 44, 0.8) !important;
-      border: 1.5px solid rgba(84, 234, 255, 0.3) !important;
-      border-radius: 8px !important;
-      color: #8beaff !important;
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.5px !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-    }
-
-    .studio-fit-btn.active {
-      background: rgba(84, 234, 255, 0.22) !important;
-      border-color: #54eaff !important;
-      color: #fff !important;
-      box-shadow: 0 0 14px rgba(84, 234, 255, 0.4) !important;
-    }
-
-    .studio-label-row {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-    }
-
-    .studio-label {
-      font-family: 'Orbitron', monospace !important;
-      font-size: 10.5px !important;
-      font-weight: 700 !important;
-      color: #54eaff !important;
-      letter-spacing: 0.8px !important;
-    }
-
-    .studio-val-badge {
-      font-family: 'Rajdhani', monospace !important;
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      color: #fff !important;
-      background: rgba(84, 234, 255, 0.2) !important;
-      border: 1px solid rgba(84, 234, 255, 0.45) !important;
-      border-radius: 4px !important;
-      padding: 1px 7px !important;
-    }
-
-    .studio-slider-row {
-      display: flex !important;
-      align-items: center !important;
-      gap: 10px !important;
-    }
-
-    .studio-slider {
-      flex: 1 !important;
-      -webkit-appearance: none !important;
-      appearance: none !important;
-      height: 6px !important;
-      background: rgba(84, 234, 255, 0.25) !important;
-      border-radius: 4px !important;
-      outline: none !important;
-      cursor: pointer !important;
-    }
-
-    .studio-slider::-webkit-slider-thumb {
-      -webkit-appearance: none !important;
-      appearance: none !important;
-      width: 18px !important;
-      height: 18px !important;
-      border-radius: 50% !important;
-      background: #54eaff !important;
-      border: 2px solid #060e1c !important;
-      box-shadow: 0 0 10px #54eaff !important;
-      cursor: pointer !important;
-      transition: transform 0.15s ease !important;
-    }
-
-    .studio-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2) !important;
-    }
-
-    .studio-slider-reset {
-      background: rgba(14, 28, 54, 0.8) !important;
-      border: 1px solid rgba(84, 234, 255, 0.4) !important;
-      color: #54eaff !important;
-      width: 26px !important;
-      height: 26px !important;
-      border-radius: 6px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: pointer !important;
-      font-size: 12px !important;
-      transition: all 0.2s ease !important;
-    }
-
-    .studio-slider-reset:hover {
-      border-color: #54eaff !important;
-      background: rgba(84, 234, 255, 0.25) !important;
-      color: #fff !important;
-    }
-
-    .studio-reset-row {
-      display: flex !important;
-      justify-content: flex-end !important;
-      margin-top: 2px !important;
-    }
-
-    .studio-reset-all-btn {
-      background: transparent !important;
-      border: 1px dashed rgba(84, 234, 255, 0.35) !important;
-      border-radius: 6px !important;
-      color: rgba(139, 234, 255, 0.8) !important;
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 11.5px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.6px !important;
-      padding: 4px 10px !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-    }
-
-    .studio-reset-all-btn:hover {
-      border-color: #54eaff !important;
-      color: #fff !important;
-      background: rgba(84, 234, 255, 0.12) !important;
-    }
-
-    .avatar-studio-footer {
-      display: flex !important;
-      gap: 10px !important;
-      margin-top: 2px !important;
-    }
-
-    .studio-btn-cancel {
-      flex: 1 !important;
-      padding: 11px 16px !important;
-      background: rgba(14, 28, 54, 0.8) !important;
-      border: 1.5px solid rgba(84, 234, 255, 0.35) !important;
-      border-radius: 10px !important;
-      color: #8beaff !important;
-      font-family: 'Orbitron', monospace !important;
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.8px !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-    }
-
-    .studio-btn-cancel:hover {
-      background: rgba(22, 42, 78, 0.9) !important;
-      color: #fff !important;
-      border-color: #54eaff !important;
-    }
-
-    .studio-btn-save {
-      flex: 2 !important;
-      padding: 12px 18px !important;
-      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #9055ff 100%) !important;
-      border: none !important;
-      border-radius: 10px !important;
-      color: #fff !important;
-      font-family: 'Orbitron', monospace !important;
-      font-size: 12.5px !important;
-      font-weight: 800 !important;
-      letter-spacing: 1px !important;
-      cursor: pointer !important;
-      box-shadow: 0 0 20px rgba(0, 210, 255, 0.5) !important;
-      transition: all 0.22s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
-    }
-
-    .studio-btn-save:hover {
-      box-shadow: 0 0 30px rgba(0, 210, 255, 0.85) !important;
-      transform: translateY(-1.5px) !important;
     }
 
     /* Aurora Avatar Toast */
@@ -3468,7 +2752,7 @@
 
             <div class="profile-core">
 
-              <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="openAvatarStudio(event)" title="Click to Change, Adjust or Upload Logo">
+              <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Click to upload profile photo">
 
                 <div class="profile-avatar-ring"></div>
 
@@ -3483,15 +2767,18 @@
 
                 <span class="profile-online-dot" title="Authenticated / Online"></span>
 
-                <button type="button" class="profile-avatar-sync-btn" id="profileAvatarSyncBtn" onclick="openAvatarStudio(event)" title="Adjust or Upload Logo" aria-label="Adjust or Upload Logo">
+                <button type="button" class="profile-avatar-upload-badge" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Upload Photo" aria-label="Upload Photo">
                   📷
                 </button>
 
                 <div class="profile-avatar-hover-pill">
-                  <span>📷 EDIT</span>
+                  <span>📷 UPLOAD</span>
                 </div>
 
               </div>
+
+              <!-- Hidden Native File Input -->
+              <input type="file" id="auroraPhotoFileInput" accept="image/*" style="display: none;" onchange="handleProfilePhotoSelect(this.files[0])">
 
               <div class="profile-identity">
 
@@ -3508,13 +2795,13 @@
                 </p>
 
                 <div class="profile-avatar-action-row">
-                  <button type="button" class="profile-avatar-upload-btn" id="openAvatarStudioBtn" onclick="openAvatarStudio(event)">
+                  <button type="button" class="profile-avatar-upload-btn" onclick="document.getElementById('auroraPhotoFileInput').click()">
                     <span class="avatar-btn-icon">📷</span>
-                    <span class="avatar-btn-text">UPLOAD &amp; ADJUST PHOTO</span>
+                    <span class="avatar-btn-text">UPLOAD PHOTO</span>
                   </button>
-                  <button type="button" class="profile-avatar-google-sync-btn" id="syncGoogleAvatarBtn" onclick="syncGoogleAvatar(event)" title="Re-sync from Google Account">
-                    <span class="avatar-btn-icon">🔄</span>
-                    <span class="avatar-btn-text">SYNC GOOGLE</span>
+                  <button type="button" class="profile-avatar-remove-btn" id="removePhotoBtn" onclick="removeAuroraPhoto(event)" style="display: none;" title="Remove Photo">
+                    <span class="avatar-btn-icon">🗑️</span>
+                    <span class="avatar-btn-text">REMOVE</span>
                   </button>
                 </div>
 
@@ -3579,134 +2866,6 @@
 
         </div>
 
-      </div>
-
-      <!-- =========================================================
-           AURORA // PHOTO & LOGO ADJUSTMENT STUDIO MODAL
-      ========================================================== -->
-      <div class="avatar-studio-overlay" id="avatarStudioOverlay" style="display: none;" aria-hidden="true" onclick="if(event.target === this) closeAvatarStudio(event)">
-        <div class="avatar-studio-panel" role="dialog" aria-labelledby="studioTitle">
-          
-          <!-- STUDIO HEADER -->
-          <div class="avatar-studio-header">
-            <div class="studio-header-text">
-              <span class="studio-eyebrow">AURORA // IDENTITY HUD</span>
-              <h3 id="studioTitle">AVATAR &amp; LOGO STUDIO</h3>
-              <p class="studio-desc">Upload, zoom, reposition &amp; perfectly fit your image</p>
-            </div>
-            <button type="button" class="studio-close-btn" onclick="closeAvatarStudio(event)" aria-label="Close Studio">✕</button>
-          </div>
-
-          <!-- STUDIO BODY -->
-          <div class="avatar-studio-body">
-            
-            <!-- PREVIEW VIEWPORT AREA -->
-            <div class="studio-viewport-wrap">
-              <div class="studio-hud-rings">
-                <div class="studio-hud-ring outer-ring"></div>
-                <div class="studio-hud-ring inner-ring"></div>
-              </div>
-              
-              <div class="studio-aperture" id="studioAperture" title="Click or Drag image to reposition">
-                <img id="studioPreviewImg" src="" alt="Avatar Preview" style="display: none;">
-                <div class="studio-empty-prompt" id="studioEmptyPrompt">
-                  <span class="empty-icon">📁</span>
-                  <span class="empty-title">SELECT OR DROP PHOTO</span>
-                  <span class="empty-sub">PNG, JPG, WEBP, SVG</span>
-                </div>
-              </div>
-
-              <div class="studio-aperture-overlay-hint">
-                <span>↕ ↔ Drag inside circle to pan image</span>
-              </div>
-            </div>
-
-            <!-- FILE UPLOAD TRIGGER -->
-            <div class="studio-upload-section">
-              <input type="file" id="studioHiddenFileInput" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" style="display: none;">
-              <button type="button" class="studio-choose-file-btn" onclick="document.getElementById('studioHiddenFileInput').click()">
-                <span class="btn-icon">📁</span>
-                <span>CHOOSE PHOTO / LOGO FROM DEVICE</span>
-              </button>
-              <span class="studio-file-name" id="studioFileName">No file selected</span>
-            </div>
-
-            <!-- ADJUSTMENT CONTROLS -->
-            <div class="studio-controls-card">
-              
-              <!-- FIT MODE SWITCH -->
-              <div class="studio-control-group">
-                <label class="studio-label">FIT MODE</label>
-                <div class="studio-fit-toggle-group">
-                  <button type="button" class="studio-fit-btn active" id="fitCoverBtn" onclick="setAvatarFitMode('cover')">
-                    <span class="fit-icon">⛶</span>
-                    <span class="fit-name">FILL CIRCLE (COVER)</span>
-                  </button>
-                  <button type="button" class="studio-fit-btn" id="fitContainBtn" onclick="setAvatarFitMode('contain')">
-                    <span class="fit-icon">⊡</span>
-                    <span class="fit-name">FIT WHOLE LOGO</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- ZOOM / SCALE SLIDER -->
-              <div class="studio-control-group">
-                <div class="studio-label-row">
-                  <label for="studioZoomSlider" class="studio-label">🔍 ZOOM / SCALE</label>
-                  <span class="studio-val-badge" id="studioZoomVal">100%</span>
-                </div>
-                <div class="studio-slider-row">
-                  <input type="range" id="studioZoomSlider" min="50" max="300" step="1" value="100" class="studio-slider">
-                  <button type="button" class="studio-slider-reset" onclick="resetAvatarSlider('zoom')" title="Reset Zoom">↺</button>
-                </div>
-              </div>
-
-              <!-- VERTICAL POSITION (Y) SLIDER -->
-              <div class="studio-control-group">
-                <div class="studio-label-row">
-                  <label for="studioPosYSlider" class="studio-label">↕ VERTICAL POSITION (Y)</label>
-                  <span class="studio-val-badge" id="studioPosYVal">0px</span>
-                </div>
-                <div class="studio-slider-row">
-                  <input type="range" id="studioPosYSlider" min="-120" max="120" step="1" value="0" class="studio-slider">
-                  <button type="button" class="studio-slider-reset" onclick="resetAvatarSlider('posY')" title="Center Vertically">↺</button>
-                </div>
-              </div>
-
-              <!-- HORIZONTAL POSITION (X) SLIDER -->
-              <div class="studio-control-group">
-                <div class="studio-label-row">
-                  <label for="studioPosXSlider" class="studio-label">↔ HORIZONTAL POSITION (X)</label>
-                  <span class="studio-val-badge" id="studioPosXVal">0px</span>
-                </div>
-                <div class="studio-slider-row">
-                  <input type="range" id="studioPosXSlider" min="-120" max="120" step="1" value="0" class="studio-slider">
-                  <button type="button" class="studio-slider-reset" onclick="resetAvatarSlider('posX')" title="Center Horizontally">↺</button>
-                </div>
-              </div>
-
-              <!-- RESET ALL ADJUSTMENTS -->
-              <div class="studio-reset-row">
-                <button type="button" class="studio-reset-all-btn" onclick="resetAllAvatarAdjustments()">
-                  ↺ RESET ALL ADJUSTMENTS
-                </button>
-              </div>
-
-            </div>
-
-          </div>
-
-          <!-- STUDIO FOOTER ACTIONS -->
-          <div class="avatar-studio-footer">
-            <button type="button" class="studio-btn-cancel" onclick="closeAvatarStudio(event)">
-              ✕ CANCEL
-            </button>
-            <button type="button" class="studio-btn-save" id="studioSaveBtn" onclick="saveAndApplyAvatarFromStudio(event)">
-              ⚡ SAVE &amp; APPLY LOGO
-            </button>
-          </div>
-
-        </div>
       </div>
 
 
@@ -4034,7 +3193,7 @@
   </script>
 
 
-  <script src="./script.js?v=66" defer></script>
+  <script src="./script.js?v=67" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>
