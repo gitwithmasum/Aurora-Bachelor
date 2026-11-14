@@ -14255,6 +14255,7 @@ html[data-accent] .title-cursor {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 
   border-radius: 50%;
 
@@ -14271,6 +14272,14 @@ html[data-accent] .title-cursor {
   box-shadow:
     0 0 20px rgba(80, 230, 255, 0.15),
     0 0 40px rgba(139, 92, 255, 0.09);
+
+  color: #54eaff;
+  font-family: 'Orbitron', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  text-shadow: 0 0 14px #54eaff;
+  line-height: 1;
+  user-select: none;
 }
 
 

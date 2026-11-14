@@ -7634,37 +7634,54 @@ async function renderProfile() {
        AVATAR
     -------------------------------------------------------- */
 
-    let avatarHTML = `
+    const initial = (name || email || "A").trim().charAt(0).toUpperCase();
+    const fallbackSVG = `<svg class="avatar-fallback-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;filter:drop-shadow(0 0 8px rgba(84,234,255,0.65));"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
 
+    let avatarHTML = `
       <div
-        class="profile-avatar"
+        class="profile-avatar profile-avatar-fallback"
         style="
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:32px;
+          width: 86px;
+          height: 86px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
+          border: 2px solid rgba(84, 234, 255, 0.65);
+          box-shadow: 0 0 22px rgba(84, 234, 255, 0.35);
+          color: #54eaff;
+          font-family: 'Orbitron', monospace;
+          font-size: 34px;
+          font-weight: 800;
+          text-shadow: 0 0 14px #54eaff;
+          line-height: 1;
+          user-select: none;
         "
       >
-        👤
+        <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center;">${initial}</span>
       </div>
-
     `;
 
-
     if (avatar) {
-
       avatarHTML = `
-
         <img
           src="${esc(avatar)}"
           class="profile-avatar"
           alt="Aurora Profile"
           referrerpolicy="no-referrer"
           crossorigin="anonymous"
+          style="
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            border: 2px solid rgba(84, 234, 255, 0.65);
+            display: block;
+          "
         >
-
       `;
-
     }
 
 
@@ -7687,13 +7704,15 @@ async function renderProfile() {
 
       <div class="profile-identity">
 
-        <div class="profile-avatar-wrap">
+        <div class="profile-avatar-wrap" onclick="document.getElementById('auroraPhotoFileInput')?.click()" title="Click to upload profile photo" style="cursor: pointer; position: relative;">
 
           ${avatarHTML}
 
           <span
             class="profile-online"
           ></span>
+
+          <span class="profile-avatar-upload-badge" title="Upload Photo" onclick="document.getElementById('auroraPhotoFileInput')?.click()">📷</span>
 
         </div>
 
@@ -7713,6 +7732,18 @@ async function renderProfile() {
           <p class="profile-email">
             ${esc(email)}
           </p>
+
+          <div class="profile-avatar-action-row">
+            <button type="button" class="profile-avatar-upload-btn" onclick="document.getElementById('auroraPhotoFileInput')?.click()">
+              <span class="avatar-btn-icon">📷</span>
+              <span class="avatar-btn-text">UPLOAD PHOTO</span>
+            </button>
+            ${avatar ? `
+            <button type="button" class="profile-avatar-remove-btn" onclick="removeAuroraPhoto(event)" title="Remove Photo">
+              <span class="avatar-btn-icon">🗑️</span>
+              <span class="avatar-btn-text">REMOVE</span>
+            </button>` : ''}
+          </div>
 
         </div>
 
