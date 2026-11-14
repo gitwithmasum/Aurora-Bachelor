@@ -27,7 +27,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=36">
+  <link rel="stylesheet" href="./style_v3.css?v=37">
   <link rel="stylesheet" href="./themes.css?v=54">
 
   <style id="aurora-hud-collapse-styles">
@@ -384,6 +384,33 @@
             if (mobIcon) mobIcon.style.display = 'inline-block';
           }
         }
+
+        // 4. Full Page Profile View (#page-profile)
+        const pageProfileWrap = document.querySelector('#page-profile .profile-avatar-wrap');
+        if (pageProfileWrap) {
+          let pageImg = pageProfileWrap.querySelector('img.profile-avatar');
+          let pageFallback = pageProfileWrap.querySelector('.profile-avatar-fallback');
+          if (url) {
+            if (!pageImg) {
+              pageImg = document.createElement('img');
+              pageImg.className = 'profile-avatar';
+              pageImg.alt = 'Aurora Profile';
+              pageImg.referrerPolicy = 'no-referrer';
+              pageImg.crossOrigin = 'anonymous';
+              pageProfileWrap.prepend(pageImg);
+            }
+            pageImg.src = url;
+            pageImg.style.display = 'block';
+            if (pageFallback) pageFallback.style.display = 'none';
+            pageImg.onerror = function() {
+              this.style.display = 'none';
+              if (pageFallback) pageFallback.style.display = 'flex';
+            };
+          } else {
+            if (pageImg) pageImg.style.display = 'none';
+            if (pageFallback) pageFallback.style.display = 'flex';
+          }
+        }
         // 4. Update Remove button visibility
         const removeBtn = document.getElementById('removePhotoBtn');
         if (removeBtn) {
@@ -509,8 +536,7 @@
       z-index: 2 !important;
     }
 
-    #auroraProfileView .profile-avatar,
-    #page-profile .profile-avatar {
+    #auroraProfileView .profile-avatar {
       width: 86px !important;
       height: 86px !important;
       border-radius: 50% !important;
@@ -527,14 +553,54 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }
 
+    #page-profile .profile-avatar-wrap {
+      position: relative !important;
+      width: 86px !important;
+      height: 86px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      user-select: none !important;
+    }
+
+    #page-profile .profile-avatar-wrap::before {
+      content: "" !important;
+      position: absolute !important;
+      inset: 0 !important;
+      border-radius: 50% !important;
+      border: 1.5px dashed rgba(84, 234, 255, 0.4) !important;
+      border-top: 2.5px solid #54eaff !important;
+      border-right: 2.5px solid rgba(183, 124, 255, 0.95) !important;
+      box-shadow: 0 0 16px rgba(84, 234, 255, 0.35) !important;
+      animation: auroraProfileOrbit 7s linear infinite !important;
+      pointer-events: none !important;
+    }
+
+    #page-profile .profile-avatar {
+      width: 74px !important;
+      height: 74px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      border: 1.5px solid rgba(84, 234, 255, 0.65) !important;
+      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(6, 14, 28, 0.98) 100%) !important;
+      box-shadow: 0 0 20px rgba(84, 234, 255, 0.35), inset 0 0 12px rgba(84, 234, 255, 0.2) !important;
+      z-index: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      margin: 0 auto !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    #page-profile .profile-avatar:hover,
     #auroraProfileView .profile-avatar:hover {
       transform: scale(1.04) !important;
       box-shadow: 0 0 28px rgba(84, 234, 255, 0.55), inset 0 0 18px rgba(84, 234, 255, 0.3) !important;
     }
 
     .profile-avatar-fallback {
-      width: 86px !important;
-      height: 86px !important;
       border-radius: 50% !important;
       display: flex !important;
       align-items: center !important;
@@ -548,6 +614,22 @@
       text-shadow: 0 0 12px #54eaff !important;
       box-shadow: 0 0 20px rgba(84, 234, 255, 0.3) !important;
       z-index: 1 !important;
+      user-select: none !important;
+    }
+
+    .profile-initial-monogram {
+      font-family: 'Orbitron', monospace !important;
+      font-size: 32px !important;
+      font-weight: 800 !important;
+      color: #54eaff !important;
+      text-shadow: 0 0 14px #54eaff, 0 0 26px rgba(84, 234, 255, 0.4) !important;
+      line-height: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      width: 100% !important;
+      height: 100% !important;
       user-select: none !important;
     }
 
@@ -786,7 +868,12 @@
 
         <!-- User Profile Avatar (right next to month switcher) -->
         <button type="button" class="mobile-avatar-btn" id="mobileProfileBtn" title="Open User Profile" aria-label="Open User Profile">
-          <span class="mobile-avatar-icon">👤</span>
+          <span class="mobile-avatar-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
         </button>
       </div>
     </header>
@@ -831,7 +918,12 @@
           <button class="icon-btn profile-btn" id="profileBtn" title="Open Profile" type="button">
             <span class="profile-ring"></span>
         
-            <span class="profile-icon">👤</span>
+            <span class="profile-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
         
             <span class="profile-label">Profile</span>
           </button>
@@ -2714,7 +2806,10 @@
           <div class="aurora-login-view" id="auroraLoginView" hidden>
 
             <div class="login-core-icon">
-              👤
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(84,234,255,0.7)); display: block; margin: auto;">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
             </div>
 
             <span class="profile-status">
@@ -2759,9 +2854,9 @@
 
                 <div class="profile-avatar-ring"></div>
 
-                <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" crossorigin="anonymous">
+                <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" crossorigin="anonymous" style="display: none;">
 
-                <div id="profileAvatarFallback" class="profile-avatar-fallback" style="display: none;">
+                <div id="profileAvatarFallback" class="profile-avatar-fallback" style="display: flex;">
                   <svg class="avatar-fallback-svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
@@ -3196,7 +3291,7 @@
   </script>
 
 
-  <script src="./script.js?v=68" defer></script>
+  <script src="./script.js?v=69" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>

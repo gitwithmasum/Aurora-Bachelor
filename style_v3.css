@@ -14249,8 +14249,8 @@ html[data-accent] .title-cursor {
 
 
 #page-profile .profile-avatar {
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
 
   display: flex;
   align-items: center;
@@ -14260,9 +14260,10 @@ html[data-accent] .title-cursor {
   border-radius: 50%;
 
   object-fit: cover;
+  object-position: center;
 
   border:
-    1px solid rgba(83, 232, 255, 0.42);
+    1.5px solid rgba(83, 232, 255, 0.65);
 
   background:
     radial-gradient(circle,
@@ -14270,8 +14271,8 @@ html[data-accent] .title-cursor {
       rgba(8, 24, 42, 0.94));
 
   box-shadow:
-    0 0 20px rgba(80, 230, 255, 0.15),
-    0 0 40px rgba(139, 92, 255, 0.09);
+    0 0 20px rgba(80, 230, 255, 0.25),
+    0 0 40px rgba(139, 92, 255, 0.15);
 
   color: #54eaff;
   font-family: 'Orbitron', monospace;
@@ -14295,13 +14296,21 @@ html[data-accent] .title-cursor {
   border-radius: 50%;
 
   border:
-    1px solid rgba(77, 231, 255, 0.20);
+    1.5px dashed rgba(77, 231, 255, 0.40);
 
-  border-top-color:
-    rgba(158, 102, 255, 0.80);
+  border-top:
+    2.5px solid #54eaff;
+
+  border-right:
+    2.5px solid rgba(183, 124, 255, 0.95);
+
+  box-shadow:
+    0 0 16px rgba(84, 234, 255, 0.35);
 
   animation:
-    auroraProfileOrbit 8s linear infinite;
+    auroraProfileOrbit 7s linear infinite;
+
+  pointer-events: none;
 }
 
 

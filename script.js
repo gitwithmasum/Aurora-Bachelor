@@ -7634,32 +7634,35 @@ async function renderProfile() {
        AVATAR
     -------------------------------------------------------- */
 
-    const initial = (name || email || "A").trim().charAt(0).toUpperCase();
-    const fallbackSVG = `<svg class="avatar-fallback-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;filter:drop-shadow(0 0 8px rgba(84,234,255,0.65));"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+    let initialClean = (name || email || "A").trim();
+    if (/^the\s+/i.test(initialClean)) {
+      initialClean = initialClean.replace(/^the\s+/i, "");
+    }
+    const initial = initialClean.charAt(0).toUpperCase() || "A";
 
     let avatarHTML = `
       <div
         class="profile-avatar profile-avatar-fallback"
         style="
-          width: 86px;
-          height: 86px;
+          width: 74px;
+          height: 74px;
           display: flex;
           align-items: center;
           justify-content: center;
           border-radius: 50%;
           background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
-          border: 2px solid rgba(84, 234, 255, 0.65);
-          box-shadow: 0 0 22px rgba(84, 234, 255, 0.35);
+          border: 1.5px solid rgba(84, 234, 255, 0.65);
+          box-shadow: 0 0 20px rgba(84, 234, 255, 0.35);
           color: #54eaff;
           font-family: 'Orbitron', monospace;
-          font-size: 34px;
+          font-size: 32px;
           font-weight: 800;
           text-shadow: 0 0 14px #54eaff;
           line-height: 1;
           user-select: none;
         "
       >
-        <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center;">${initial}</span>
+        <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${initial}</span>
       </div>
     `;
 
@@ -7671,16 +7674,40 @@ async function renderProfile() {
           alt="Aurora Profile"
           referrerpolicy="no-referrer"
           crossorigin="anonymous"
+          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
           style="
-            width: 86px;
-            height: 86px;
+            width: 74px;
+            height: 74px;
             border-radius: 50%;
             object-fit: cover;
             object-position: center;
-            border: 2px solid rgba(84, 234, 255, 0.65);
+            border: 1.5px solid rgba(84, 234, 255, 0.65);
             display: block;
           "
         >
+        <div
+          class="profile-avatar profile-avatar-fallback"
+          style="
+            width: 74px;
+            height: 74px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
+            border: 1.5px solid rgba(84, 234, 255, 0.65);
+            box-shadow: 0 0 20px rgba(84, 234, 255, 0.35);
+            color: #54eaff;
+            font-family: 'Orbitron', monospace;
+            font-size: 32px;
+            font-weight: 800;
+            text-shadow: 0 0 14px #54eaff;
+            line-height: 1;
+            user-select: none;
+          "
+        >
+          <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${initial}</span>
+        </div>
       `;
     }
 
