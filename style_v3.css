@@ -24750,13 +24750,18 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
   }
 
   .mobile-sync-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #10b981;
     box-shadow: 0 0 8px #10b981;
     flex-shrink: 0;
     margin-right: 2px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .mobile-sync-dot:active {
+    transform: scale(1.4);
   }
 
   .mobile-sync-dot.synced {

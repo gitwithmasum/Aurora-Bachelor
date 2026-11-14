@@ -3613,6 +3613,7 @@ const AuroraCloudSync = (() => {
 
 
         subscribeRealtime();
+        startFallbackPolling();
 
         return;
 
@@ -3674,6 +3675,7 @@ const AuroraCloudSync = (() => {
 
 
       subscribeRealtime();
+      startFallbackPolling();
 
 
       console.log(
@@ -3766,6 +3768,7 @@ const AuroraCloudSync = (() => {
 
     /*
       Combine rapid edits into one cloud write.
+      Fast 250ms debounce for lightning fast multi-device sync.
     */
 
     saveTimer =
@@ -3778,7 +3781,7 @@ const AuroraCloudSync = (() => {
           flushSave();
 
         },
-        700
+        250
       );
 
   }
@@ -4222,7 +4225,7 @@ const AuroraCloudSync = (() => {
                 Polling is safety fallback.
               */
 
-              // Realtime handles cloud changes; disable five-second background fetching.
+              startFallbackPolling();
 
 
               /*
@@ -4234,6 +4237,19 @@ const AuroraCloudSync = (() => {
               reloadFromCloud(
                 false
               );
+
+            } else if (
+              status === "CLOSED" ||
+              status === "CHANNEL_ERROR" ||
+              status === "TIMED_OUT"
+            ) {
+
+              console.warn(
+                "⚠️ Aurora Realtime inactive, ensuring fallback polling is active:",
+                status
+              );
+
+              startFallbackPolling();
 
             }
 
@@ -4276,12 +4292,12 @@ const AuroraCloudSync = (() => {
           );
 
         },
-        5000
+        3000
       );
 
 
     console.log(
-      "🔄 Aurora Auto Sync Fallback: ACTIVE"
+      "🔄 Aurora Auto Sync Fallback: ACTIVE (3s interval)"
     );
 
   }
@@ -4417,6 +4433,70 @@ const AuroraCloudSync = (() => {
     };
 
   }
+
+
+  /* ==========================================================
+     RESUME / VISIBILITY & FOCUS AUTO-SYNC
+     Instantly pulls cloud changes when returning to the app
+  ========================================================== */
+
+  let visibilitySyncInstalled = false;
+
+  function installVisibilitySync() {
+
+    if (visibilitySyncInstalled || typeof window === "undefined" || !window.addEventListener) {
+      return;
+    }
+
+    visibilitySyncInstalled = true;
+
+    const onAppResume = async () => {
+
+      if (
+        !ready ||
+        !householdId ||
+        saving
+      ) {
+        return;
+      }
+
+      if (document.visibilityState === "visible") {
+
+        console.log(
+          "⚡ Aurora App Resumed: Checking latest cloud sync..."
+        );
+
+        await reloadFromCloud(false);
+
+        if (!pollTimer) {
+          startFallbackPolling();
+        }
+
+        if (!realtimeChannel) {
+          subscribeRealtime();
+        }
+
+      }
+
+    };
+
+    document.addEventListener("visibilitychange", onAppResume);
+    window.addEventListener("focus", onAppResume);
+    window.addEventListener("online", () => {
+
+      console.log(
+        "🌐 Aurora Network Reconnected: Resuming sync..."
+      );
+
+      reloadFromCloud(false);
+      subscribeRealtime();
+      startFallbackPolling();
+
+    });
+
+  }
+
+  installVisibilitySync();
 
 
   return {

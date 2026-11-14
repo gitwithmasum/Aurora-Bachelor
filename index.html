@@ -2658,6 +2658,16 @@
         syncMobileHud();
       }
 
+      if (syncDot) {
+        syncDot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (window.AuroraCloudSync && typeof window.AuroraCloudSync.reloadFromCloud === 'function') {
+            syncDot.className = 'mobile-sync-dot syncing';
+            window.AuroraCloudSync.reloadFromCloud(true);
+          }
+        });
+      }
+
       // Hook navigation
       const origNavigate = typeof AuroraApp !== 'undefined' ? AuroraApp.navigate : null;
       if (origNavigate) {
