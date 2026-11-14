@@ -27,8 +27,8 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=29">
-  <link rel="stylesheet" href="./themes.css?v=48">
+  <link rel="stylesheet" href="./style_v3.css?v=30">
+  <link rel="stylesheet" href="./themes.css?v=49">
 
   <style id="aurora-hud-collapse-styles">
     .top-hud-container {
@@ -237,6 +237,187 @@
         btn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
       }
     };
+
+    // Auto-apply cached Google avatar to nav on boot
+    (function() {
+      try {
+        const cached = localStorage.getItem('aurora_user_avatar');
+        if (cached) {
+          window.__auroraCachedAvatar = cached;
+          const applyAvatars = () => {
+            const sideBtn = document.getElementById('profileBtn');
+            if (sideBtn && !sideBtn.querySelector('.sidebar-avatar-img')) {
+              const icon = sideBtn.querySelector('.profile-icon');
+              const img = document.createElement('img');
+              img.className = 'sidebar-avatar-img';
+              img.src = cached;
+              img.alt = 'Profile';
+              img.referrerPolicy = 'no-referrer';
+              img.crossOrigin = 'anonymous';
+              if (icon) {
+                icon.style.display = 'none';
+                icon.parentNode.insertBefore(img, icon);
+              }
+            }
+            const mobBtn = document.getElementById('mobileProfileBtn');
+            if (mobBtn && !mobBtn.querySelector('.mobile-avatar-img')) {
+              const icon = mobBtn.querySelector('.mobile-avatar-icon');
+              const img = document.createElement('img');
+              img.className = 'mobile-avatar-img';
+              img.src = cached;
+              img.alt = 'Profile';
+              img.referrerPolicy = 'no-referrer';
+              img.crossOrigin = 'anonymous';
+              if (icon) {
+                icon.style.display = 'none';
+                icon.parentNode.insertBefore(img, icon);
+              }
+            }
+          };
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyAvatars);
+          } else {
+            setTimeout(applyAvatars, 50);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style id="aurora-profile-avatar-styles">
+    /* ============================================================
+       AURORA // PROFILE AVATAR CORE (PERFECTLY ADJUSTED & FITTED)
+    ============================================================ */
+    #auroraProfileView .profile-avatar-wrap,
+    #page-profile .profile-avatar-wrap {
+      position: relative;
+      width: 92px;
+      height: 92px;
+      flex: 0 0 92px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      user-select: none;
+    }
+
+    .profile-avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(84, 234, 255, 0.45);
+      border-top: 2.5px solid #54eaff;
+      border-right: 2.5px solid rgba(183, 124, 255, 0.95);
+      box-shadow: 0 0 16px rgba(84, 234, 255, 0.35);
+      animation: auroraOrbit 7s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #auroraProfileView .profile-avatar,
+    #page-profile .profile-avatar {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      border: 2px solid rgba(84, 234, 255, 0.65);
+      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(6, 14, 28, 0.98) 100%);
+      box-shadow: 0 0 22px rgba(84, 234, 255, 0.35), inset 0 0 14px rgba(84, 234, 255, 0.2);
+      z-index: 1;
+      display: block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #auroraProfileView .profile-avatar:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 28px rgba(84, 234, 255, 0.55), inset 0 0 18px rgba(84, 234, 255, 0.3);
+    }
+
+    .profile-avatar-fallback {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
+      border: 2px solid rgba(84, 234, 255, 0.55);
+      color: #54eaff;
+      font-family: 'Orbitron', monospace;
+      font-size: 32px;
+      font-weight: 800;
+      text-shadow: 0 0 12px #54eaff;
+      box-shadow: 0 0 20px rgba(84, 234, 255, 0.3);
+      z-index: 1;
+      user-select: none;
+    }
+
+    .profile-online-dot {
+      position: absolute;
+      right: 2px;
+      bottom: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2.5px solid #060e1c;
+      box-shadow: 0 0 12px #10b981, 0 0 4px #fff;
+      z-index: 4;
+    }
+
+    .profile-avatar-sync-btn {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(6, 18, 38, 0.94);
+      border: 1px solid rgba(84, 234, 255, 0.7);
+      color: #54eaff;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(84, 234, 255, 0.4);
+      z-index: 5;
+      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+      padding: 0;
+      outline: none;
+    }
+
+    .profile-avatar-sync-btn:hover {
+      background: rgba(14, 38, 76, 0.98);
+      border-color: #54eaff;
+      transform: scale(1.18) rotate(180deg);
+      box-shadow: 0 0 16px rgba(84, 234, 255, 0.7);
+    }
+
+    .sidebar-avatar-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      border: 1.5px solid #54eaff;
+      box-shadow: 0 0 10px rgba(84, 234, 255, 0.45);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .mobile-avatar-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      border: 1.5px solid #54eaff;
+      box-shadow: 0 0 8px rgba(84, 234, 255, 0.45);
+      display: block;
+    }
+  </style>
   </script>
 </head>
 
@@ -2249,13 +2430,21 @@
 
             <div class="profile-core">
 
-              <div class="profile-avatar-wrap">
+              <div class="profile-avatar-wrap" id="profileAvatarWrap">
 
                 <div class="profile-avatar-ring"></div>
 
-                <img id="profileAvatar" class="profile-avatar" src="" alt="Profile">
+                <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" crossorigin="anonymous">
 
-                <span class="profile-online-dot"></span>
+                <div id="profileAvatarFallback" class="profile-avatar-fallback" style="display: none;">👤</div>
+
+                <span class="profile-online-dot" title="Authenticated / Online"></span>
+
+                <button type="button" class="profile-avatar-sync-btn" id="profileAvatarSyncBtn" title="Sync Google Avatar / Upload Logo" aria-label="Sync Profile Avatar">
+                  🔄
+                </button>
+
+                <input type="file" id="auroraAvatarFileInput" accept="image/*" style="display: none;">
 
               </div>
 

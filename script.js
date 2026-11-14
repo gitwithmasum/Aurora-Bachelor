@@ -7388,10 +7388,32 @@ async function renderProfile() {
       "No email";
 
 
-    const avatar =
-      metadata.avatar_url ||
-      metadata.picture ||
-      "";
+    let avatar = "";
+    try {
+      avatar = localStorage.getItem("aurora_custom_avatar_" + user.id) ||
+               localStorage.getItem("aurora_user_avatar") || "";
+    } catch (e) {}
+
+    if (!avatar) {
+      avatar = metadata.avatar_url || metadata.picture || "";
+    }
+
+    if (!avatar && Array.isArray(user.identities)) {
+      for (const ident of user.identities) {
+        if (ident.identity_data) {
+          avatar = ident.identity_data.avatar_url || ident.identity_data.picture || "";
+          if (avatar) break;
+        }
+      }
+    }
+
+    if (avatar && avatar.includes("googleusercontent.com")) {
+      if (/=s\d+(-c)?$/i.test(avatar)) {
+        avatar = avatar.replace(/=s\d+(-c)?$/i, "=s384-c");
+      } else if (!avatar.includes("=")) {
+        avatar = avatar + "=s384-c";
+      }
+    }
 
 
     /* --------------------------------------------------------
@@ -7637,6 +7659,8 @@ async function renderProfile() {
           src="${esc(avatar)}"
           class="profile-avatar"
           alt="Aurora Profile"
+          referrerpolicy="no-referrer"
+          crossorigin="anonymous"
         >
 
       `;
@@ -27596,7 +27620,7 @@ function restoreSettingsDefaults() {
 
 
     /* ============================================================
-       GOOGLE USER METADATA
+       GOOGLE USER METADATA & AVATAR RESOLUTION
     ============================================================ */
 
     const metadata =
@@ -27608,10 +27632,44 @@ function restoreSettingsDefaults() {
       user.email?.split("@")[0] ||
       "Aurora User";
 
-    const avatarUrl =
-      metadata.avatar_url ||
-      metadata.picture ||
-      "";
+    let avatarUrl = "";
+
+    // 1. Check custom saved logo/avatar
+    try {
+      avatarUrl = localStorage.getItem("aurora_custom_avatar_" + user.id) ||
+                  localStorage.getItem("aurora_user_avatar") || "";
+    } catch (e) {}
+
+    // 2. Check user.user_metadata
+    if (!avatarUrl) {
+      avatarUrl = metadata.avatar_url || metadata.picture || "";
+    }
+
+    // 3. Check user.identities
+    if (!avatarUrl && Array.isArray(user.identities)) {
+      for (const ident of user.identities) {
+        if (ident.identity_data) {
+          avatarUrl = ident.identity_data.avatar_url || ident.identity_data.picture || "";
+          if (avatarUrl) break;
+        }
+      }
+    }
+
+    // 4. Upgrade Google avatar to high-res (e.g. s384-c)
+    if (avatarUrl && avatarUrl.includes("googleusercontent.com")) {
+      if (/=s\d+(-c)?$/i.test(avatarUrl)) {
+        avatarUrl = avatarUrl.replace(/=s\d+(-c)?$/i, "=s384-c");
+      } else if (!avatarUrl.includes("=")) {
+        avatarUrl = avatarUrl + "=s384-c";
+      }
+    }
+
+    // Cache latest resolved avatar for fast boot
+    if (avatarUrl) {
+      try {
+        localStorage.setItem("aurora_user_avatar", avatarUrl);
+      } catch (e) {}
+    }
 
 
     /* ============================================================
@@ -27632,18 +27690,97 @@ function restoreSettingsDefaults() {
         user.id || "—";
     }
 
+    // Update Modal Avatar
     if (el.avatar) {
+      el.avatar.referrerPolicy = "no-referrer";
+      el.avatar.crossOrigin = "anonymous";
+
+      const fallback = document.getElementById("profileAvatarFallback");
+      const initial = (fullName || user.email || "A").trim().charAt(0).toUpperCase();
 
       if (avatarUrl) {
-
         el.avatar.src = avatarUrl;
         el.avatar.alt = fullName;
         el.avatar.style.display = "block";
+        if (fallback) fallback.style.display = "none";
 
+        el.avatar.onerror = function () {
+          console.warn("Google avatar load failed, switching to fallback monogram");
+          this.style.display = "none";
+          if (fallback) {
+            fallback.textContent = initial;
+            fallback.style.display = "flex";
+          }
+        };
       } else {
-
         el.avatar.removeAttribute("src");
         el.avatar.style.display = "none";
+        if (fallback) {
+          fallback.textContent = initial;
+          fallback.style.display = "flex";
+        }
+      }
+    }
+
+    // Update Sidebar Profile Avatar Icon
+    const sidebarProfileBtn = document.getElementById("profileBtn");
+    if (sidebarProfileBtn) {
+      let sidebarAvatar = sidebarProfileBtn.querySelector(".sidebar-avatar-img");
+      const profileIcon = sidebarProfileBtn.querySelector(".profile-icon");
+      if (avatarUrl) {
+        if (!sidebarAvatar) {
+          sidebarAvatar = document.createElement("img");
+          sidebarAvatar.className = "sidebar-avatar-img";
+          sidebarAvatar.referrerPolicy = "no-referrer";
+          sidebarAvatar.crossOrigin = "anonymous";
+          if (profileIcon) {
+            profileIcon.style.display = "none";
+            profileIcon.parentNode.insertBefore(sidebarAvatar, profileIcon);
+          } else {
+            sidebarProfileBtn.prepend(sidebarAvatar);
+          }
+        }
+        sidebarAvatar.src = avatarUrl;
+        sidebarAvatar.alt = fullName;
+        sidebarAvatar.style.display = "block";
+        sidebarAvatar.onerror = function () {
+          this.style.display = "none";
+          if (profileIcon) profileIcon.style.display = "inline-block";
+        };
+      } else if (profileIcon) {
+        if (sidebarAvatar) sidebarAvatar.style.display = "none";
+        profileIcon.style.display = "inline-block";
+      }
+    }
+
+    // Update Mobile Profile Avatar Button
+    const mobileProfileBtn = document.getElementById("mobileProfileBtn");
+    if (mobileProfileBtn) {
+      let mobileAvatar = mobileProfileBtn.querySelector(".mobile-avatar-img");
+      const mobileIcon = mobileProfileBtn.querySelector(".mobile-avatar-icon");
+      if (avatarUrl) {
+        if (!mobileAvatar) {
+          mobileAvatar = document.createElement("img");
+          mobileAvatar.className = "mobile-avatar-img";
+          mobileAvatar.referrerPolicy = "no-referrer";
+          mobileAvatar.crossOrigin = "anonymous";
+          if (mobileIcon) {
+            mobileIcon.style.display = "none";
+            mobileIcon.parentNode.insertBefore(mobileAvatar, mobileIcon);
+          } else {
+            mobileProfileBtn.prepend(mobileAvatar);
+          }
+        }
+        mobileAvatar.src = avatarUrl;
+        mobileAvatar.alt = fullName;
+        mobileAvatar.style.display = "block";
+        mobileAvatar.onerror = function () {
+          this.style.display = "none";
+          if (mobileIcon) mobileIcon.style.display = "inline-block";
+        };
+      } else if (mobileIcon) {
+        if (mobileAvatar) mobileAvatar.style.display = "none";
+        mobileIcon.style.display = "inline-block";
       }
     }
 
@@ -27700,6 +27837,20 @@ function restoreSettingsDefaults() {
     document.body.classList.add(
       "profile-open"
     );
+
+    // Fetch fresh user metadata from Supabase to capture any updated Google logo
+    try {
+      const client = getAuroraSupabaseClient();
+      if (client?.auth) {
+        const { data: freshUserRes } = await client.auth.getUser();
+        if (freshUserRes?.user) {
+          await loadAuroraProfile({ user: freshUserRes.user });
+          return;
+        }
+      }
+    } catch (err) {
+      console.log("Using session for profile:", err);
+    }
 
     await loadAuroraProfile();
   }
@@ -28002,6 +28153,98 @@ function restoreSettingsDefaults() {
         event.preventDefault();
 
         signOutAurora();
+
+        return;
+      }
+
+
+      /* =========================================================
+         SYNC / UPLOAD PROFILE AVATAR
+      ========================================================= */
+
+      const syncAvatarBtn =
+        event.target.closest(
+          "#profileAvatarSyncBtn"
+        );
+
+      if (syncAvatarBtn) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const fileInput = document.getElementById("auroraAvatarFileInput");
+
+        const action = confirm(
+          "PROFILE LOGO OPTIONS:\n\n" +
+          "• Click OK to Re-sync Logo directly from your Google Account.\n" +
+          "• Click Cancel to select and upload a custom Logo file from your device."
+        );
+
+        if (action) {
+          (async () => {
+            try {
+              syncAvatarBtn.textContent = "⏳";
+              const client = getAuroraSupabaseClient();
+              if (client?.auth) {
+                const session = await getAuroraSession();
+                if (session?.user) {
+                  try {
+                    localStorage.removeItem("aurora_custom_avatar_" + session.user.id);
+                  } catch (e) {}
+                }
+                const { data: userRes } = await client.auth.getUser();
+                if (userRes?.user) {
+                  await loadAuroraProfile({ user: userRes.user });
+                }
+              }
+              alert("Google profile logo re-synced successfully!");
+            } catch (err) {
+              alert("Could not sync from Google: " + (err?.message || err));
+            } finally {
+              syncAvatarBtn.textContent = "🔄";
+            }
+          })();
+        } else {
+          if (fileInput) {
+            fileInput.onchange = async function (e) {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              if (!file.type.startsWith("image/")) {
+                alert("Please select a valid image file (PNG, JPG, SVG, WebP).");
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = async function (loadEvt) {
+                const img = new Image();
+                img.onload = async function () {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d");
+                  const size = 300;
+                  canvas.width = size;
+                  canvas.height = size;
+                  const minDim = Math.min(img.width, img.height);
+                  const sx = (img.width - minDim) / 2;
+                  const sy = (img.height - minDim) / 2;
+                  ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+                  const dataUrl = canvas.toDataURL("image/webp", 0.92);
+                  try {
+                    const session = await getAuroraSession();
+                    const uid = session?.user?.id || "default";
+                    localStorage.setItem("aurora_custom_avatar_" + uid, dataUrl);
+                    localStorage.setItem("aurora_user_avatar", dataUrl);
+                    await loadAuroraProfile(session);
+                    alert("Custom profile logo updated and adjusted successfully!");
+                  } catch (err) {
+                    console.error("Save avatar error:", err);
+                  }
+                };
+                img.src = loadEvt.target.result;
+              };
+              reader.readAsDataURL(file);
+            };
+            fileInput.click();
+          }
+        }
 
         return;
       }
