@@ -27,7 +27,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=37">
+  <link rel="stylesheet" href="./style_v3.css?v=38">
   <link rel="stylesheet" href="./themes.css?v=54">
 
   <style id="aurora-hud-collapse-styles">
@@ -389,15 +389,16 @@
         const pageProfileWrap = document.querySelector('#page-profile .profile-avatar-wrap');
         if (pageProfileWrap) {
           let pageImg = pageProfileWrap.querySelector('img.profile-avatar');
-          let pageFallback = pageProfileWrap.querySelector('.profile-avatar-fallback');
+          let pageFallback = pageProfileWrap.querySelector('.profile-avatar-monogram, .profile-avatar-fallback');
           if (url) {
             if (!pageImg) {
               pageImg = document.createElement('img');
               pageImg.className = 'profile-avatar';
+              pageImg.id = 'profileAvatarImg';
               pageImg.alt = 'Aurora Profile';
               pageImg.referrerPolicy = 'no-referrer';
               pageImg.crossOrigin = 'anonymous';
-              pageProfileWrap.prepend(pageImg);
+              pageProfileWrap.insertBefore(pageImg, pageProfileWrap.querySelector('.profile-online') || null);
             }
             pageImg.src = url;
             pageImg.style.display = 'block';
@@ -411,7 +412,7 @@
             if (pageFallback) pageFallback.style.display = 'flex';
           }
         }
-        // 4. Update Remove button visibility
+        // 5. Update Remove button visibility
         const removeBtn = document.getElementById('removePhotoBtn');
         if (removeBtn) {
           removeBtn.style.display = (url && (url.startsWith('data:') || url.startsWith('blob:') || localStorage.getItem('aurora_user_avatar'))) ? 'inline-flex' : 'none';
@@ -449,11 +450,17 @@
               }
 
               window.applyAuroraAvatarsEverywhere(dataUrl);
+              if (typeof renderProfile === 'function') {
+                setTimeout(renderProfile, 50);
+              }
               showAuroraAvatarToast("✅ Profile photo updated!");
             } catch (err) {
               console.error("Photo crop error:", err);
               localStorage.setItem('aurora_user_avatar', e.target.result);
               window.applyAuroraAvatarsEverywhere(e.target.result);
+              if (typeof renderProfile === 'function') {
+                setTimeout(renderProfile, 50);
+              }
               showAuroraAvatarToast("✅ Profile photo updated!");
             }
           };
@@ -473,6 +480,9 @@
           localStorage.removeItem('aurora_custom_avatar_' + user.id);
         }
         window.applyAuroraAvatarsEverywhere("");
+        if (typeof renderProfile === 'function') {
+          setTimeout(renderProfile, 50);
+        }
         showAuroraAvatarToast("🗑️ Profile photo removed");
       };
 
@@ -507,122 +517,116 @@
 
   <style id="aurora-profile-avatar-styles">
     /* ============================================================
-       AURORA // PROFILE AVATAR CORE (PERFECTLY ADJUSTED & FITTED)
+       AURORA // CYBER HUD PROFILE AVATAR (MINIMALIST & FUTURISTIC)
     ============================================================ */
     #auroraProfileView .profile-avatar-wrap,
     #page-profile .profile-avatar-wrap {
       position: relative !important;
-      width: 92px !important;
-      height: 92px !important;
-      flex: 0 0 92px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
+      width: 86px !important;
+      height: 86px !important;
+      min-width: 86px !important;
+      min-height: 86px !important;
+      max-width: 86px !important;
+      max-height: 86px !important;
+      flex: 0 0 86px !important;
+      display: grid !important;
+      place-items: center !important;
       border-radius: 50% !important;
       user-select: none !important;
       cursor: pointer !important;
+      background: transparent !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
     }
 
-    .profile-avatar-ring {
+    /* Disable duplicate legacy pseudo-element orbits */
+    #page-profile .profile-avatar-wrap::before,
+    #page-profile .profile-avatar-wrap::after,
+    #auroraProfileView .profile-avatar-wrap::before,
+    #auroraProfileView .profile-avatar-wrap::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    /* Futuristic Rotating Dual-Color Cyber Orbit Ring */
+    .profile-avatar-ring,
+    #auroraProfileView .profile-avatar-ring,
+    #page-profile .profile-avatar-ring {
       position: absolute !important;
-      inset: -4px !important;
+      inset: 0 !important;
+      width: 86px !important;
+      height: 86px !important;
       border-radius: 50% !important;
-      border: 1.5px dashed rgba(84, 234, 255, 0.45) !important;
-      border-top: 2.5px solid #54eaff !important;
-      border-right: 2.5px solid rgba(183, 124, 255, 0.95) !important;
-      box-shadow: 0 0 16px rgba(84, 234, 255, 0.35) !important;
-      animation: auroraOrbit 7s linear infinite !important;
+      border: 1.5px dashed rgba(84, 234, 255, 0.35) !important;
+      border-top: 2px solid #54eaff !important;
+      border-right: 2px solid #a855f7 !important;
+      box-shadow: 0 0 16px rgba(84, 234, 255, 0.3), inset 0 0 8px rgba(84, 234, 255, 0.1) !important;
+      animation: auroraOrbit 8s linear infinite !important;
       pointer-events: none !important;
       z-index: 2 !important;
     }
 
-    #auroraProfileView .profile-avatar {
-      width: 86px !important;
-      height: 86px !important;
-      border-radius: 50% !important;
-      object-fit: cover !important;
-      object-position: center !important;
-      border: 2px solid rgba(84, 234, 255, 0.65) !important;
-      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(6, 14, 28, 0.98) 100%) !important;
-      box-shadow: 0 0 22px rgba(84, 234, 255, 0.35), inset 0 0 14px rgba(84, 234, 255, 0.2) !important;
-      z-index: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      text-align: center !important;
-      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    @keyframes auroraOrbit {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
-    #page-profile .profile-avatar-wrap {
-      position: relative !important;
-      width: 86px !important;
-      height: 86px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      user-select: none !important;
-    }
-
-    #page-profile .profile-avatar-wrap::before {
-      content: "" !important;
-      position: absolute !important;
-      inset: 0 !important;
-      border-radius: 50% !important;
-      border: 1.5px dashed rgba(84, 234, 255, 0.4) !important;
-      border-top: 2.5px solid #54eaff !important;
-      border-right: 2.5px solid rgba(183, 124, 255, 0.95) !important;
-      box-shadow: 0 0 16px rgba(84, 234, 255, 0.35) !important;
-      animation: auroraProfileOrbit 7s linear infinite !important;
-      pointer-events: none !important;
-    }
-
+    /* Central Avatar Core (Photo or Monogram) - Exact 72px Circle Concentric with 86px Orbit */
+    #auroraProfileView .profile-avatar,
     #page-profile .profile-avatar {
-      width: 74px !important;
-      height: 74px !important;
+      position: relative !important;
+      width: 72px !important;
+      height: 72px !important;
+      min-width: 72px !important;
+      min-height: 72px !important;
+      max-width: 72px !important;
+      max-height: 72px !important;
       border-radius: 50% !important;
       object-fit: cover !important;
       object-position: center !important;
       border: 1.5px solid rgba(84, 234, 255, 0.65) !important;
-      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(6, 14, 28, 0.98) 100%) !important;
-      box-shadow: 0 0 20px rgba(84, 234, 255, 0.35), inset 0 0 12px rgba(84, 234, 255, 0.2) !important;
+      background: radial-gradient(circle at center, rgba(14, 32, 60, 0.96) 0%, rgba(5, 14, 28, 0.98) 100%) !important;
+      box-shadow: 0 0 18px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.18) !important;
       z-index: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      text-align: center !important;
+      display: block !important;
       margin: 0 auto !important;
-      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease !important;
     }
 
-    #page-profile .profile-avatar:hover,
-    #auroraProfileView .profile-avatar:hover {
-      transform: scale(1.04) !important;
-      box-shadow: 0 0 28px rgba(84, 234, 255, 0.55), inset 0 0 18px rgba(84, 234, 255, 0.3) !important;
-    }
-
-    .profile-avatar-fallback {
+    #auroraProfileView .profile-avatar-monogram,
+    #page-profile .profile-avatar-monogram,
+    .profile-avatar-monogram {
+      width: 72px !important;
+      height: 72px !important;
+      min-width: 72px !important;
+      min-height: 72px !important;
       border-radius: 50% !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%) !important;
-      border: 2px solid rgba(84, 234, 255, 0.55) !important;
-      color: #54eaff !important;
-      font-family: 'Orbitron', monospace !important;
-      font-size: 32px !important;
-      font-weight: 800 !important;
-      text-shadow: 0 0 12px #54eaff !important;
-      box-shadow: 0 0 20px rgba(84, 234, 255, 0.3) !important;
+      text-align: center !important;
+      background: radial-gradient(circle at center, rgba(16, 36, 70, 0.95) 0%, rgba(5, 14, 28, 0.98) 100%) !important;
+      border: 1.5px solid rgba(84, 234, 255, 0.65) !important;
+      box-shadow: 0 0 18px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.18) !important;
       z-index: 1 !important;
       user-select: none !important;
     }
 
+    #page-profile .profile-avatar-wrap:hover .profile-avatar,
+    #auroraProfileView .profile-avatar-wrap:hover .profile-avatar {
+      transform: scale(1.03) !important;
+      box-shadow: 0 0 24px rgba(84, 234, 255, 0.5), inset 0 0 14px rgba(84, 234, 255, 0.3) !important;
+    }
+
+    /* Orbitron Neon Initial Monogram */
     .profile-initial-monogram {
       font-family: 'Orbitron', monospace !important;
       font-size: 32px !important;
       font-weight: 800 !important;
       color: #54eaff !important;
-      text-shadow: 0 0 14px #54eaff, 0 0 26px rgba(84, 234, 255, 0.4) !important;
+      text-shadow: 0 0 14px #54eaff, 0 0 28px rgba(84, 234, 255, 0.5) !important;
       line-height: 1 !important;
       display: flex !important;
       align-items: center !important;
@@ -633,11 +637,73 @@
       user-select: none !important;
     }
 
+    /* Minimalist Futuristic Holographic Hover Sheen */
+    .profile-avatar-sheen {
+      position: absolute !important;
+      width: 72px !important;
+      height: 72px !important;
+      border-radius: 50% !important;
+      inset: 7px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      background: rgba(4, 14, 28, 0.78) !important;
+      backdrop-filter: blur(3px) !important;
+      -webkit-backdrop-filter: blur(3px) !important;
+      opacity: 0 !important;
+      transition: opacity 0.22s ease !important;
+      z-index: 3 !important;
+      pointer-events: none !important;
+    }
+
+    .profile-avatar-wrap:hover .profile-avatar-sheen {
+      opacity: 1 !important;
+    }
+
+    .profile-avatar-sheen span {
+      font-family: 'Orbitron', monospace !important;
+      font-size: 8.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: 1px !important;
+      color: #54eaff !important;
+      text-shadow: 0 0 6px #54eaff !important;
+    }
+
+    /* High-Tech Glowing Emerald Online Beacon */
+    #page-profile .profile-online,
     .profile-online-dot {
       position: absolute !important;
-      right: 2px !important;
-      bottom: 2px !important;
-      width: 14px !important;
+      right: 3px !important;
+      bottom: 3px !important;
+      width: 12px !important;
+      height: 12px !important;
+      border-radius: 50% !important;
+      background: #00ffaa !important;
+      border: 2px solid #06111e !important;
+      box-shadow: 0 0 10px #00ffaa, 0 0 18px rgba(0, 255, 170, 0.5) !important;
+      z-index: 4 !important;
+      pointer-events: none !important;
+      animation: auroraPulseBeacon 2.5s infinite ease-in-out !important;
+    }
+
+    @keyframes auroraPulseBeacon {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #00ffaa, 0 0 18px rgba(0, 255, 170, 0.5);
+      }
+      50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 14px #00ffaa, 0 0 24px rgba(0, 255, 170, 0.75);
+      }
+    }
+
+    /* Hide legacy clumsy badges */
+    .profile-avatar-upload-badge,
+    .profile-avatar-hover-pill {
+      display: none !important;
+    }
       height: 14px !important;
       border-radius: 50% !important;
       background: #10b981 !important;
@@ -2850,14 +2916,14 @@
 
             <div class="profile-core">
 
-              <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Click to upload profile photo">
+              <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Click to change profile photo">
 
                 <div class="profile-avatar-ring"></div>
 
                 <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" crossorigin="anonymous" style="display: none;">
 
-                <div id="profileAvatarFallback" class="profile-avatar-fallback" style="display: flex;">
-                  <svg class="avatar-fallback-svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <div id="profileAvatarFallback" class="profile-avatar-monogram" style="display: flex;">
+                  <svg class="avatar-fallback-svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
@@ -2865,12 +2931,12 @@
 
                 <span class="profile-online-dot" title="Authenticated / Online"></span>
 
-                <button type="button" class="profile-avatar-upload-badge" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Upload Photo" aria-label="Upload Photo">
-                  📷
-                </button>
-
-                <div class="profile-avatar-hover-pill">
-                  <span>📷 UPLOAD</span>
+                <div class="profile-avatar-sheen">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>EDIT</span>
                 </div>
 
               </div>
@@ -3291,7 +3357,7 @@
   </script>
 
 
-  <script src="./script.js?v=69" defer></script>
+  <script src="./script.js?v=70" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>

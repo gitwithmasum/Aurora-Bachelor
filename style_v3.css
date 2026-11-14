@@ -14287,30 +14287,7 @@ html[data-accent] .title-cursor {
 /* ORBIT */
 
 #page-profile .profile-avatar-wrap::before {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  border-radius: 50%;
-
-  border:
-    1.5px dashed rgba(77, 231, 255, 0.40);
-
-  border-top:
-    2.5px solid #54eaff;
-
-  border-right:
-    2.5px solid rgba(183, 124, 255, 0.95);
-
-  box-shadow:
-    0 0 16px rgba(84, 234, 255, 0.35);
-
-  animation:
-    auroraProfileOrbit 7s linear infinite;
-
-  pointer-events: none;
+  display: none !important;
 }
 
 

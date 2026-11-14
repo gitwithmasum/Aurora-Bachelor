@@ -7640,73 +7640,34 @@ async function renderProfile() {
     }
     const initial = initialClean.charAt(0).toUpperCase() || "A";
 
-    let avatarHTML = `
-      <div
-        class="profile-avatar profile-avatar-fallback"
-        style="
-          width: 74px;
-          height: 74px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
-          border: 1.5px solid rgba(84, 234, 255, 0.65);
-          box-shadow: 0 0 20px rgba(84, 234, 255, 0.35);
-          color: #54eaff;
-          font-family: 'Orbitron', monospace;
-          font-size: 32px;
-          font-weight: 800;
-          text-shadow: 0 0 14px #54eaff;
-          line-height: 1;
-          user-select: none;
-        "
-      >
-        <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${initial}</span>
-      </div>
-    `;
+    let avatarHTML = "";
 
     if (avatar) {
       avatarHTML = `
         <img
           src="${esc(avatar)}"
           class="profile-avatar"
-          alt="Aurora Profile"
+          id="profileAvatarImg"
+          alt="${esc(name)}"
           referrerpolicy="no-referrer"
           crossorigin="anonymous"
-          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
-          style="
-            width: 74px;
-            height: 74px;
-            border-radius: 50%;
-            object-fit: cover;
-            object-position: center;
-            border: 1.5px solid rgba(84, 234, 255, 0.65);
-            display: block;
-          "
+          onerror="this.onerror=null; this.style.display='none'; const fb = document.getElementById('profileAvatarFallbackNode'); if(fb) fb.style.display='flex';"
         >
         <div
-          class="profile-avatar profile-avatar-fallback"
-          style="
-            width: 74px;
-            height: 74px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: radial-gradient(circle at center, rgba(18, 38, 72, 0.95) 0%, rgba(7, 16, 32, 0.98) 100%);
-            border: 1.5px solid rgba(84, 234, 255, 0.65);
-            box-shadow: 0 0 20px rgba(84, 234, 255, 0.35);
-            color: #54eaff;
-            font-family: 'Orbitron', monospace;
-            font-size: 32px;
-            font-weight: 800;
-            text-shadow: 0 0 14px #54eaff;
-            line-height: 1;
-            user-select: none;
-          "
+          class="profile-avatar profile-avatar-monogram"
+          id="profileAvatarFallbackNode"
+          style="display: none;"
         >
-          <span class="profile-initial-monogram" style="line-height: 1; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${initial}</span>
+          <span class="profile-initial-monogram">${initial}</span>
+        </div>
+      `;
+    } else {
+      avatarHTML = `
+        <div
+          class="profile-avatar profile-avatar-monogram"
+          id="profileAvatarFallbackNode"
+        >
+          <span class="profile-initial-monogram">${initial}</span>
         </div>
       `;
     }
@@ -7731,15 +7692,24 @@ async function renderProfile() {
 
       <div class="profile-identity">
 
-        <div class="profile-avatar-wrap" onclick="document.getElementById('auroraPhotoFileInput')?.click()" title="Click to upload profile photo" style="cursor: pointer; position: relative;">
+        <div class="profile-avatar-wrap" onclick="document.getElementById('auroraPhotoFileInput')?.click()" title="Click to change profile photo">
+
+          <div class="profile-avatar-ring"></div>
 
           ${avatarHTML}
 
           <span
             class="profile-online"
+            title="Authenticated / Active"
           ></span>
 
-          <span class="profile-avatar-upload-badge" title="Upload Photo" onclick="document.getElementById('auroraPhotoFileInput')?.click()">📷</span>
+          <div class="profile-avatar-sheen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>EDIT</span>
+          </div>
 
         </div>
 
