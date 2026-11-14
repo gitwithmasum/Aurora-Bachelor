@@ -27,7 +27,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=39">
+  <link rel="stylesheet" href="./style_v3.css?v=40">
   <link rel="stylesheet" href="./themes.css?v=54">
 
   <style id="aurora-hud-collapse-styles">
@@ -326,31 +326,27 @@
         // 2. Sidebar profile button
         const sideBtn = document.getElementById('profileBtn');
         if (sideBtn) {
-          let sideImg = sideBtn.querySelector('.sidebar-avatar-img');
-          const sideIcon = sideBtn.querySelector('.profile-icon');
+          const avatarBox = sideBtn.querySelector('.sidebar-avatar-box') || sideBtn;
+          let sideImg = avatarBox.querySelector('.sidebar-avatar-img');
+          const sideIcon = avatarBox.querySelector('.profile-icon');
           if (url) {
             if (!sideImg) {
               sideImg = document.createElement('img');
               sideImg.className = 'sidebar-avatar-img';
               sideImg.referrerPolicy = 'no-referrer';
               sideImg.crossOrigin = 'anonymous';
-              if (sideIcon) {
-                sideIcon.style.display = 'none';
-                sideIcon.parentNode.insertBefore(sideImg, sideIcon);
-              } else {
-                sideBtn.prepend(sideImg);
-              }
+              avatarBox.appendChild(sideImg);
             }
             sideImg.src = url;
             sideImg.style.display = 'block';
             if (sideIcon) sideIcon.style.display = 'none';
             sideImg.onerror = function() {
               this.style.display = 'none';
-              if (sideIcon) sideIcon.style.display = 'inline-block';
+              if (sideIcon) sideIcon.style.display = 'flex';
             };
           } else if (sideImg) {
             sideImg.style.display = 'none';
-            if (sideIcon) sideIcon.style.display = 'inline-block';
+            if (sideIcon) sideIcon.style.display = 'flex';
           }
         }
 
@@ -749,16 +745,88 @@
       box-shadow: 0 0 16px rgba(84, 234, 255, 0.7) !important;
     }
 
-    .sidebar-avatar-img {
+    .sidebar-avatar-box {
+      position: relative !important;
       width: 32px !important;
       height: 32px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      max-width: 32px !important;
+      max-height: 32px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      user-select: none !important;
+    }
+
+    .sidebar-profile .profile-ring {
+      position: absolute !important;
+      inset: -2px !important;
+      width: calc(100% + 4px) !important;
+      height: calc(100% + 4px) !important;
+      left: -2px !important;
+      top: -2px !important;
+      border-radius: 50% !important;
+      border: 1px dashed rgba(84, 234, 255, 0.45) !important;
+      border-top: 1.5px solid #54eaff !important;
+      border-right: 1.5px solid rgba(183, 124, 255, 0.95) !important;
+      box-shadow: 0 0 8px rgba(84, 234, 255, 0.25) !important;
+      animation: auroraSidebarOrbit 8s linear infinite !important;
+      pointer-events: none !important;
+      z-index: 3 !important;
+    }
+
+    @keyframes auroraSidebarOrbit {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .sidebar-profile .profile-ring::before {
+      content: "" !important;
+      position: absolute !important;
+      width: 5px !important;
+      height: 5px !important;
+      top: -1px !important;
+      right: 2px !important;
+      left: auto !important;
+      border-radius: 50% !important;
+      background: #00ffaa !important;
+      box-shadow: 0 0 6px #00ffaa, 0 0 10px rgba(0, 255, 170, 0.6) !important;
+    }
+
+    .sidebar-avatar-img {
+      position: relative !important;
+      width: 28px !important;
+      height: 28px !important;
+      min-width: 28px !important;
+      min-height: 28px !important;
+      max-width: 28px !important;
+      max-height: 28px !important;
       border-radius: 50% !important;
       object-fit: cover !important;
       object-position: center !important;
-      border: 1.5px solid #54eaff !important;
-      box-shadow: 0 0 10px rgba(84, 234, 255, 0.45) !important;
+      border: 1.5px solid rgba(84, 234, 255, 0.7) !important;
+      box-shadow: 0 0 8px rgba(84, 234, 255, 0.35) !important;
       display: block !important;
-      margin: 0 auto !important;
+      margin: 0 !important;
+      z-index: 2 !important;
+    }
+
+    .sidebar-profile .profile-icon {
+      position: relative !important;
+      width: 28px !important;
+      height: 28px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 50% !important;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.25), rgba(79, 70, 229, 0.1) 60%) !important;
+      color: #54eaff !important;
+      z-index: 2 !important;
     }
 
     .mobile-avatar-img {
@@ -990,14 +1058,16 @@
         <div class="sidebar-profile">
         
           <button class="icon-btn profile-btn" id="profileBtn" title="Open Profile" type="button">
-            <span class="profile-ring"></span>
+            <div class="sidebar-avatar-box">
+              <span class="profile-ring"></span>
         
-            <span class="profile-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </span>
+              <span class="profile-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+            </div>
         
             <span class="profile-label">Profile</span>
           </button>
@@ -3365,7 +3435,7 @@
   </script>
 
 
-  <script src="./script.js?v=71" defer></script>
+  <script src="./script.js?v=72" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>

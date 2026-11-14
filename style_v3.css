@@ -12652,33 +12652,55 @@ html[data-accent] .title-cursor {
    ORBITAL RING
 --------------------------------------------------------- */
 
+.sidebar-avatar-box {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
 .sidebar-profile .profile-ring {
   position: absolute;
-
-  left: 10px;
-  top: 10px;
-
-  width: 30px;
-  height: 30px;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  left: -2px;
+  top: -2px;
 
   border-radius: 50%;
 
-  border: 1px solid rgba(6, 182, 212, .4);
+  border: 1px dashed rgba(6, 182, 212, .45);
 
-  border-top-color: rgba(255, 255, 255, .7);
-  border-right-color: rgba(139, 92, 246, .7);
+  border-top-color: #54eaff;
+  border-right-color: rgba(139, 92, 246, .85);
 
   box-shadow:
     0 0 7px rgba(6, 182, 212, .25);
 
   pointer-events: none;
 
+  animation: auroraSidebarOrbit 8s linear infinite;
+
   transition: .35s ease;
 
   z-index: 4;
 }
 
-
+@keyframes auroraSidebarOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .sidebar-profile .profile-ring::before {
   content: "";
@@ -12688,16 +12710,17 @@ html[data-accent] .title-cursor {
   width: 5px;
   height: 5px;
 
-  top: -3px;
-  left: 8px;
+  top: -1px;
+  right: 2px;
+  left: auto;
 
   border-radius: 50%;
 
-  background: #67e8f9;
+  background: #00ffaa;
 
   box-shadow:
-    0 0 7px #67e8f9,
-    0 0 14px rgba(6, 182, 212, .8);
+    0 0 7px #00ffaa,
+    0 0 12px rgba(0, 255, 170, .8);
 }
 
 
@@ -13499,15 +13522,21 @@ html[data-accent] .title-cursor {
 }
 
 .sidebar-avatar-img {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
-  border: 1.5px solid #54eaff;
-  box-shadow: 0 0 10px rgba(84, 234, 255, 0.45);
+  border: 1.5px solid rgba(84, 234, 255, 0.7);
+  box-shadow: 0 0 8px rgba(84, 234, 255, 0.35);
   display: block;
-  margin: 0 auto;
+  margin: 0;
+  z-index: 2;
 }
 
 .mobile-avatar-img {

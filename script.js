@@ -27745,31 +27745,28 @@ function restoreSettingsDefaults() {
     // Update Sidebar Profile Avatar Icon
     const sidebarProfileBtn = document.getElementById("profileBtn");
     if (sidebarProfileBtn) {
-      let sidebarAvatar = sidebarProfileBtn.querySelector(".sidebar-avatar-img");
-      const profileIcon = sidebarProfileBtn.querySelector(".profile-icon");
+      const avatarBox = sidebarProfileBtn.querySelector(".sidebar-avatar-box") || sidebarProfileBtn;
+      let sidebarAvatar = avatarBox.querySelector(".sidebar-avatar-img");
+      const profileIcon = avatarBox.querySelector(".profile-icon");
       if (avatarUrl) {
         if (!sidebarAvatar) {
           sidebarAvatar = document.createElement("img");
           sidebarAvatar.className = "sidebar-avatar-img";
           sidebarAvatar.referrerPolicy = "no-referrer";
           sidebarAvatar.crossOrigin = "anonymous";
-          if (profileIcon) {
-            profileIcon.style.display = "none";
-            profileIcon.parentNode.insertBefore(sidebarAvatar, profileIcon);
-          } else {
-            sidebarProfileBtn.prepend(sidebarAvatar);
-          }
+          avatarBox.appendChild(sidebarAvatar);
         }
         sidebarAvatar.src = avatarUrl;
         sidebarAvatar.alt = fullName;
         sidebarAvatar.style.display = "block";
+        if (profileIcon) profileIcon.style.display = "none";
         sidebarAvatar.onerror = function () {
           this.style.display = "none";
-          if (profileIcon) profileIcon.style.display = "inline-block";
+          if (profileIcon) profileIcon.style.display = "flex";
         };
       } else if (profileIcon) {
         if (sidebarAvatar) sidebarAvatar.style.display = "none";
-        profileIcon.style.display = "inline-block";
+        profileIcon.style.display = "flex";
       }
     }
 
