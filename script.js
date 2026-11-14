@@ -27703,7 +27703,7 @@ function restoreSettingsDefaults() {
           console.warn("Google avatar load failed, switching to fallback monogram");
           this.style.display = "none";
           if (fallback) {
-            fallback.textContent = initial;
+            fallback.innerHTML = initial ? `<span class="profile-initial-monogram">${initial}</span>` : `<svg class="avatar-fallback-svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
             fallback.style.display = "flex";
           }
         };
@@ -27711,9 +27711,13 @@ function restoreSettingsDefaults() {
         el.avatar.removeAttribute("src");
         el.avatar.style.display = "none";
         if (fallback) {
-          fallback.textContent = initial;
+          fallback.innerHTML = initial ? `<span class="profile-initial-monogram">${initial}</span>` : `<svg class="avatar-fallback-svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
           fallback.style.display = "flex";
         }
+      }
+
+      if (avatarUrl && typeof window.applyAuroraAvatarsEverywhere === "function") {
+        window.applyAuroraAvatarsEverywhere(avatarUrl);
       }
     }
 
