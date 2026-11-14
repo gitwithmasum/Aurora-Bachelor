@@ -47,7 +47,7 @@
     ========================================================== -->
     <header class="mobile-top-bar" id="mobileTopBar">
       <!-- 1. Left: Brand Logo & Title (AURORA BACHELOR) -->
-      <div class="mobile-brand-box">
+      <div class="mobile-brand-box" id="mobileBrandBox" title="Tap to toggle Navigation Bar">
         <div class="mobile-logo-badge">
           <img src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Logo" class="mobile-logo-img">
         </div>
@@ -80,13 +80,15 @@
     <!-- Part-1: Sidebar -->
     <aside class="sidebar">
 
-      <div class="brand">
+      <div class="brand" id="sidebarBrand" title="Toggle Navigation Bar (Collapse/Expand)">
         <img class="brand-logo" src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo">
 
         <div class="brand-text">
           <strong>AURORA</strong>
           <div class="brand-subtitle">BACHELOR</div>
         </div>
+
+        <span class="brand-collapse-hint" id="brandCollapseHint" title="Toggle Sidebar">◀</span>
       </div>
 
       <nav id="nav">
@@ -2689,10 +2691,67 @@
       }, 400);
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileNavSystem);
-    } else {
+    /* ============================================================
+       AURORA // NAVBAR COLLAPSE ENGINE (DESKTOP & MOBILE)
+    ============================================================ */
+    function initNavbarCollapseSystem() {
+      // 1. Desktop Sidebar Collapse
+      const sidebarBrand = document.getElementById('sidebarBrand') || document.querySelector('.sidebar .brand');
+      if (sidebarBrand) {
+        sidebarBrand.style.cursor = 'pointer';
+
+        // Populate tooltip on nav buttons for collapsed state
+        document.querySelectorAll('#nav .nav-item').forEach(item => {
+          const span = item.querySelector('span');
+          if (span && !item.getAttribute('data-tooltip')) {
+            item.setAttribute('data-tooltip', span.textContent.trim());
+          }
+        });
+
+        // Restore saved desktop preference
+        const savedDesktop = localStorage.getItem('aurora_sidebar_collapsed');
+        if (savedDesktop === 'true') {
+          document.body.classList.add('sidebar-collapsed');
+        }
+
+        sidebarBrand.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+          localStorage.setItem('aurora_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+          setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+          }, 260);
+        });
+      }
+
+      // 2. Mobile Bottom Navbar Collapse
+      const mobileBrandBox = document.getElementById('mobileBrandBox') || document.querySelector('.mobile-brand-box');
+      if (mobileBrandBox) {
+        mobileBrandBox.style.cursor = 'pointer';
+
+        // Restore saved mobile preference
+        const savedMobile = localStorage.getItem('aurora_mobile_nav_collapsed');
+        if (savedMobile === 'true') {
+          document.body.classList.add('mobile-nav-collapsed');
+        }
+
+        mobileBrandBox.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isCollapsed = document.body.classList.toggle('mobile-nav-collapsed');
+          localStorage.setItem('aurora_mobile_nav_collapsed', isCollapsed ? 'true' : 'false');
+        });
+      }
+    }
+
+    function initNavSystems() {
       initMobileNavSystem();
+      initNavbarCollapseSystem();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initNavSystems);
+    } else {
+      initNavSystems();
     }
   </script>
 </body>
