@@ -81,14 +81,21 @@
     <aside class="sidebar">
 
       <div class="brand" id="sidebarBrand" title="Toggle Navigation Bar (Collapse/Expand)">
-        <img class="brand-logo" src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo">
+        <div class="brand-logo-frame">
+          <img class="brand-logo" src="./Assets/AURORA BACHELOR LOGO.png" alt="Aurora Bachelor Logo">
+          <span class="brand-reactor-ring"></span>
+        </div>
 
         <div class="brand-text">
           <strong>AURORA</strong>
           <div class="brand-subtitle">BACHELOR</div>
         </div>
 
-        <span class="brand-collapse-hint" id="brandCollapseHint" title="Toggle Sidebar">◀</span>
+        <div class="brand-collapse-hint" id="brandCollapseHint" title="Toggle Sidebar">
+          <span class="cyber-bracket">[</span>
+          <span class="cyber-arrow">◀</span>
+          <span class="cyber-bracket">]</span>
+        </div>
       </div>
 
       <nav id="nav">
@@ -2712,15 +2719,23 @@
         const savedDesktop = localStorage.getItem('aurora_sidebar_collapsed');
         if (savedDesktop === 'true') {
           document.body.classList.add('sidebar-collapsed');
+          const hintArrow = document.querySelector('#brandCollapseHint .cyber-arrow');
+          if (hintArrow) {
+            hintArrow.textContent = '▶';
+          }
         }
 
         sidebarBrand.addEventListener('click', (e) => {
           e.preventDefault();
           const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
           localStorage.setItem('aurora_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+          const hintArrow = document.querySelector('#brandCollapseHint .cyber-arrow');
+          if (hintArrow) {
+            hintArrow.textContent = isCollapsed ? '▶' : '◀';
+          }
           setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
-          }, 260);
+          }, 130);
         });
       }
 

@@ -25206,146 +25206,257 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
 }
 
 /* ============================================================
-   AURORA // NAVBAR COLLAPSE SYSTEM (DESKTOP & MOBILE)
+   AURORA // ULTRA-FAST FUTURISTIC NAVBAR COLLAPSE SYSTEM
 ============================================================ */
 
-/* Desktop Sidebar Smooth Transition */
+/* 1. Fast GPU-Accelerated Desktop Transitions */
 .sidebar {
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), padding 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: width 0.12s cubic-bezier(0.1, 0.9, 0.2, 1), padding 0.12s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  will-change: width, padding;
+  transform: translateZ(0);
 }
 
 .main {
-  transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: margin-left 0.12s cubic-bezier(0.1, 0.9, 0.2, 1), width 0.12s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  will-change: margin-left, width;
+  transform: translateZ(0);
 }
 
 .sidebar .brand {
   cursor: pointer;
   user-select: none;
-  border-radius: 12px;
-  transition: background 0.2s ease, transform 0.2s ease;
+  border-radius: 14px;
+  transition: background 0.12s ease, transform 0.12s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .sidebar .brand:hover {
-  background: rgba(84, 234, 255, 0.05);
+  background: rgba(84, 234, 255, 0.06);
 }
 
 .sidebar .brand:active {
   transform: scale(0.98);
 }
 
-.brand-collapse-hint {
-  margin-left: auto;
-  font-size: 11px;
-  color: #64748b;
-  width: 22px;
-  height: 22px;
+/* Futuristic Brand Reactor Ring & Frame */
+.brand-logo-frame {
+  position: relative;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  border: 1px solid rgba(84, 234, 255, 0.12);
-  background: rgba(5, 14, 30, 0.4);
-  transition: all 0.2s ease;
-  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.brand-reactor-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px dashed rgba(84, 234, 255, 0.45);
+  pointer-events: none;
+  animation: rotateReactor 10s linear infinite;
+  opacity: 0.75;
+  transition: all 0.15s ease;
+}
+
+.brand:hover .brand-reactor-ring {
+  border-color: #54eaff;
+  border-style: solid;
+  box-shadow: 0 0 14px rgba(84, 234, 255, 0.65), inset 0 0 8px rgba(84, 234, 255, 0.35);
+  opacity: 1;
+}
+
+@keyframes rotateReactor {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Futuristic Cybernetic Collapse Hint Badge */
+.brand-collapse-hint {
+  margin-left: auto;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(6, 18, 38, 0.85);
+  border: 1px solid rgba(84, 234, 255, 0.25);
+  border-radius: 8px;
+  padding: 3px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset 0 0 6px rgba(84, 234, 255, 0.1);
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.brand-collapse-hint .cyber-bracket {
+  color: #54eaff;
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.brand-collapse-hint .cyber-arrow {
+  color: #e2f1fd;
+  font-size: 9px;
+  transition: transform 0.12s ease, color 0.12s ease;
 }
 
 .brand:hover .brand-collapse-hint {
+  border-color: #54eaff;
+  background: rgba(10, 26, 52, 0.95);
+  box-shadow: 0 0 15px rgba(84, 234, 255, 0.45), inset 0 0 8px rgba(84, 234, 255, 0.25);
+}
+
+.brand:hover .brand-collapse-hint .cyber-bracket {
   opacity: 1;
+  text-shadow: 0 0 6px #54eaff;
+}
+
+.brand:hover .brand-collapse-hint .cyber-arrow {
   color: #54eaff;
-  border-color: rgba(84, 234, 255, 0.4);
-  box-shadow: 0 0 10px rgba(84, 234, 255, 0.25);
-  transform: translateX(-2px);
+  transform: scale(1.15);
+  text-shadow: 0 0 6px #54eaff;
 }
 
 .brand-text {
-  transition: opacity 0.2s ease, max-width 0.25s ease, transform 0.2s ease;
+  transition: opacity 0.12s ease, max-width 0.12s ease;
   max-width: 180px;
   overflow: hidden;
   white-space: nowrap;
 }
 
-/* Desktop Collapsed Sidebar State (Min-width: 769px) */
+/* ============================================================
+   DESKTOP COLLAPSED SIDEBAR (MIN-WIDTH: 769px)
+============================================================ */
 @media (min-width: 769px) {
   body.sidebar-collapsed .sidebar {
-    width: 72px !important;
-    padding: 20px 8px !important;
+    width: 70px !important;
+    padding: 16px 6px !important;
+    background: rgba(3, 9, 20, 0.88) !important;
+    backdrop-filter: blur(25px) !important;
+    border-right: 1px solid rgba(84, 234, 255, 0.25) !important;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.65), inset -1px 0 0 rgba(84, 234, 255, 0.15) !important;
   }
 
   body.sidebar-collapsed .sidebar .brand {
-    padding: 4px 0 22px !important;
+    padding: 6px 0 18px !important;
     justify-content: center !important;
-    gap: 0 !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  body.sidebar-collapsed .brand-logo-frame {
+    width: 44px !important;
+    height: 44px !important;
   }
 
   body.sidebar-collapsed .brand-logo {
-    width: 44px !important;
-    height: 44px !important;
-    margin: 0 auto !important;
-    filter: drop-shadow(0 0 8px rgba(84, 234, 255, 0.55)) !important;
+    width: 40px !important;
+    height: 40px !important;
+    filter: drop-shadow(0 0 10px rgba(84, 234, 255, 0.65)) !important;
   }
 
-  body.sidebar-collapsed .brand-text {
-    opacity: 0 !important;
-    max-width: 0 !important;
-    pointer-events: none !important;
-    transform: translateX(-10px);
+  body.sidebar-collapsed .brand-reactor-ring {
+    opacity: 1 !important;
+    border-color: rgba(84, 234, 255, 0.65) !important;
+    box-shadow: 0 0 12px rgba(84, 234, 255, 0.45) !important;
   }
 
   body.sidebar-collapsed .brand-collapse-hint {
+    padding: 2px 4px !important;
+    font-size: 9px !important;
+    background: rgba(6, 18, 38, 0.9) !important;
+    border-color: rgba(84, 234, 255, 0.45) !important;
+    margin: 0 auto !important;
+    display: inline-flex !important;
+    opacity: 0.9 !important;
+  }
+
+  body.sidebar-collapsed .brand-collapse-hint .cyber-arrow {
+    transform: rotate(180deg);
+  }
+
+  body.sidebar-collapsed .brand-text {
     display: none !important;
   }
 
   body.sidebar-collapsed #nav {
     overflow-x: hidden !important;
-    padding: 0 2px !important;
+    padding: 2px !important;
+    gap: 8px !important;
   }
 
+  /* Cybernetic icon capsules */
   body.sidebar-collapsed #nav .nav-item {
     justify-content: center !important;
-    padding: 12px 0 !important;
+    padding: 11px 0 !important;
     gap: 0 !important;
     font-size: 19px !important;
     position: relative !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     text-align: center !important;
+    background: rgba(84, 234, 255, 0.03) !important;
+    border: 1px solid rgba(84, 234, 255, 0.08) !important;
+    transition: all 0.12s cubic-bezier(0, 0, 0.2, 1) !important;
+  }
+
+  body.sidebar-collapsed #nav .nav-item:hover {
+    background: rgba(84, 234, 255, 0.12) !important;
+    border-color: rgba(84, 234, 255, 0.45) !important;
+    box-shadow: 0 0 14px rgba(84, 234, 255, 0.3) !important;
+    transform: scale(1.08) !important;
+  }
+
+  /* Glowing Reactor Core Active Item */
+  body.sidebar-collapsed #nav .nav-item.active {
+    background: linear-gradient(135deg, rgba(84, 234, 255, 0.24), rgba(183, 124, 255, 0.18)) !important;
+    border: 1px solid #54eaff !important;
+    box-shadow: 0 0 18px rgba(84, 234, 255, 0.5), inset 0 0 10px rgba(84, 234, 255, 0.3) !important;
+    color: #54eaff !important;
   }
 
   body.sidebar-collapsed #nav .nav-item span {
     display: none !important;
   }
 
-  /* Tooltip on hover in collapsed mode */
+  /* Ultra-Fast Holographic HUD Tooltip (80ms snappy popup) */
   body.sidebar-collapsed #nav .nav-item:hover::after {
-    content: attr(data-tooltip);
+    content: "SYS // " attr(data-tooltip);
     position: absolute;
     left: calc(100% + 14px);
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(5, 14, 30, 0.96);
-    color: #e2f1fd;
-    border: 1px solid rgba(84, 234, 255, 0.35);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 10px rgba(84, 234, 255, 0.2);
-    pointer-events: none;
-    z-index: 9999;
-    animation: auroraTooltipFade 0.14s ease-out;
+    background: rgba(3, 10, 24, 0.96) !important;
+    color: #54eaff !important;
+    border: 1px solid rgba(84, 234, 255, 0.55) !important;
+    padding: 7px 14px !important;
+    border-radius: 8px !important;
+    font-family: 'SF Mono', Consolas, monospace !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.85), 0 0 16px rgba(84, 234, 255, 0.35) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    animation: auroraFastTooltip 0.08s cubic-bezier(0, 0, 0.2, 1) !important;
   }
 
-  @keyframes auroraTooltipFade {
-    from { opacity: 0; transform: translateY(-50%) translateX(-4px); }
-    to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  @keyframes auroraFastTooltip {
+    from { opacity: 0; transform: translateY(-50%) translateX(-6px) scale(0.95); }
+    to { opacity: 1; transform: translateY(-50%) translateX(0) scale(1); }
   }
 
   body.sidebar-collapsed .sidebar-profile {
     justify-content: center !important;
-    padding: 10px 0 !important;
+    padding: 8px 0 !important;
   }
 
   body.sidebar-collapsed .sidebar-profile .profile-label {
@@ -25358,44 +25469,66 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
     padding: 0 !important;
     justify-content: center !important;
     margin: 0 auto !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(84, 234, 255, 0.15) !important;
+    background: rgba(84, 234, 255, 0.04) !important;
+    transition: all 0.12s ease !important;
+  }
+
+  body.sidebar-collapsed .sidebar-profile .profile-btn:hover {
+    border-color: #54eaff !important;
+    box-shadow: 0 0 14px rgba(84, 234, 255, 0.35) !important;
+    transform: scale(1.08) !important;
   }
 
   body.sidebar-collapsed .main {
-    margin-left: 72px !important;
-    width: calc(100% - 72px) !important;
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
   }
 }
 
-/* Mobile Bottom Navbar Collapse (Max-width: 768px) */
+/* ============================================================
+   MOBILE FUTURISTIC BOTTOM NAVBAR COLLAPSE (MAX-WIDTH: 768px)
+============================================================ */
 .mobile-brand-box {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.16s ease, filter 0.16s ease;
+  transition: transform 0.1s ease !important;
+  position: relative;
 }
 
 .mobile-brand-box:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
 @media (max-width: 768px) {
   .mobile-bottom-nav {
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease !important;
+    transition: transform 0.13s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.1s ease !important;
+    will-change: transform, opacity;
+    transform: translateZ(0);
   }
 
   body.mobile-nav-collapsed .mobile-bottom-nav {
-    transform: translateY(calc(100% + 25px)) !important;
+    transform: translateY(calc(100% + 28px)) !important;
     opacity: 0 !important;
     pointer-events: none !important;
   }
 
   body.mobile-nav-collapsed .main {
     padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-    transition: padding-bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: padding-bottom 0.13s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
   }
 
+  /* High-tech pulsing indicator on mobile logo when navbar is collapsed */
   body.mobile-nav-collapsed .mobile-logo-badge {
-    box-shadow: 0 0 14px rgba(84, 234, 255, 0.6) !important;
-    border-color: rgba(84, 234, 255, 0.9) !important;
+    box-shadow: 0 0 18px rgba(84, 234, 255, 0.8), 0 0 35px rgba(183, 124, 255, 0.4) !important;
+    border-color: #54eaff !important;
+    animation: mobileReactorPulse 1.6s infinite alternate ease-in-out !important;
+  }
+
+  @keyframes mobileReactorPulse {
+    0% { box-shadow: 0 0 10px rgba(84, 234, 255, 0.5); transform: scale(1); }
+    100% { box-shadow: 0 0 20px rgba(84, 234, 255, 0.9), 0 0 35px rgba(183, 124, 255, 0.5); transform: scale(1.04); }
   }
 }
