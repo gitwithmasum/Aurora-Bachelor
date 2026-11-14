@@ -158,71 +158,83 @@
         </div>
 
 
-        <div class="top-actions">
+        <div class="top-actions-wrapper" id="topActionsWrapper">
+          <button type="button" class="hud-restore-pill" id="hudRestorePill" title="Expand HUD Bar (Slide Down)" aria-label="Expand HUD Bar">
+            <span class="hud-restore-dot" id="hudRestoreDot"></span>
+            <span class="hud-restore-title">HUD CORE</span>
+            <span class="hud-restore-arrow">▼</span>
+          </button>
 
-          <!-- SYSTEM STATUS -->
-         <!-- AURORA CLOUD SYNC HUD -->
+          <div class="top-actions" id="topActionsBar">
 
-          <div
-            class="hud-status aurora-sync-hud"
-            id="auroraSyncHud"
-            title="Aurora Cloud Sync"
-            >
+            <!-- SYSTEM STATUS -->
+           <!-- AURORA CLOUD SYNC HUD -->
 
-            <span
-              class="status-orb aurora-sync-orb"
-              id="auroraSyncOrb"
-            ></span>
+            <div
+              class="hud-status aurora-sync-hud"
+              id="auroraSyncHud"
+              title="Aurora Cloud Sync"
+              >
+
+              <span
+                class="status-orb aurora-sync-orb"
+                id="auroraSyncOrb"
+              ></span>
 
 
-            <div class="aurora-sync-info">
+              <div class="aurora-sync-info">
 
-              <div class="aurora-sync-head">
+                <div class="aurora-sync-head">
 
-                <span class="status-label">
-                  CLOUD CORE
-                </span>
+                  <span class="status-label">
+                    CLOUD CORE
+                  </span>
+
+                  <span
+                    class="aurora-sync-revision"
+                    id="auroraSyncRevision"
+                  >
+                    REV —
+                  </span>
+
+                </div>
+
+
+                <strong id="auroraSyncState">
+                  CONNECTING
+                </strong>
+
 
                 <span
-                  class="aurora-sync-revision"
-                  id="auroraSyncRevision"
+                  class="aurora-sync-meta"
+                  id="auroraSyncMeta"
                 >
-                  REV —
+                  Initializing cloud link...
                 </span>
 
               </div>
 
-
-              <strong id="auroraSyncState">
-                CONNECTING
-              </strong>
+            </div>
 
 
-              <span
-                class="aurora-sync-meta"
-                id="auroraSyncMeta"
-              >
-                Initializing cloud link...
+
+           
+
+            <!-- MONTH CONTROL -->
+
+            <div class="month-select" id="monthSelect">
+
+              <span class="month-label">
+                <i></i>
+                ACTIVE CYCLE
               </span>
 
             </div>
 
-          </div>
-
-
-
-         
-
-          <!-- MONTH CONTROL -->
-
-          <div class="month-select" id="monthSelect">
-
-            <span class="month-label">
-              <i></i>
-              ACTIVE CYCLE
-            </span>
-
-          </div>
+            <!-- HUD COLLAPSE TOGGLE BUTTON (Slide Up) -->
+            <button type="button" class="hud-collapse-btn" id="hudCollapseBtn" title="Collapse HUD Bar (Slide Up)" aria-label="Collapse HUD Bar">
+              <span class="hud-collapse-arrow">▲</span>
+            </button>
         
 
 
@@ -293,6 +305,8 @@
           </div>
 
         </div>
+
+      </div>
 
       </header>
 
@@ -2741,6 +2755,49 @@
           const isCollapsed = document.body.classList.toggle('mobile-nav-collapsed');
           localStorage.setItem('aurora_mobile_nav_collapsed', isCollapsed ? 'true' : 'false');
         });
+      }
+
+      // 3. Desktop Header HUD Bar Slide Collapse (Slide Up / Down)
+      const hudCollapseBtn = document.getElementById('hudCollapseBtn');
+      const hudRestorePill = document.getElementById('hudRestorePill');
+      const hudRestoreDot = document.getElementById('hudRestoreDot');
+      const syncOrb = document.getElementById('auroraSyncOrb');
+
+      if (hudCollapseBtn && hudRestorePill) {
+        // Restore saved preference
+        const savedHud = localStorage.getItem('aurora_hud_collapsed');
+        if (savedHud === 'true') {
+          document.body.classList.add('top-actions-collapsed');
+        }
+
+        hudCollapseBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.body.classList.add('top-actions-collapsed');
+          localStorage.setItem('aurora_hud_collapsed', 'true');
+        });
+
+        hudRestorePill.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.body.classList.remove('top-actions-collapsed');
+          localStorage.setItem('aurora_hud_collapsed', 'false');
+        });
+
+        // Sync live dot status to restore pill
+        if (syncOrb && hudRestoreDot) {
+          const syncPillDot = () => {
+            const isSynced = document.getElementById('auroraSyncHud')?.classList.contains('sync-synced');
+            const isSyncing = document.getElementById('auroraSyncHud')?.classList.contains('sync-syncing');
+            if (isSyncing) {
+              hudRestoreDot.style.background = '#f59e0b';
+              hudRestoreDot.style.boxShadow = '0 0 8px #f59e0b';
+            } else if (isSynced) {
+              hudRestoreDot.style.background = '#10b981';
+              hudRestoreDot.style.boxShadow = '0 0 8px #10b981';
+            }
+          };
+          setInterval(syncPillDot, 1000);
+          syncPillDot();
+        }
       }
     }
 
