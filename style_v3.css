@@ -25474,127 +25474,181 @@ body>.weekly-overlay>.weekly-form{position:relative!important;flex:0 1 520px!imp
    AURORA // HEADER TOP ACTIONS SLIDE COLLAPSE (SLIDE UP / DOWN)
 ============================================================ */
 
-.top-actions-wrapper {
-  position: relative;
+.top-hud-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  gap: 10px;
+  position: relative;
   justify-content: flex-end;
 }
 
 .top-actions {
-  transition: transform 0.13s cubic-bezier(0.1, 0.9, 0.2, 1), 
-              opacity 0.11s ease, 
-              max-height 0.13s cubic-bezier(0.1, 0.9, 0.2, 1),
-              margin 0.13s ease !important;
-  transform-origin: top center;
-  will-change: transform, opacity, max-height;
+  transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1), 
+              opacity 0.14s ease, 
+              max-width 0.16s cubic-bezier(0.1, 0.9, 0.2, 1),
+              margin 0.16s ease,
+              padding 0.16s ease !important;
+  transform-origin: top right;
+  will-change: transform, opacity, max-width;
   transform: translateZ(0);
-  max-height: 120px;
+  max-width: 1400px;
+  opacity: 1;
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
 }
 
-/* Collapse Toggle Button inside HUD capsule */
-.hud-collapse-btn {
-  background: rgba(84, 234, 255, 0.06);
-  border: 1px solid rgba(84, 234, 255, 0.2);
-  color: #94a3b8;
-  border-radius: 10px;
-  width: 28px;
-  height: 38px;
-  display: flex;
+.top-actions > * {
+  flex-shrink: 0 !important;
+}
+
+/* =========================================================
+   AURORA // ULTRA-FUTURISTIC HUD CYBER TOGGLE BUTTON
+========================================================= */
+.hud-cyber-toggle {
+  position: relative;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.12s ease;
-  font-size: 11px;
-  padding: 0;
-  flex-shrink: 0;
-  user-select: none;
-}
-
-.hud-collapse-btn:hover {
-  background: rgba(84, 234, 255, 0.18);
-  border-color: #54eaff;
-  color: #54eaff;
-  box-shadow: 0 0 12px rgba(84, 234, 255, 0.45);
-  transform: translateY(-2px);
-}
-
-.hud-collapse-btn:active {
-  transform: scale(0.92);
-}
-
-/* Floating Restore Pill when HUD is collapsed */
-.hud-restore-pill {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  background: rgba(4, 12, 28, 0.94);
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(8, 22, 45, 0.92) 0%, rgba(13, 33, 64, 0.85) 100%);
   border: 1px solid rgba(84, 234, 255, 0.45);
-  border-radius: 999px;
-  padding: 6px 14px;
+  border-radius: 12px;
   color: #54eaff;
-  font-family: 'SF Mono', Consolas, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 14px rgba(84, 234, 255, 0.25);
+  box-shadow: 0 0 16px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.14);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  transition: all 0.12s ease;
+  transition: all 0.14s cubic-bezier(0.1, 0.9, 0.2, 1);
   user-select: none;
-  margin-bottom: 4px;
+  flex-shrink: 0;
+  overflow: hidden;
+  outline: none;
 }
 
-.hud-restore-pill:hover {
-  background: rgba(8, 22, 48, 0.98);
-  border-color: #54eaff;
-  box-shadow: 0 0 18px rgba(84, 234, 255, 0.55), 0 4px 25px rgba(0, 0, 0, 0.8);
-  transform: translateY(2px);
+.hud-cyber-toggle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #54eaff 40%, #b77cff 80%, transparent);
+  box-shadow: 0 0 8px #54eaff;
+  border-radius: 999px;
+  transition: all 0.2s ease;
 }
 
-.hud-restore-dot {
-  width: 7px;
-  height: 7px;
+.hud-cyber-led {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
-  animation: pulseRestoreDot 1.4s infinite alternate ease-in-out;
+  background: #54eaff;
+  box-shadow: 0 0 8px #54eaff, 0 0 2px #fff;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-@keyframes pulseRestoreDot {
-  from { opacity: 0.6; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #10b981; }
-}
-
-.hud-restore-arrow {
+.hud-cyber-code {
+  font-family: 'Orbitron', 'SF Mono', Consolas, monospace;
   font-size: 10px;
-  transition: transform 0.12s ease;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #54eaff;
+  text-shadow: 0 0 8px rgba(84, 234, 255, 0.6);
+  line-height: 1;
+  display: inline-block;
 }
 
-.hud-restore-pill:hover .hud-restore-arrow {
-  transform: translateY(2px);
+.hud-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #54eaff;
+  filter: drop-shadow(0 0 6px #54eaff);
+  transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1);
+  line-height: 1;
 }
 
-/* Collapsed State: Top actions slides up */
-body.top-actions-collapsed .top-actions {
-  transform: translateY(-110%) scaleY(0.7) !important;
+.hud-toggle-svg {
+  display: block;
+  transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.hud-cyber-toggle:hover {
+  background: linear-gradient(135deg, rgba(12, 32, 68, 0.96) 0%, rgba(18, 48, 92, 0.9) 100%);
+  border-color: #54eaff;
+  box-shadow: 0 0 24px rgba(84, 234, 255, 0.6), inset 0 0 16px rgba(84, 234, 255, 0.3);
+  transform: translateY(-1px) scale(1.03);
+}
+
+.hud-cyber-toggle:hover::before {
+  left: 4%;
+  right: 4%;
+  box-shadow: 0 0 12px #54eaff, 0 0 4px #fff;
+}
+
+.hud-cyber-toggle:hover .hud-toggle-icon {
+  transform: translateY(-1px);
+}
+
+.hud-cyber-toggle:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px rgba(84, 234, 255, 0.4);
+}
+
+/* ==========================================================
+   WHEN TOP HUD IS COLLAPSED: SLIDES UP & TUCKS INTO CEILING
+========================================================== */
+body.top-hud-collapsed .top-actions,
+html.top-hud-collapsed body .top-actions {
+  transform: translateY(-85px) scale(0.9) !important;
   opacity: 0 !important;
-  pointer-events: none !important;
-  max-height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  max-width: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   border-color: transparent !important;
   box-shadow: none !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
 }
 
-body.top-actions-collapsed .hud-restore-pill {
-  display: inline-flex !important;
-  animation: hudPillSlideDown 0.14s cubic-bezier(0.1, 0.9, 0.2, 1);
+/* When collapsed: Toggle button stays docked on the right and pulses */
+body.top-hud-collapsed .hud-cyber-toggle,
+html.top-hud-collapsed body .hud-cyber-toggle {
+  border-color: rgba(84, 234, 255, 0.7) !important;
+  box-shadow: 0 0 18px rgba(84, 234, 255, 0.5), inset 0 0 12px rgba(84, 234, 255, 0.25) !important;
+  animation: cyberHudPulse 2s infinite alternate ease-in-out;
 }
 
-@keyframes hudPillSlideDown {
-  from { opacity: 0; transform: translateY(-8px) scale(0.92); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+body.top-hud-collapsed .hud-cyber-toggle .hud-toggle-icon,
+html.top-hud-collapsed body .hud-cyber-toggle .hud-toggle-icon {
+  transform: rotate(180deg);
+}
+
+body.top-hud-collapsed .hud-cyber-toggle:hover .hud-toggle-icon,
+html.top-hud-collapsed body .hud-cyber-toggle:hover .hud-toggle-icon {
+  transform: rotate(180deg) translateY(-1px);
+}
+
+body.top-hud-collapsed .hud-cyber-toggle .hud-cyber-led,
+html.top-hud-collapsed body .hud-cyber-toggle .hud-cyber-led {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981, 0 0 2px #fff;
+}
+
+@keyframes cyberHudPulse {
+  0% { box-shadow: 0 0 12px rgba(84, 234, 255, 0.35); }
+  100% { box-shadow: 0 0 24px rgba(84, 234, 255, 0.8), inset 0 0 14px rgba(84, 234, 255, 0.35); }
+}
+
+@media (max-width: 720px) {
+  .hud-cyber-toggle {
+    display: none !important;
+  }
 }

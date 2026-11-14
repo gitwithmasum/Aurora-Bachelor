@@ -27,9 +27,217 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=26">
-  <link rel="stylesheet" href="./themes.css?v=47">
+  <link rel="stylesheet" href="./style_v3.css?v=29">
+  <link rel="stylesheet" href="./themes.css?v=48">
 
+  <style id="aurora-hud-collapse-styles">
+    .top-hud-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      justify-content: flex-end;
+      min-height: 48px;
+    }
+
+    .top-actions {
+      transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1),
+                  opacity 0.14s ease,
+                  max-width 0.16s cubic-bezier(0.1, 0.9, 0.2, 1),
+                  margin 0.16s ease,
+                  padding 0.16s ease !important;
+      transform-origin: top right;
+      will-change: transform, opacity, max-width;
+      transform: translateZ(0);
+      max-width: 1400px;
+      opacity: 1;
+      white-space: nowrap !important;
+      flex-wrap: nowrap !important;
+    }
+
+    .top-actions > * {
+      flex-shrink: 0 !important;
+    }
+
+    /* =========================================================
+       AURORA // ULTRA-FUTURISTIC HUD CYBER TOGGLE BUTTON
+    ========================================================= */
+    .hud-cyber-toggle {
+      position: relative;
+      height: 44px;
+      min-width: 44px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      background: linear-gradient(135deg, rgba(8, 22, 45, 0.92) 0%, rgba(13, 33, 64, 0.85) 100%);
+      border: 1px solid rgba(84, 234, 255, 0.45);
+      border-radius: 12px;
+      color: #54eaff;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(84, 234, 255, 0.25), inset 0 0 12px rgba(84, 234, 255, 0.14);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.14s cubic-bezier(0.1, 0.9, 0.2, 1);
+      user-select: none;
+      flex-shrink: 0;
+      overflow: hidden;
+      outline: none;
+    }
+
+    .hud-cyber-toggle::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #54eaff 40%, #b77cff 80%, transparent);
+      box-shadow: 0 0 8px #54eaff;
+      border-radius: 999px;
+      transition: all 0.2s ease;
+    }
+
+    .hud-cyber-led {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #54eaff;
+      box-shadow: 0 0 8px #54eaff, 0 0 2px #fff;
+      display: inline-block;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .hud-cyber-code {
+      font-family: 'Orbitron', 'SF Mono', Consolas, monospace;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #54eaff;
+      text-shadow: 0 0 8px rgba(84, 234, 255, 0.6);
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .hud-toggle-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #54eaff;
+      filter: drop-shadow(0 0 6px #54eaff);
+      transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1);
+      line-height: 1;
+    }
+
+    .hud-toggle-svg {
+      display: block;
+      transition: transform 0.16s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .hud-cyber-toggle:hover {
+      background: linear-gradient(135deg, rgba(12, 32, 68, 0.96) 0%, rgba(18, 48, 92, 0.9) 100%);
+      border-color: #54eaff;
+      box-shadow: 0 0 24px rgba(84, 234, 255, 0.6), inset 0 0 16px rgba(84, 234, 255, 0.3);
+      transform: translateY(-1px) scale(1.03);
+    }
+
+    .hud-cyber-toggle:hover::before {
+      left: 4%;
+      right: 4%;
+      box-shadow: 0 0 12px #54eaff, 0 0 4px #fff;
+    }
+
+    .hud-cyber-toggle:hover .hud-toggle-icon {
+      transform: translateY(-1px);
+    }
+
+    .hud-cyber-toggle:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 10px rgba(84, 234, 255, 0.4);
+    }
+
+    /* =========================================================
+       WHEN TOP HUD IS COLLAPSED: SLIDES UP SMOOTHLY INTO CEILING
+    ========================================================= */
+    body.top-hud-collapsed .top-actions,
+    html.top-hud-collapsed body .top-actions {
+      transform: translateY(-85px) scale(0.9) !important;
+      opacity: 0 !important;
+      max-width: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
+    }
+
+    body.top-hud-collapsed .hud-cyber-toggle,
+    html.top-hud-collapsed body .hud-cyber-toggle {
+      border-color: rgba(84, 234, 255, 0.7) !important;
+      box-shadow: 0 0 18px rgba(84, 234, 255, 0.5), inset 0 0 12px rgba(84, 234, 255, 0.25) !important;
+      animation: cyberHudPulse 2s infinite alternate ease-in-out;
+    }
+
+    body.top-hud-collapsed .hud-cyber-toggle .hud-toggle-icon,
+    html.top-hud-collapsed body .hud-cyber-toggle .hud-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    body.top-hud-collapsed .hud-cyber-toggle:hover .hud-toggle-icon,
+    html.top-hud-collapsed body .hud-cyber-toggle:hover .hud-toggle-icon {
+      transform: rotate(180deg) translateY(-1px);
+    }
+
+    body.top-hud-collapsed .hud-cyber-toggle .hud-cyber-led,
+    html.top-hud-collapsed body .hud-cyber-toggle .hud-cyber-led {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981, 0 0 2px #fff;
+    }
+
+    @keyframes cyberHudPulse {
+      0% { box-shadow: 0 0 12px rgba(84, 234, 255, 0.35); }
+      100% { box-shadow: 0 0 24px rgba(84, 234, 255, 0.8), inset 0 0 14px rgba(84, 234, 255, 0.35); }
+    }
+
+    @media (max-width: 720px) {
+      .hud-cyber-toggle {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <script id="aurora-top-hud-init">
+    (function() {
+      try {
+        if (localStorage.getItem('aurora_top_hud_collapsed') === 'true') {
+          document.documentElement.classList.add('top-hud-collapsed');
+          if (document.body) document.body.classList.add('top-hud-collapsed');
+        }
+      } catch (e) {}
+    })();
+
+    window.toggleAuroraTopHud = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const isCollapsed = document.body.classList.toggle('top-hud-collapsed');
+      document.documentElement.classList.toggle('top-hud-collapsed', isCollapsed);
+      try {
+        localStorage.setItem('aurora_top_hud_collapsed', isCollapsed ? 'true' : 'false');
+      } catch (err) {}
+      const btn = document.getElementById('hudCyberToggle');
+      if (btn) {
+        btn.setAttribute('title', isCollapsed ? 'Expand HUD Bar (Slide Down)' : 'Collapse HUD Bar (Slide Up)');
+        btn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      }
+    };
+  </script>
 </head>
 
 <body>
@@ -158,13 +366,7 @@
         </div>
 
 
-        <div class="top-actions-wrapper" id="topActionsWrapper">
-          <button type="button" class="hud-restore-pill" id="hudRestorePill" title="Expand HUD Bar (Slide Down)" aria-label="Expand HUD Bar">
-            <span class="hud-restore-dot" id="hudRestoreDot"></span>
-            <span class="hud-restore-title">HUD CORE</span>
-            <span class="hud-restore-arrow">▼</span>
-          </button>
-
+        <div class="top-hud-container" id="topHudContainer">
           <div class="top-actions" id="topActionsBar">
 
             <!-- SYSTEM STATUS -->
@@ -230,13 +432,6 @@
               </span>
 
             </div>
-
-            <!-- HUD COLLAPSE TOGGLE BUTTON (Slide Up) -->
-            <button type="button" class="hud-collapse-btn" id="hudCollapseBtn" title="Collapse HUD Bar (Slide Up)" aria-label="Collapse HUD Bar">
-              <span class="hud-collapse-arrow">▲</span>
-            </button>
-        
-
 
           <!-- =========================================================
                          AURORA // NOTIFICATION CENTER
@@ -305,6 +500,17 @@
           </div>
 
         </div>
+
+        <!-- FUTURISTIC HUD COLLAPSE TOGGLE (ON THE RIGHT) -->
+        <button type="button" class="hud-cyber-toggle" id="hudCyberToggle" onclick="toggleAuroraTopHud(event)" title="Collapse HUD Bar (Slide Up)" aria-label="Toggle HUD Bar" aria-expanded="true">
+          <span class="hud-cyber-led" aria-hidden="true"></span>
+          <span class="hud-cyber-code">HUD</span>
+          <span class="hud-toggle-icon" aria-hidden="true">
+            <svg class="hud-toggle-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </span>
+        </button>
 
       </div>
 
@@ -2758,45 +2964,46 @@
       }
 
       // 3. Desktop Header HUD Bar Slide Collapse (Slide Up / Down)
-      const hudCollapseBtn = document.getElementById('hudCollapseBtn');
-      const hudRestorePill = document.getElementById('hudRestorePill');
-      const hudRestoreDot = document.getElementById('hudRestoreDot');
-      const syncOrb = document.getElementById('auroraSyncOrb');
+      const hudToggle = document.getElementById('hudCyberToggle');
+      const topActionsBar = document.getElementById('topActionsBar');
 
-      if (hudCollapseBtn && hudRestorePill) {
+      if (hudToggle) {
         // Restore saved preference
-        const savedHud = localStorage.getItem('aurora_hud_collapsed');
-        if (savedHud === 'true') {
-          document.body.classList.add('top-actions-collapsed');
+        const isCollapsed = localStorage.getItem('aurora_top_hud_collapsed') === 'true';
+        if (isCollapsed) {
+          document.body.classList.add('top-hud-collapsed');
+          document.documentElement.classList.add('top-hud-collapsed');
+          hudToggle.setAttribute('title', 'Expand HUD Bar (Slide Down)');
+          hudToggle.setAttribute('aria-expanded', 'false');
+        } else {
+          document.body.classList.remove('top-hud-collapsed');
+          document.documentElement.classList.remove('top-hud-collapsed');
+          hudToggle.setAttribute('title', 'Collapse HUD Bar (Slide Up)');
+          hudToggle.setAttribute('aria-expanded', 'true');
         }
 
-        hudCollapseBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          document.body.classList.add('top-actions-collapsed');
-          localStorage.setItem('aurora_hud_collapsed', 'true');
-        });
-
-        hudRestorePill.addEventListener('click', (e) => {
-          e.stopPropagation();
-          document.body.classList.remove('top-actions-collapsed');
-          localStorage.setItem('aurora_hud_collapsed', 'false');
-        });
-
-        // Sync live dot status to restore pill
-        if (syncOrb && hudRestoreDot) {
-          const syncPillDot = () => {
-            const isSynced = document.getElementById('auroraSyncHud')?.classList.contains('sync-synced');
-            const isSyncing = document.getElementById('auroraSyncHud')?.classList.contains('sync-syncing');
-            if (isSyncing) {
-              hudRestoreDot.style.background = '#f59e0b';
-              hudRestoreDot.style.boxShadow = '0 0 8px #f59e0b';
-            } else if (isSynced) {
-              hudRestoreDot.style.background = '#10b981';
-              hudRestoreDot.style.boxShadow = '0 0 8px #10b981';
+        // Secondary event listener fallback if onclick attribute is restricted
+        if (!hudToggle.dataset.bound) {
+          hudToggle.dataset.bound = '1';
+          hudToggle.addEventListener('click', (e) => {
+            if (e.defaultPrevented) return;
+            if (typeof window.toggleAuroraTopHud === 'function') {
+              window.toggleAuroraTopHud(e);
             }
-          };
-          setInterval(syncPillDot, 1000);
-          syncPillDot();
+          });
+        }
+
+        if (topActionsBar) {
+          topActionsBar.addEventListener('dblclick', (e) => {
+            if (e.target.closest('button, select, input, a, .hud-status')) return;
+            document.body.classList.add('top-hud-collapsed');
+            document.documentElement.classList.add('top-hud-collapsed');
+            try {
+              localStorage.setItem('aurora_top_hud_collapsed', 'true');
+            } catch (err) {}
+            hudToggle.setAttribute('title', 'Expand HUD Bar (Slide Down)');
+            hudToggle.setAttribute('aria-expanded', 'false');
+          });
         }
       }
     }
