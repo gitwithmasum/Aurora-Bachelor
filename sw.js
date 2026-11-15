@@ -3,7 +3,7 @@
 ============================================================ */
 
 const CACHE_VERSION =
-    "aurora-bachelor-v69";
+    "aurora-bachelor-v70";
 
 const STATIC_CACHE =
     `${CACHE_VERSION}-static`;
@@ -34,7 +34,8 @@ const CORE_FILES = [
     "./Assets/themes/afads-special.jpg",
     "./Assets/themes/auroras-special.png",
     "./Assets/themes/Three-Tier Thunderstorm.png",
-    "./Assets/themes/cosmic-aurora-special.jpg"
+    "./Assets/themes/cosmic-aurora-special.jpg",
+    "./Assets/AURORA BACHELOR LOGO.png"
 ];
 
 

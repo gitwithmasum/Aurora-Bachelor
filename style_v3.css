@@ -24562,7 +24562,8 @@ body.aurora-invite-gate-open {
   .aurora-modal-panel,
   .ledger-modal,
   .aurora-install-modal,
-  .aurora-invite-gate-card {
+  .aurora-invite-gate-card,
+  .aurora-profile-panel {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
