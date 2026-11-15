@@ -28043,30 +28043,18 @@ function restoreSettingsDefaults() {
 
 
             /* ==========================================
-               LOGGED IN → FULL PROFILE PAGE
+               AUTHENTICATED → OPEN PROFILE PANEL
+               The page-profile section is intentionally empty;
+               keep authenticated users in the actual profile overlay.
             ========================================== */
 
             if (session?.user) {
 
               console.log(
-                "✅ Aurora Session Active → Opening Full Profile"
+                "✅ Aurora Session Active → Opening Profile Panel"
               );
 
-              closeAuroraProfile();
-
-              if (typeof go === "function") {
-
-                go("profile");
-
-              } else if (
-                typeof AuroraApp !== "undefined" &&
-                typeof AuroraApp.navigate === "function"
-              ) {
-
-                AuroraApp.navigate(
-                  "profile"
-                );
-              }
+              openAuroraProfile();
 
               return;
             }
