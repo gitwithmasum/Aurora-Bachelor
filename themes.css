@@ -1031,3 +1031,76 @@ html[data-theme="thors-special"] :is(.stars,.aurora){display:none!important}
 html[data-theme="thors-special"] :is(.app-shell,.app,.main,.main-content,main,.page,.settings-page){background:transparent!important}
 html[data-theme="thors-special"] :is(.sidebar,.card,.stat-card,.settings-card,.hero,.settings-hero,.data-sheet,.modal,.aurora-profile-panel){background:rgba(5,18,36,.87)!important;border-color:rgba(113,193,255,.4)!important;color:var(--text)!important;box-shadow:0 12px 32px #02091699!important}
 @media(max-width:720px){html[data-theme="thors-special"] body{background-position:center center!important}}
+
+/* Cosmic Aurora Special: high-definition cosmic aurora borealis background covering full screen */
+html[data-theme="cosmic-aurora-special"] {
+  color-scheme: dark;
+  --bg: #040d1a;
+  --panel: #07192f;
+  --panel-2: #0e2a4a;
+  --line: #22d3ee;
+  --text: #f0faff;
+  --muted: #a5d2eb;
+  --cyan: #38e1ff;
+  --blue: #3b82f6;
+  --violet: #c084fc;
+  --green: #34d399;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --personal-accent: #38e1ff;
+  --shadow: 0 12px 35px rgba(0, 10, 25, 0.75);
+  --skin-0: #0284c7;
+  --skin-1: #38e1ff;
+  --skin-2: rgba(56, 225, 255, 0.25);
+  --skin-3: #07192f;
+  --skin-4: #0b223d;
+  --skin-5: #0e2a4a;
+  --skin-6: #38e1ff;
+  --skin-7: rgba(56, 225, 255, 0.35);
+  --skin-8: #0c365b;
+  --skin-9: #07233f;
+  --skin-10: #0e2d4f;
+  --aurora-shadow: var(--shadow);
+}
+
+html[data-theme="cosmic-aurora-special"] body,
+html[data-theme="cosmic-aurora-special"][data-background] body {
+  background-color: #040d1a !important;
+  background-image: url("./Assets/themes/cosmic-aurora-special.jpg") !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  filter: none !important;
+  color: var(--text) !important;
+}
+
+html[data-theme="cosmic-aurora-special"] :is(.stars, .aurora) {
+  display: none !important;
+}
+
+html[data-theme="cosmic-aurora-special"] :is(.app-shell, .app, .main, .main-content, main, .page, .settings-page) {
+  background: transparent !important;
+}
+
+html[data-theme="cosmic-aurora-special"] :is(.sidebar, .card, .stat-card, .settings-card, .hero, .settings-hero, .data-sheet, .modal, .aurora-profile-panel) {
+  background: rgba(4, 18, 35, 0.84) !important;
+  border-color: rgba(56, 225, 255, 0.35) !important;
+  color: var(--text) !important;
+  box-shadow: 0 12px 32px rgba(1, 8, 20, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+html[data-theme="cosmic-aurora-special"] body::before,
+html[data-theme="cosmic-aurora-special"] body::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@media (max-width: 720px) {
+  html[data-theme="cosmic-aurora-special"] body {
+    background-position: center center !important;
+  }
+}
+
