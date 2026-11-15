@@ -27,7 +27,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aurora Bachelor — House Management OS</title>
-  <link rel="stylesheet" href="./style_v3.css?v=42">
+  <link rel="stylesheet" href="./style_v3.css?v=43">
   <link rel="stylesheet" href="./themes.css?v=55">
 
   <style id="aurora-hud-collapse-styles">
@@ -963,6 +963,151 @@
     .aurora-avatar-toast.active {
       opacity: 1 !important;
       transform: translateX(-50%) translateY(0) !important;
+    }
+
+    /* ============================================================
+       AURORA // PROFILE OVERLAY TRUE VIEWPORT FIX & COMPACT NO-SCROLL
+    ============================================================ */
+    body.profile-open {
+      overflow: hidden !important;
+    }
+
+    .profile-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      z-index: 99999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 18px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+    }
+
+    .profile-overlay:not(.active) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .profile-overlay.active {
+      display: flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+
+    .aurora-profile-panel {
+      position: relative !important;
+      z-index: 2 !important;
+      width: min(580px, 94vw) !important;
+      max-height: calc(100vh - 36px) !important;
+      max-height: calc(100dvh - 36px) !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      padding: 20px 24px !important;
+      margin: auto !important;
+      box-sizing: border-box !important;
+      scrollbar-width: thin !important;
+    }
+
+    .profile-panel-top {
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      padding-bottom: 12px !important;
+      margin-bottom: 14px !important;
+      border-bottom: 1px solid rgba(91, 220, 255, 0.12) !important;
+    }
+
+    #profilePanelTitle {
+      font-size: 22px !important;
+      margin: 0 !important;
+    }
+
+    #auroraProfileView {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
+    }
+
+    #auroraProfileView .profile-core {
+      padding: 14px 18px !important;
+      gap: 16px !important;
+      border-radius: 14px !important;
+    }
+
+    .profile-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      margin: 0 !important;
+    }
+
+    .profile-data-card {
+      min-height: 64px !important;
+      padding: 10px 14px !important;
+      gap: 4px !important;
+      border-radius: 11px !important;
+    }
+
+    .profile-data-card span {
+      font-size: 8.5px !important;
+    }
+
+    .profile-data-card strong {
+      font-size: 13.5px !important;
+    }
+
+    .profile-id {
+      padding: 8px 14px !important;
+      border-radius: 11px !important;
+    }
+
+    .profile-id > span {
+      margin-bottom: 4px !important;
+      font-size: 7.5px !important;
+    }
+
+    .profile-id code {
+      font-size: 10.5px !important;
+    }
+
+    .profile-actions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      margin-top: 2px !important;
+    }
+
+    .profile-action {
+      min-height: 38px !important;
+      font-size: 9.5px !important;
+      border-radius: 9px !important;
+    }
+
+    @media (max-width: 650px) {
+      .aurora-profile-panel {
+        padding: 16px !important;
+        border-radius: 16px !important;
+      }
+      #auroraProfileView .profile-core {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 14px 12px !important;
+      }
+      .profile-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .profile-actions {
+        grid-template-columns: 1fr !important;
+      }
     }
   </style>
 </head>
@@ -2914,199 +3059,6 @@
       <section id="page-profile" class="page"></section>
 
 
-      <div class="profile-overlay" id="profileOverlay" aria-hidden="true">
-
-        <div class="aurora-profile-panel">
-
-          <!-- HEADER -->
-          <div class="profile-panel-top">
-
-            <div>
-              <span class="profile-eyebrow">
-                AURORA // IDENTITY CORE
-              </span>
-
-              <h2 id="profilePanelTitle">
-                PROFILE
-              </h2>
-            </div>
-
-            <button class="profile-close" id="profileClose" type="button">
-              ×
-            </button>
-
-          </div>
-
-
-
-
-          <!-- ======================================================
-                       LOGIN VIEW
-              ======================================================= -->
-
-          <div class="aurora-login-view" id="auroraLoginView" hidden>
-
-            <div class="login-core-icon">
-              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(84,234,255,0.7)); display: block; margin: auto;">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-
-            <span class="profile-status">
-              ● AUTHENTICATION REQUIRED
-            </span>
-
-            <h3>
-              ACCESS AURORA
-            </h3>
-
-            <p>
-              Sign in with your Google account to access
-              your Aurora Bachelor profile and personal data.
-            </p>
-
-            <button class="google-login-btn" id="googleLoginBtn" type="button">
-
-              <span class="google-logo">G</span>
-
-              <span>
-                Sign in with Google
-              </span>
-
-            </button>
-
-            <small class="login-security-text">
-              SECURE AUTHENTICATION // SUPABASE
-            </small>
-
-          </div>
-
-
-          <!-- ======================================================
-                       PROFILE VIEW
-          ======================================================= -->
-
-          <div id="auroraProfileView">
-
-            <div class="profile-core">
-
-              <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Click to change profile photo">
-
-                <div class="profile-avatar-ring"></div>
-
-                <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" style="display: none;">
-
-                <div id="profileAvatarFallback" class="profile-avatar-monogram" style="display: flex;">
-                  <svg class="avatar-fallback-svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-
-                <span class="profile-online-dot" title="Authenticated / Online"></span>
-
-                <div class="profile-avatar-sheen">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                  <span>EDIT</span>
-                </div>
-
-              </div>
-
-              <!-- Hidden Native File Input -->
-              <input type="file" id="auroraPhotoFileInput" accept="image/*" style="display: none;" onchange="handleProfilePhotoSelect(this.files[0])">
-
-              <div class="profile-identity">
-
-                <span class="profile-status">
-                  ● AUTHENTICATED
-                </span>
-
-                <h3 id="profileName">
-                  Loading...
-                </h3>
-
-                <p id="profileEmail">
-                  Loading...
-                </p>
-
-                <div class="profile-avatar-action-row">
-                  <button type="button" class="profile-avatar-upload-btn" onclick="document.getElementById('auroraPhotoFileInput').click()">
-                    <span class="avatar-btn-icon">📷</span>
-                    <span class="avatar-btn-text">UPLOAD PHOTO</span>
-                  </button>
-                  <button type="button" class="profile-avatar-remove-btn" id="removePhotoBtn" onclick="removeAuroraPhoto(event)" style="display: none;" title="Remove Photo">
-                    <span class="avatar-btn-icon">🗑️</span>
-                    <span class="avatar-btn-text">REMOVE</span>
-                  </button>
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div class="profile-grid">
-
-              <div class="profile-data-card">
-                <span>ACCESS LEVEL</span>
-                <strong id="profileRole">—</strong>
-              </div>
-
-              <div class="profile-data-card">
-                <span>HOUSE NAME</span>
-                <strong id="profileHouse">
-                  Not assigned
-                </strong>
-              </div>
-
-              <div class="profile-data-card">
-                <span>ACCOUNT STATUS</span>
-                <strong class="online-text">
-                  ACTIVE
-                </strong>
-              </div>
-
-              <div class="profile-data-card">
-                <span>AUTH PROVIDER</span>
-                <strong>GOOGLE</strong>
-              </div>
-
-            </div>
-
-
-            <div class="profile-id">
-
-              <span>AURORA USER ID</span>
-
-              <code id="profileUserId">
-                          —
-              </code>
-
-            </div>
-
-
-            <div class="profile-actions">
-
-              <button class="profile-action secondary" id="profileSettingsBtn" type="button">
-                ⚙ SETTINGS
-              </button>
-
-              <button class="profile-action danger" id="profileSignOut" type="button">
-                ⇥ SIGN OUT
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
 
 
 
@@ -3230,6 +3182,200 @@
       <!-- Populated dynamically via JavaScript -->
     </div>
   </aside>
+
+  <!-- ============================================================
+       AURORA // CYBER HUD PROFILE MODAL OVERLAY (VIEWPORT ROOT)
+  ============================================================ -->
+  <div class="profile-overlay" id="profileOverlay" aria-hidden="true">
+
+    <div class="aurora-profile-panel">
+
+      <!-- HEADER -->
+      <div class="profile-panel-top">
+
+        <div>
+          <span class="profile-eyebrow">
+            AURORA // IDENTITY CORE
+          </span>
+
+          <h2 id="profilePanelTitle">
+            PROFILE
+          </h2>
+        </div>
+
+        <button class="profile-close" id="profileClose" type="button" aria-label="Close Profile">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- ======================================================
+                   LOGIN VIEW
+          ======================================================= -->
+
+      <div class="aurora-login-view" id="auroraLoginView" hidden>
+
+        <div class="login-core-icon">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(84,234,255,0.7)); display: block; margin: auto;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+
+        <span class="profile-status">
+          ● AUTHENTICATION REQUIRED
+        </span>
+
+        <h3>
+          ACCESS AURORA
+        </h3>
+
+        <p>
+          Sign in with your Google account to access
+          your Aurora Bachelor profile and personal data.
+        </p>
+
+        <button class="google-login-btn" id="googleLoginBtn" type="button">
+
+          <span class="google-logo">G</span>
+
+          <span>
+            Sign in with Google
+          </span>
+
+        </button>
+
+        <small class="login-security-text">
+          SECURE AUTHENTICATION // SUPABASE
+        </small>
+
+      </div>
+
+
+      <!-- ======================================================
+                   PROFILE VIEW
+          ======================================================= -->
+
+      <div id="auroraProfileView">
+
+        <div class="profile-core">
+
+          <div class="profile-avatar-wrap" id="profileAvatarWrap" onclick="document.getElementById('auroraPhotoFileInput').click()" title="Click to change profile photo">
+
+            <div class="profile-avatar-ring"></div>
+
+            <img id="profileAvatar" class="profile-avatar" src="" alt="Profile" referrerpolicy="no-referrer" style="display: none;">
+
+            <div id="profileAvatarFallback" class="profile-avatar-monogram" style="display: flex;">
+              <svg class="avatar-fallback-svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+
+            <span class="profile-online-dot" title="Authenticated / Online"></span>
+
+            <div class="profile-avatar-sheen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#54eaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>EDIT</span>
+            </div>
+
+          </div>
+
+          <!-- Hidden Native File Input -->
+          <input type="file" id="auroraPhotoFileInput" accept="image/*" style="display: none;" onchange="handleProfilePhotoSelect(this.files[0])">
+
+          <div class="profile-identity">
+
+            <span class="profile-status">
+              ● AUTHENTICATED
+            </span>
+
+            <h3 id="profileName">
+              Loading...
+            </h3>
+
+            <p id="profileEmail">
+              Loading...
+            </p>
+
+            <div class="profile-avatar-action-row">
+              <button type="button" class="profile-avatar-upload-btn" onclick="document.getElementById('auroraPhotoFileInput').click()">
+                <span class="avatar-btn-icon">📷</span>
+                <span class="avatar-btn-text">UPLOAD PHOTO</span>
+              </button>
+              <button type="button" class="profile-avatar-remove-btn" id="removePhotoBtn" onclick="removeAuroraPhoto(event)" style="display: none;" title="Remove Photo">
+                <span class="avatar-btn-icon">🗑️</span>
+                <span class="avatar-btn-text">REMOVE</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="profile-grid">
+
+          <div class="profile-data-card">
+            <span>ACCESS LEVEL</span>
+            <strong id="profileRole">—</strong>
+          </div>
+
+          <div class="profile-data-card">
+            <span>HOUSE NAME</span>
+            <strong id="profileHouse">
+              Not assigned
+            </strong>
+          </div>
+
+          <div class="profile-data-card">
+            <span>ACCOUNT STATUS</span>
+            <strong class="online-text">
+              ACTIVE
+            </strong>
+          </div>
+
+          <div class="profile-data-card">
+            <span>AUTH PROVIDER</span>
+            <strong>GOOGLE</strong>
+          </div>
+
+        </div>
+
+
+        <div class="profile-id">
+
+          <span>AURORA USER ID</span>
+
+          <code id="profileUserId">
+                      —
+          </code>
+
+        </div>
+
+
+        <div class="profile-actions">
+
+          <button class="profile-action secondary" id="profileSettingsBtn" type="button">
+            ⚙ SETTINGS
+          </button>
+
+          <button class="profile-action danger" id="profileSignOut" type="button">
+            ⇥ SIGN OUT
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
   <div id="modalRoot"></div>
   <div id="toast"></div>
@@ -3432,7 +3578,7 @@
   </script>
 
 
-  <script src="./script.js?v=73" defer></script>
+  <script src="./script.js?v=74" defer></script>
 
   <script src="./bazaar-planner.js?v=2" defer></script>
   <script src="./weekly-meal-planner.js?v=1" defer></script>

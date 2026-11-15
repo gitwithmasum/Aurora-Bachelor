@@ -27843,6 +27843,11 @@ function restoreSettingsDefaults() {
       return;
     }
 
+    const panel = el.overlay.querySelector(".aurora-profile-panel");
+    if (panel) {
+      panel.scrollTop = 0;
+    }
+
     el.overlay.classList.add(
       "active"
     );
@@ -27853,6 +27858,9 @@ function restoreSettingsDefaults() {
     );
 
     document.body.classList.add(
+      "profile-open"
+    );
+    document.documentElement.classList.add(
       "profile-open"
     );
 
@@ -27896,6 +27904,9 @@ function restoreSettingsDefaults() {
     );
 
     document.body.classList.remove(
+      "profile-open"
+    );
+    document.documentElement.classList.remove(
       "profile-open"
     );
   }
