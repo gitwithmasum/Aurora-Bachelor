@@ -12669,6 +12669,37 @@ html[data-accent] .title-cursor {
   user-select: none;
 }
 
+/* Profile avatar: keep the photo centered and replace the fallback icon cleanly. */
+.sidebar-avatar-box.has-avatar {
+  isolation: isolate;
+}
+.sidebar-avatar-box.has-avatar .profile-icon {
+  display: none !important;
+  visibility: hidden !important;
+}
+.sidebar-avatar-box .sidebar-avatar-img {
+  position: absolute !important;
+  inset: 2px !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  z-index: 6 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+.sidebar-avatar-box.has-avatar .profile-ring {
+  z-index: 7;
+  pointer-events: none;
+}
+
 .sidebar-profile .profile-ring {
   position: absolute;
   inset: -2px;
