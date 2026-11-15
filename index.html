@@ -328,6 +328,7 @@
           const avatarBox = sideBtn.querySelector('.sidebar-avatar-box') || sideBtn;
           let sideImg = avatarBox.querySelector('.sidebar-avatar-img');
           const sideIcon = avatarBox.querySelector('.profile-icon');
+          avatarBox.classList.toggle('has-avatar', !!url);
           if (url) {
             if (!sideImg) {
               sideImg = document.createElement('img');
