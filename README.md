@@ -2,242 +2,224 @@
 
 ![Aurora Bachelor — House Management OS](./Assets/Aurora%20House%20Management%20Dashboard.png)
 
-```
-   █████╗ ██╗   ██╗██████╗  ██████╗ ██████╗  █████╗ 
-  ██╔══██╗██║   ██║██╔══██╗██╔═══██╗██╔══██╗██╔══██╗
-  ███████║██║   ██║██████╔╝██║   ██║██████╔╝███████║
-  ██╔══██║██║   ██║██╔══██╗██║   ██║██╔══██╗██╔══██║
-  ██║  ██║╚██████╔╝██║  ██║╚██████╔╝██║  ██║██║  ██║
-  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
-  ░▒▓█ BACHELOR HOUSE MANAGEMENT OS // SYSTEM CORE v3.0 █▓▒░
+```text
+ ▄▄▄       █    ██  ██▀███   ▒█████   ██▀███   ▄▄▄      
+▒████▄     ██  ▓██▒▓██ ▒ ██▒▒██▒  ██▒▓██ ▒ ██▒▒████▄    
+▒██  ▀█▄  ▓██  ▒██░▓██ ░▄█ ▒▒██░  ██▒▓██ ░▄█ ▒▒██  ▀█▄  
+░██▄▄▄▄██ ▓▓█  ░██░▒██▀▀█▄  ▒██   ██░▒██▀▀█▄  ░██▄▄▄▄██ 
+ ▓█   ▓██▒▒▒█████▓ ░██▓ ▒██▒░ ████▓▒░░██▓ ▒██▒ ▓█   ▓██▒
+ ▒▒   ▓▒█░░▒▓▒ ▒ ▒ ░ ▒▓ ░▒▓░░ ▒░▒░▒░ ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░
+  ░   ▒▒ ░░░▒░ ░ ░   ░▒ ░ ▒░  ░ ▒ ▒░   ░▒ ░ ▒░  ░   ▒▒ ░
+░▒▓█ AURORA BACHELOR OS // CYBER-HUD FINANCIAL COMMAND MATRIX v3.5.0 █▓▒░
 ```
 
 ### 🌌 NEXT-GENERATION HOUSE FINANCIAL COMMAND CENTER ⚡
-
-**"Your House. Your Meals. Your Money. One Intelligent System."**  
-*The ultimate local-first, zero-dispute financial OS engineered to eliminate broken Excel sheets.*
+**"Your House. Your Meals. Your Money. One Intelligent Operating System."**  
+*The ultimate local-first, zero-dispute financial OS engineered to eliminate broken spreadsheets forever.*
 
 ---
 
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://aurora-bachelor-masumtheinvincible.vercel.app)
-[![GitHub Repository](https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/gitwithmasum/Aurora-Bachelor)
-[![PWA Architecture](https://img.shields.io/badge/Platform-Installable%20PWA-7454ED?style=for-the-badge&logo=pwa&logoColor=white)](./manifest.json)
-[![Cloud Core](https://img.shields.io/badge/Database-Supabase%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
-[![Status](https://img.shields.io/badge/System%20Status-Operational-00E5FF?style=for-the-badge)](https://aurora-bachelor-masumtheinvincible.vercel.app)
+[![Production Deployment](https://img.shields.io/badge/Vercel-Production%20Live-00E5FF?style=for-the-badge&logo=vercel&logoColor=black)](https://aurora-bachelor.vercel.app)
+[![Release](https://img.shields.io/badge/System%20Core-v3.5.0%20CYBER--HUD-7928CA?style=for-the-badge&logo=electron&logoColor=white)](https://github.com/gitwithmasum/Aurora-Bachelor/releases)
+[![Platform](https://img.shields.io/badge/Architecture-Local--First%20PWA-54EAFF?style=for-the-badge&logo=pwa&logoColor=black)](./manifest.json)
+[![Cloud Backbone](https://img.shields.io/badge/Cloud%20Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Offline Cache](https://img.shields.io/badge/Service%20Worker-Cache%20v70-FF007A?style=for-the-badge&logo=html5&logoColor=white)](./sw.js)
+[![Status](https://img.shields.io/badge/Status-100%25%20Operational-00FF66?style=for-the-badge)](https://aurora-bachelor.vercel.app)
 
 <br>
 
-**[🚀 Launch Application](https://aurora-bachelor-masumtheinvincible.vercel.app)** · **[🌐 Product Landing Page](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html)** · **[📋 Specification PDF](./Assets/Aurora%20Bachelor%20Product%20Specification.pdf)**
+**[⚡ Launch Aurora OS Terminal](https://aurora-bachelor.vercel.app)** · **[🌐 Cyber Landing Matrix](https://aurora-bachelor.vercel.app/landing.html)** · **[📋 Specification PDF](./Assets/Aurora%20Bachelor%20Product%20Specification.pdf)**
 
 </div>
 
 ---
 
-## 🌐 Live Links
-
-1. **Vercel লাইভ ল্যান্ডিং পেজ**: [https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html)
-2. **GitHub Pages লাইভ ল্যান্ডিং পেজ**: [https://gitwithmasum.github.io/Aurora-Bachelor/landing.html](https://gitwithmasum.github.io/Aurora-Bachelor/landing.html)
-3. **লাইভ ওয়েব অ্যাপ্লিকেশন লিঙ্ক**: [https://aurora-bachelor-masumtheinvincible.vercel.app](https://aurora-bachelor-masumtheinvincible.vercel.app)
-
----
-
-## ⚡ 01 / Mission & Philosophy
-
-Living in a shared bachelor flat or mess shouldn't require arguing over bazaar vouchers, broken spreadsheet formulas, or end-of-month debt calculation disputes.
-
-**Aurora Bachelor** is engineered as a **Personal Operating System for Bachelor House Life**:
-- **Dual-Ledger Architecture**: Decouples fluctuating food costs from static house bills.
-- **Zero-Error Accounting**: All balances and meal rates are derived deterministically in real time.
-- **Local-First & Resilient**: Works 100% offline via IndexedDB, automatically synchronizing to Supabase Cloud whenever connectivity is restored.
-
-> *"Two accounts. One household. Absolute financial clarity."*
-
----
-
-## 🛸 02 / Dual-Core System Architecture
-
 ```text
-                           🌌 AURORA CORE
-                                 │
-                   ┌─────────────┴─────────────┐
-                   ▼                           ▼
-          🍚 MEAL LEDGER ENGINE       🏠 HOUSE LEDGER MATRIX
-          ─────────────────────       ──────────────────────
-          • Breakfast / Lunch / Dinner • Fixed Apartment Rent
-          • Daily Meal Matrix (B/L/D)  • Electricity & Water
-          • Dynamic Grocery Expenses   • Gas & WiFi Internet
-          • Meal Rate Engine (৳/meal)  • Maid & Maintenance
-                   │                           │
-                   └─────────────┬─────────────┘
-                                 │
-                                 ▼
-                     ⚡ SETTLEMENT ENGINE v3
-                                 │
-                     ┌───────────┴───────────┐
-                     ▼                       ▼
-               RECEIVE CREDITS          PAY DEBITS
-                     │                       │
-                     └───────────┬───────────┘
-                                 ▼
-                    ✦ FINAL MINIMIZED PAYOUT ✦
+╭────────────────────────────────────────────────────────────────────────────────────────╮
+│  SYSTEM STATUS : OPERATIONAL [● ONLINE]       CORE REVISION  : v3.5.0-CYBER-HUD       │
+│  NETWORK CORE  : VERCEL EDGE RUNTIME          DATA REPLICA   : LOCAL-FIRST INDEXEDDB  │
+│  SECURITY GATE : SUPABASE POSTGRES RLS        CACHE REVISION : SERVICE WORKER v70     │
+│  THEME ENGINES : 19 ULTRA-HD SCI-FI PRESETS   FINANCIAL CORE : ZERO-DISPUTE LEDGER    │
+╰────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ---
 
-## 🛰️ 03 / Command Center Modules
+## 🌐 01 / Production Access Nodes
 
-| Code | Module | Cyber Designation | Status |
+| Terminal Node | Access URI | Target Gateway | Status |
 |:--|:--|:--|:--:|
-| **MOD-01** | **Dashboard** | Mission Control & Real-time Financial Pulse | `ONLINE` |
-| **MOD-02** | **Daily Meals** | Single-Tap B / L / D Meal Matrix & Guest Tracker | `ONLINE` |
-| **MOD-03** | **Members** | Household Identity, Roles & Individual Ledgers | `ONLINE` |
-| **MOD-04** | **Expenses** | Categorized Bazaar & Maintenance Ledger | `ONLINE` |
-| **MOD-05** | **Payments** | Member Inflow Ledger & Time-stamped Receipts | `ONLINE` |
-| **MOD-06** | **House Bills** | Fixed Utilities, Rent & Maid Bill Splitter | `ONLINE` |
-| **MOD-07** | **Reports** | Automated Monthly Summaries & Excel (.xlsx) Exporter | `ONLINE` |
-| **MOD-08** | **Settlement** | Graph-Optimized Peer-to-Peer Debt Minimizer | `ONLINE` |
-| **MOD-09** | **Weekly Planner** | Task Coordination, Bazaar Planning & Menu Rotation | `ONLINE` |
-| **MOD-10** | **Activity** | Tamper-evident Audit Log & Event Timeline | `ONLINE` |
-| **MOD-11** | **Settings** | Cloud Sync, Auth Tokens, Data Backup & Appearance | `ONLINE` |
+| **Primary OS Terminal** | [`aurora-bachelor.vercel.app`](https://aurora-bachelor.vercel.app) | Production Application Core | `ACTIVE` |
+| **Cyber Landing Matrix** | [`aurora-bachelor.vercel.app/landing.html`](https://aurora-bachelor.vercel.app/landing.html) | Showcase & Product Overview | `ACTIVE` |
+| **GitHub Mirror Node** | [`gitwithmasum.github.io/Aurora-Bachelor`](https://gitwithmasum.github.io/Aurora-Bachelor/) | Secondary Fallback Mirror | `STANDBY` |
 
 ---
 
-## 📐 04 / Transparent Accounting Engine
+## ⚡ 02 / Mission & Cybernetic Philosophy
 
-Aurora Bachelor never hardcodes financial values. Every displayed metric is derived dynamically:
+Living in a shared bachelor flat, student mess, or roommate house shouldn't require arguing over paper vouchers, broken Excel formulas, or month-end debt calculation headaches.
 
-### 1. Dynamic Meal Rate Engine
-$$\text{Meal Rate} = \frac{\sum \text{Valid Meal Grocery Expenses}}{\sum \text{Total Combined Meals Consumed}}$$
+**Aurora Bachelor** is an autonomous **Financial Operating System** for collective living:
+- **Dual-Ledger Matrix**: Decouples volatile daily food costs from fixed apartment rent and utility bills.
+- **Zero-Error Derived Accounting**: Never hardcodes balances — every ledger rate and debt obligation is calculated deterministically in real time.
+- **Local-First & Offline Resilience**: Fully functional without internet via client-side IndexedDB, seamlessly replicated to Supabase PostgreSQL when back online.
+- **Cyber-HUD User Experience**: High-contrast, glassmorphic sci-fi telemetry aesthetics inspired by holographic flight control interfaces.
 
-### 2. Individual Member Obligation
-$$\text{Total Responsibility} = (\text{Member Meals} \times \text{Meal Rate}) + \text{Equal House Bills Share} + \text{Personal Expenses}$$
-
-### 3. Net Balance & Liquidity
-$$\text{Net Balance} = \text{Total Member Payments} - \text{Total Responsibility}$$
-
-- **Positive ($+\text{৳}$)**: House owes member (Cash to Receive).
-- **Negative ($-\text{৳}$)**: Member owes house (Cash to Pay).
+> *"Two ledgers. One household. Zero financial ambiguity."*
 
 ---
 
-## 🔒 05 / Cloud Sync & Security Protocol
+## 🛸 03 / Dual-Core Ledger Topology
 
 ```text
-[ Google OAuth / Supabase Auth ]
-               │
-               ▼
-   [ Household Membership ID ]
-               │
-               ▼
-      [ RLS Security Guard ]
-   ┌───────────┼───────────┐
-   ▼           ▼           ▼
- OWNER       ADMIN      MEMBER
- (Root)     (Manage)    (View)
-   │           │           │
-   └───────────┼───────────┘
-               │
-               ▼
-[ Local IndexedDB ] ←──(Replication)──→ [ Supabase PostgreSQL ]
+                                  🌌 AURORA OS CORE
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    ▼                                         ▼
+         🍚 MEAL LEDGER ENGINE                     🏠 HOUSE BILLS MATRIX
+         ─────────────────────                     ─────────────────────
+         • Daily B / L / D Matrix                  • Monthly Flat Rent
+         • Dynamic Grocery Expenses                • Electricity & Power
+         • Auto Meal Rate (৳/meal)                 • High-Speed WiFi & Gas
+         • Personal Meal Exclusions                • Maid & Waste Sanitation
+                    │                                         │
+                    └────────────────────┬────────────────────┘
+                                         │
+                                         ▼
+                            ⚡ SETTLEMENT ENGINE v3
+                                         │
+                         ┌───────────────┴───────────────┐
+                         ▼                               ▼
+                   RECEIVE CREDITS                  PAY DEBITS
+                         │                               │
+                         └───────────────┬───────────────┘
+                                         ▼
+                         ✦ OPTIMIZED P2P CLEARING GRAPH ✦
+```
+
+---
+
+## 🛰️ 04 / Cyber-HUD Command Modules
+
+| Module Code | Interface | Cyber Designation | Telemetry Status |
+|:--|:--|:--|:--:|
+| **MOD-01** | **Dashboard** | Mission Control & Real-time Financial Pulse Telemetry | `[ONLINE]` |
+| **MOD-02** | **Daily Meals** | Single-Tap B / L / D Matrix with Real-Time Guest Multipliers | `[ONLINE]` |
+| **MOD-03** | **Members** | Household Identity Core, Cryptographic Roles & Member Ledgers | `[ONLINE]` |
+| **MOD-04** | **Expenses** | Categorized Bazaar Ledger with Timestamped Expense Proofs | `[ONLINE]` |
+| **MOD-05** | **Payments** | Inflow Deposit Matrix & Tamper-Evident Receipts | `[ONLINE]` |
+| **MOD-06** | **House Bills** | Fixed Utility Allocator & Split-Engine (Rent, Gas, WiFi) | `[ONLINE]` |
+| **MOD-07** | **Reports** | Automated Monthly Statements with Instant Excel (.xlsx) / PDF Engine | `[ONLINE]` |
+| **MOD-08** | **Settlement** | Graph-Optimized Debt Settlement Engine with Minimized Transactions | `[ONLINE]` |
+| **MOD-09** | **Weekly Planner** | Autonomous Meal Schedule, Chore Rotation & Duty Tracker | `[ONLINE]` |
+| **MOD-10** | **Activity Log** | Immutable Audit Trail & Real-Time Household Event Signals | `[ONLINE]` |
+| **MOD-11** | **Settings** | Cloud Sync Protocol, OAuth Management & Holographic Appearance | `[ONLINE]` |
+| **MOD-12** | **Profile Studio** | Concentric Cyber-Ring Avatar Customizer & Google Auth HUD | `[ONLINE]` |
+
+---
+
+## 📐 05 / Deterministic Mathematical Accounting
+
+Aurora Bachelor never stores static financial totals. All balances are derived dynamically on each tick:
+
+### 1. Dynamic Meal Rate Engine
+$$\text{Meal Rate} = \frac{\sum \text{Valid Meal Grocery Incurred}}{\sum \text{Total Active Resident Meals Consumed}}$$
+
+### 2. Member Obligation Formula
+$$\text{Total Responsibility} = (\text{Consumed Meals} \times \text{Meal Rate}) + \left(\frac{\sum \text{House Bills}}{\text{Active Members Count}}\right) + \text{Personal Line Items}$$
+
+### 3. Net Liquidity Status
+$$\text{Net Balance} = \sum \text{Deposits Paid} - \text{Total Responsibility}$$
+
+- **Positive ($+\text{৳}$)**: House owes resident (Net Credit).
+- **Negative ($-\text{৳}$)**: Resident owes house (Net Debit).
+
+---
+
+## 🔒 06 / Cloud Architecture & Security Matrix
+
+```text
+[ Google OAuth 2.0 / Supabase Auth ]
+                  │
+                  ▼
+      [ Household Cryptographic ID ]
+                  │
+                  ▼
+       [ PostgreSQL RLS Guard ]
+     ┌────────────┼────────────┐
+     ▼            ▼            ▼
+   OWNER        ADMIN        MEMBER
+  (Root)       (Ops)         (View)
+     │            │            │
+     └────────────┼────────────┘
+                  │
+                  ▼
+  [ Local IndexedDB Store ]  ←──(Replication Protocol)──→  [ Supabase PostgreSQL ]
 ```
 
 - **Row Level Security (RLS)**: Enforces cryptographic boundaries between separate households.
-- **Offline Cache**: IndexedDB + Service Worker cache ensure zero downtime in subway/offline environments.
-- **Export Control**: 1-click JSON snapshot and Excel workbook generation for complete data sovereignty.
+- **Offline Cache v70**: IndexedDB + Service Worker cache ensure 100% functionality with zero network latency.
+- **Data Sovereignty**: 1-click JSON snapshot backup and Excel (.xlsx) export without vendor lock-in.
 
 ---
 
-## 🎨 06 / Futuristic Visual Themes
+## 🎨 07 / Holographic Visual Themes
 
-Aurora Bachelor ships with an extensible Cosmic design system powered by glassmorphism, glowing accents, and high-contrast typography (`Orbitron` & `Inter`):
+Aurora Bachelor features an ultra-futuristic cosmic visual engine rendered with real-time glassmorphism, glowing neon borders, and high-legibility typography (`Orbitron`, `Rajdhani` & `Inter`):
 
-- 🌌 **Aurora Borealis** (Signature Obsidian & Cyan/Violet Glow)
-- 🌃 **Midnight Horizon**
-- ⚡ **Neon Circuit Blue**
-- 🪐 **Mirage Sky & Arctic Teal**
-- 🌸 **Pink & Purple Neon Waves**
-- 🛡️ **Thor's Special & Afad's Custom Preset**
+- 🌌 **Cosmic Aurora Special** *(Full 2K QHD Aurora Wallpaper, unblurred atmospheric depth & cyber-cyan accents)*
+- ⚡ **Thor's Special** *(Electrifying three-tier thunderstorm wallpaper & dark lightning shell)*
+- 🏎️ **Aurora's Special** *(Hypercar neon-blue cockpit aesthetic)*
+- 🌅 **Afad's Special** *(Scenic supercar sunset palette)*
+- ⚡ **Neon Circuit Blue** *(High-contrast cybernetic circuit board lines)*
+- 🌊 **Ocean Wave Neon** *(Deep oceanic bioluminescence)*
+- 🟣 **Violet Neon Stripes & Plum Orchid** *(Synthwave & vaporwave night glows)*
+- ❄️ **Arctic Teal, Mirage Sky & Slate Serenity** *(Minimalist arctic stealth)*
+- ☀️ **White Gold & Copper Cocoa** *(Daylight high-contrast executive modes)*
 
 ---
 
-## 🚀 07 / Quick Start & Installation
+## 🚀 08 / Local Development & Deployment
 
-### Option A — Instant Web Terminal (No Setup Required)
-Open the deployed web terminal directly:  
-👉 **[Launch Aurora Bachelor on Vercel](https://aurora-bachelor-masumtheinvincible.vercel.app)**
-
-### Option B — Run Local Server
+### Quick Run Local Terminal
 ```bash
-# 1. Clone repository
+# Clone the Cyber Repository
 git clone https://github.com/gitwithmasum/Aurora-Bachelor.git
 cd Aurora-Bachelor
 
-# 2. Boot lightweight local server
+# Boot instant HTTP daemon
 python -m http.server 5500
-# or: npx serve .
+# or with Node.js:
+# npx serve .
 ```
-Visit `http://localhost:5500` in any modern web browser.
+Access the application console at `http://localhost:5500`.
 
 ---
 
-## 🛠️ 08 / Technology Stack
+## 🛠️ 09 / Technology Matrix
 
 ```text
-Frontend Layer  :: HTML5 • CSS3 Glassmorphism • Vanilla JavaScript (ESNext)
-Typography      :: Orbitron (Headings) • Inter (UI) • Hind Siliguri (Bangla)
-Data Persistence:: IndexedDB (Local-First) • Supabase Cloud PostgreSQL
-Security        :: Supabase Auth (Google OAuth) • PostgreSQL Row-Level-Security (RLS)
-Reporting Engine:: SheetJS (XLSX) • jsPDF • AutoTable
-Application PWA :: Service Worker (Cache v53) • Web App Manifest
-Hosting / CDN   :: Vercel Edge Network • GitHub Pages
-```
-
----
-
-## 🧪 09 / Quality Verification & Regression Tests
-
-Run automated test suites using Node.js:
-
-```bash
-node tests/themes.cjs            # Theme registry & style validation
-node tests/cloud-status.cjs       # Supabase heartbeat & sync checks
-node tests/install-onboarding.cjs # PWA installation flow validation
-node tests/invitation-flow.cjs    # Household invitation state machine
-node tests/weekly-planner.cjs     # 7-day task board regression checks
-```
-
----
-
-## 🗺️ 10 / Project Directory Structure
-
-```text
-Aurora-Bachelor/
-├── index.html                   # Core Application Shell & Navigation
-├── landing.html                 # 9-Section Product Landing Page & BG Showcase
-├── style_v3.css                 # Primary Futuristic Design System
-├── themes.css                   # Dynamic Visual Theme Tokens
-├── script.js                    # Reactive Engine, Accounting & Supabase Bridge
-├── manifest.json                # PWA Progressive Web App Manifest
-├── sw.js                        # Service Worker & Offline Cache Controller
-├── Assets/
-│   ├── AURORA BACHELOR LOGO.png
-│   ├── Aurora House Management Dashboard.png
-│   ├── icons/                   # High-res PWA & Maskable Icons
-│   └── themes/                  # Visual Theme Assets
-├── database/                    # Idempotent PostgreSQL Migration Schemas
-├── supabase/functions/          # Edge Functions (Invite Emails & Automations)
-├── tests/                       # Automated Regression Test Suites
-└── README.md                    # System Specification & Architecture Docs
+Application Layer :: Modern ESNext Vanilla JavaScript • Semantic HTML5 • CSS3 Custom Properties
+Design Language   :: Cyber-HUD Glassmorphism • Futuristic Sci-Fi Telemetry • CSS Hardware Acceleration
+Typography        :: Orbitron (Headings) • Rajdhani (Cyber HUD) • Inter (UI Telemetry)
+Local Store       :: Client-side IndexedDB (Local-First Engine)
+Cloud Backbone    :: Supabase PostgreSQL Database with Realtime Channels
+Security Layer    :: Google OAuth 2.0 • PostgreSQL Row-Level Security (RLS) Policies
+Reporting Core    :: SheetJS (XLSX) • jsPDF Engine • AutoTable Matrix
+PWA Architecture  :: Service Worker (Cache v70) • Web App Manifest (Standalone HUD)
+Edge Delivery     :: Vercel Global Edge Network • GitHub Pages
 ```
 
 ---
 
 <div align="center">
 
-### 🌌 AURORA BACHELOR · HOUSE MANAGEMENT OS
-*Engineered for seamless, transparent, and intelligent bachelor house life.*
+### 🌌 AURORA BACHELOR OS // CYBER COMMAND
+*Engineered for modern bachelor life with absolute transparency, speed and precision.*
 
-[![Vercel App](https://img.shields.io/badge/Launch-WebApp-00E5FF?style=for-the-badge)](https://aurora-bachelor-masumtheinvincible.vercel.app)
-[![Landing Page](https://img.shields.io/badge/Explore-Landing%20Page-7928CA?style=for-the-badge)](https://aurora-bachelor-masumtheinvincible.vercel.app/landing.html)
+[![Launch Web Terminal](https://img.shields.io/badge/Launch-Web%20Terminal-00E5FF?style=for-the-badge&logo=googlechrome&logoColor=black)](https://aurora-bachelor.vercel.app)
+[![Explore Landing Matrix](https://img.shields.io/badge/Explore-Landing%20Matrix-7928CA?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://aurora-bachelor.vercel.app/landing.html)
+
+**Developed with ⚡ by [Masum Billah (gitwithmasum)](https://github.com/gitwithmasum)**
 
 </div>
